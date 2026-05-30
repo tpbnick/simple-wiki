@@ -7,6 +7,27 @@ let { data, form }: { data: PageData; form: ActionData } = $props()
 
 let pending = $state(false)
 let showPassword = $state(false)
+let loginError = $state<string | null>(null)
+
+$effect(() => {
+  loginError = form?.error ?? null
+})
+
+function loginErrorMessage(result: {
+  type?: string
+  data?: { error?: string }
+  message?: string
+  status?: number
+}): string | null {
+  if (result.type === 'failure') {
+    return result.data?.error ?? 'Invalid username or password'
+  }
+  if (result.type === 'redirect' || result.type === 'success') return null
+  if (typeof result.message === 'string' && result.message.length > 0) {
+    return result.message
+  }
+  return 'Unable to sign in. Please try again.'
+}
 </script>
 
 <svelte:head>
@@ -29,24 +50,17 @@ let showPassword = $state(false)
 
     <!-- Card -->
     <div class="bg-base-100 rounded-2xl border border-base-200 shadow-lg p-6">
-      {#if form?.error}
-        <div
-          class="flex items-start gap-2.5 px-3 py-2.5 rounded-lg bg-error/10
-                    border border-error/20 text-error text-sm mb-4"
-          role="alert"
-        >
-          {form.error}
-        </div>
-      {/if}
-
       <form
         method="POST"
         class="space-y-4"
         use:enhance={() => {
           pending = true
-          return async ({ update }) => {
+          loginError = null
+          return async ({ result, update }) => {
             try {
-              await update()
+              const message = loginErrorMessage(result)
+              if (message) loginError = message
+              await update({ reset: false })
             } finally {
               pending = false
             }
@@ -90,10 +104,12 @@ let showPassword = $state(false)
               name="password"
               autocomplete="current-password"
               required
+              aria-invalid={loginError ? 'true' : undefined}
+              aria-describedby={loginError ? 'login-error' : undefined}
               class="w-full h-10 px-3 pr-10 rounded-lg border border-base-300 bg-base-100
                      text-sm text-base-content
                      focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary
-                     transition-all"
+                     transition-all {loginError ? 'border-error/60' : ''}"
             />
             <button
               type="button"
@@ -109,6 +125,16 @@ let showPassword = $state(false)
               {/if}
             </button>
           </div>
+          {#if loginError}
+            <p
+              id="login-error"
+              class="mt-2 text-sm text-error"
+              role="alert"
+              aria-live="polite"
+            >
+              {loginError}
+            </p>
+          {/if}
         </div>
 
         <button

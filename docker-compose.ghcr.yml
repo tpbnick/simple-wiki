@@ -26,6 +26,8 @@ services:
       # PGID: "100"
       # Plain HTTP on LAN — set to "true" if you put HTTPS in front (NPM, SWAG, etc.)
       COOKIE_SECURE: 'false'
+      # Optional: public URL when behind a reverse proxy (e.g. https://wiki.example.com)
+      # WIKI_ORIGIN: https://wiki.example.com
       # Optional: custom wiki name shown in admin / backups
       # WIKI_NAME: My Wiki
       # Optional: require login to read pages

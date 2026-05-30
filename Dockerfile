@@ -36,6 +36,7 @@ RUN apt-get update \
 COPY --from=builder /app/package.json /app/bun.lock* ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/build ./build
+COPY server/start.mjs ./server/start.mjs
 
 RUN npm prune --omit=dev \
   && npm rebuild better-sqlite3 \
@@ -48,6 +49,10 @@ cat >/entrypoint.sh <<'EOF'
 set -e
 
 mkdir -p /data /uploads
+
+if [ -n "${WIKI_ORIGIN:-}" ] && [ -z "${ORIGIN:-}" ]; then
+  export ORIGIN="$WIKI_ORIGIN"
+fi
 
 if [ -n "${PUID:-}" ] || [ -n "${PGID:-}" ]; then
   if [ -z "${PUID:-}" ] || [ -z "${PGID:-}" ]; then
@@ -90,4 +95,4 @@ EXPOSE 3000
 VOLUME ["/data", "/uploads"]
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["node", "build/index.js"]
+CMD ["node", "server/start.mjs"]
