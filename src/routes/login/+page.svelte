@@ -126,12 +126,7 @@ function loginErrorMessage(result: {
             </button>
           </div>
           {#if loginError}
-            <p
-              id="login-error"
-              class="mt-2 text-sm text-error"
-              role="alert"
-              aria-live="polite"
-            >
+            <p id="login-error" class="mt-2 text-sm text-error" role="alert" aria-live="polite">
               {loginError}
             </p>
           {/if}
