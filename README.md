@@ -1,6 +1,21 @@
-# Wiki
+<p align="center">
+  <img src="static/logo.png" alt="Simple-Wiki logo" width="96">
+</p>
 
-A small personal wiki — Markdown pages, wiki links, search, uploads, revision history, and a family tree extension. Built with SvelteKit and SQLite.
+# Simple-Wiki
+
+A personal markdown wiki with Wikipedia-like features — wiki links, full-text search, uploads, revision history, templates, admin tools, and a pluggable extension system. Built with SvelteKit and SQLite.
+
+## Features
+
+- **Markdown pages** with wiki links (`[[Page Title]]`), syntax highlighting, and a table of contents on long articles
+- **Search** with live suggestions in the header
+- **Editing** with a split markdown/preview editor, infoboxes, image boxes, and callout templates
+- **Revision history** with diffs and restore
+- **Uploads** for images and files
+- **Admin dashboard** — pages, users, uploads, templates, recent changes, backups, and extensions
+- **Family tree extension** — interactive trees embeddable in any page
+- **Reading settings** — font, text size, and column width (gear icon in the header)
 
 ## Getting started
 
@@ -9,9 +24,30 @@ bun install
 bun run dev
 ```
 
-On first run the app creates a database and an admin account. Log in with **admin / admin** — you'll be asked to change the password right away.
+Open **http://localhost:5173** (or the port shown in the terminal).
 
-Copy `.env.example` to `.env` if you want to change paths or the port. Everything works out of the box without it.
+On first run the app creates a SQLite database and an admin account. Log in with **admin / admin** — you'll be asked to change the password right away.
+
+Copy `.env.example` to `.env` to customize paths, port, or behavior. Everything works out of the box without it.
+
+### Production build
+
+```bash
+bun run build
+bun run start
+```
+
+`bun run start` serves the built app on **http://localhost:3000** by default (`PORT` in `.env`).
+
+### Scripts
+
+| Command | Description |
+|---|---|
+| `bun run dev` | Development server with hot reload |
+| `bun run build` | Production build |
+| `bun run start` | Run the production server |
+| `bun run check` | Typecheck (Svelte + TypeScript) |
+| `bun run test` | Run tests |
 
 ## Docker
 
@@ -21,18 +57,117 @@ docker compose up --build
 
 Open **http://localhost:3000**. The database and uploads live in Docker volumes so they survive restarts.
 
-The compose file sets `COOKIE_SECURE=false` so login works over plain HTTP on localhost. Put TLS in front (Caddy, nginx, Traefik) and set `COOKIE_SECURE=true` if the wiki is reachable beyond your machine.
+Production images use Node (`node build/index.js`). Bun is fine for local development.
 
-Production images use Node (`bun run start` runs the same build locally). Bun is fine for development.
+Pre-built images are published to GitHub Container Registry on pushes to `main`:
 
-## Reverse proxy
+```bash
+docker pull ghcr.io/tpbnick/simple-wiki:latest
+```
 
-If the wiki runs behind a proxy, set `ADDRESS_HEADER=x-forwarded-for` and `XFF_DEPTH=1` so login rate limits use the real client IP instead of the proxy.
+## Environment variables
 
-## Private wiki
+Copy `.env.example` to `.env` and uncomment or set values as needed.
 
-By default anyone can read pages. To require login for reading, set `PUBLIC_READ=false` in your environment.
+### Paths & server
+
+| Variable | Default | Description |
+|---|---|---|
+| `DATABASE_PATH` | `./wiki.db` | SQLite database file |
+| `UPLOADS_DIR` | `./uploads` | Directory for uploaded files |
+| `PORT` | `3000` | Port for `bun run start` / production server |
+
+### Wiki identity
+
+| Variable | Default | Description |
+|---|---|---|
+| `WIKI_NAME` | `Wiki` | Display name shown in the admin UI and backups |
+
+### Access control
+
+| Variable | Default | Description |
+|---|---|---|
+| `PUBLIC_READ` | enabled | Set to `false` to require login for reading pages and read APIs |
+
+### Sessions & cookies
+
+| Variable | Default | Description |
+|---|---|---|
+| `NODE_ENV` | — | Set to `production` for production deployments |
+| `COOKIE_SECURE` | `true` in production | Set to `false` for plain HTTP (e.g. local Docker). Use `true` behind HTTPS |
+
+### Reverse proxy
+
+When the wiki runs behind a proxy (Caddy, nginx, Traefik), set these so rate limits use the real client IP:
+
+| Variable | Example | Description |
+|---|---|---|
+| `ADDRESS_HEADER` | `x-forwarded-for` | Header containing the client IP |
+| `XFF_DEPTH` | `1` | How many proxy hops to trust |
+
+### Localization
+
+| Variable | Default | Description |
+|---|---|---|
+| `PUBLIC_WIKI_LOCALE` | `en-US` | BCP 47 locale for formatted dates (client + server) |
 
 ## Extensions
 
-Add extensions under `extensions/` as TypeScript. They're compiled into the app at build time — change an extension, run `bun run build`, and restart. The family tree extension is included; see `extensions/family-tree/` for an example.
+Extensions add features to Simple-Wiki without modifying core app code. Each extension lives in `extensions/<name>/` and is **compiled into the app at build time**.
+
+> Extensions run trusted code at startup. Only install extensions you wrote or fully trust.
+
+### How loading works
+
+1. On build, SvelteKit bundles every `extensions/*/index.ts` file into the server.
+2. On startup, the app loads each extension, applies any database schema, and registers hooks.
+3. Optional client code (`mount-client.ts`) and styles (`styles/*.css`) are bundled for the browser.
+
+After changing an extension, run `bun run build` and restart the server.
+
+The bundled **Example** extension (`extensions/example/`) is included in development only. **Family Tree** (`extensions/family-tree/`) ships in production.
+
+### Extension structure
+
+```
+extensions/my-extension/
+  index.ts           # Required — extension entry point
+  schema.sql         # Optional — tables created on first DB open
+  mount-client.ts    # Optional — client-side interactivity for page embeds
+  styles/            # Optional — CSS loaded globally
+  routes/            # Optional — SvelteKit routes (see family-tree for a full example)
+```
+
+### Extension API
+
+Each extension exports a default object matching `WikiExtension`:
+
+```typescript
+const extension: WikiExtension = {
+  name: 'My Extension',
+  version: '1.0.0',
+  description: 'What it does',
+  manageHref: '/my-extension',       // optional — link from Admin → Extensions
+  schema: 'CREATE TABLE IF NOT EXISTS ...',  // optional
+  writeGuardPaths: ['/api/my-ext'],  // optional — require login for writes
+  hooks: {
+    onSidebarItems(items) { ... },           // add nav links
+    onTemplateParse(name, params) { ... },   // custom {{Template}} syntax
+    onEditorToolbarItems() { ... },         // editor toolbar buttons
+    onEditorLoad(toolIds) { ... },            // data for the editor
+    onPageRender(html, page) { ... },        // transform rendered HTML
+    onDatabaseReset() { ... }                 // clear caches after backup restore
+  }
+}
+```
+
+### Examples
+
+- **`extensions/example/`** — minimal starter: sidebar link + `{{Counter}}` template
+- **`extensions/family-tree/`** — full extension with database schema, API routes, editor toolbar, `{{FamilyTree}}` embeds, and client-side canvas rendering
+
+View loaded extensions in **Admin → Extensions**.
+
+## License
+
+MIT
