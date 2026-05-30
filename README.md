@@ -98,6 +98,7 @@ Copy `.env.example` to `.env` and uncomment or set values as needed.
 | `DATABASE_PATH` | `./wiki.db` | SQLite database file                         |
 | `UPLOADS_DIR`   | `./uploads` | Directory for uploaded files                 |
 | `PORT`          | `3000`      | Port for `bun run start` / production server |
+| `BODY_SIZE_LIMIT` | `512K` (adapter-node) / `500M` (Docker image) | Max POST body size for backup restore and file uploads |
 
 ### Wiki identity
 

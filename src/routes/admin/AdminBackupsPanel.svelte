@@ -61,7 +61,11 @@ async function submitImport() {
     const res = await fetch('/api/admin/backup', { method: 'POST', body })
     const payload = await res.json().catch(() => ({}))
     if (!res.ok) {
-      importError = payload.error ?? payload.message ?? 'Import failed'
+      const raw = payload.error ?? payload.message ?? 'Import failed'
+      importError =
+        typeof raw === 'string' && raw.includes('BODY_SIZE_LIMIT')
+          ? 'Backup file is too large for the server upload limit. Set BODY_SIZE_LIMIT=500M (or higher) and restart the container.'
+          : raw
       return
     }
     importSuccess = payload.manifest

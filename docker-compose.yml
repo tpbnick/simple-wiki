@@ -11,6 +11,7 @@ services:
       UPLOADS_DIR: /uploads
       PORT: 3000
       COOKIE_SECURE: 'false'
+      BODY_SIZE_LIMIT: 500M
     restart: unless-stopped
     healthcheck:
       test:
