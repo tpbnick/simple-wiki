@@ -37,6 +37,11 @@ export function resetDatabaseConnection(): void {
   invalidatePageSlugCache()
 }
 
+/** Flushes WAL pages into the main db file before a backup restore swap. */
+export function checkpointDatabaseConnection(): void {
+  database?.pragma('wal_checkpoint(TRUNCATE)')
+}
+
 function scheduleUploadHashBackfill(db: Database): void {
   const pending = db
     .prepare("SELECT filename FROM uploads WHERE content_hash IS NULL OR content_hash = ''")

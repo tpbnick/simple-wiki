@@ -1,4 +1,4 @@
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'fs'
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import { tmpdir } from 'os'
 import BetterSqlite3 from 'better-sqlite3'
@@ -133,10 +133,12 @@ describe('backup archive', () => {
 
     const archive = await createBackupArchive({ includeUploads: true })
     writeFileSync(join(uploadsDirectory(), 'photo.png'), 'changed-bytes')
+    writeFileSync(join(uploadsDirectory(), 'old-only.txt'), 'remove-me')
 
     const { manifest } = importBackupArchive(archive, { restoreUploads: true })
     expect(manifest.includesUploads).toBe(true)
     expect(readFileSync(join(uploadsDirectory(), 'photo.png'), 'utf8')).toBe('png-bytes')
+    expect(existsSync(join(uploadsDirectory(), 'old-only.txt'))).toBe(false)
   })
 
   it('warns when uploads are not restored', async () => {
@@ -159,6 +161,30 @@ describe('backup archive', () => {
 
   it('rejects invalid zip files', () => {
     expect(() => importBackupArchive(new Uint8Array([1, 2, 3]))).toThrow(BackupError)
+  })
+
+  it('ignores hidden upload paths when restoring uploads', async () => {
+    writeFileSync(join(uploadsDirectory(), 'visible.txt'), 'live')
+
+    const manifest = formatBackupManifest({
+      wikiName: 'Test Wiki',
+      wikiVersion: '0.1.0',
+      backupFormat: 1,
+      createdAt: '2026-05-28T12:00:00.000Z',
+      includesUploads: true,
+      includesMarkdown: false
+    })
+
+    const archive = zipSync({
+      [BACKUP_MANIFEST_FILE]: new TextEncoder().encode(manifest),
+      [BACKUP_DATABASE_FILE]: readFileSync(process.env.DATABASE_PATH!),
+      'uploads/.hidden.txt': new TextEncoder().encode('secret'),
+      'uploads/visible.txt': new TextEncoder().encode('from-backup')
+    })
+
+    importBackupArchive(archive, { restoreUploads: true })
+    expect(existsSync(join(uploadsDirectory(), '.hidden.txt'))).toBe(false)
+    expect(readFileSync(join(uploadsDirectory(), 'visible.txt'), 'utf8')).toBe('from-backup')
   })
 
   it('applies extension schemas when the backup database lacks extension tables', () => {

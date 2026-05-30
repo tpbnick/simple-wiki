@@ -59,13 +59,20 @@ async function submitImport() {
     body.set('backup', file)
     if (restoreUploadsOnImport) body.set('restoreUploads', 'on')
     const res = await fetch('/api/admin/backup', { method: 'POST', body })
-    const payload = await res.json().catch(() => ({}))
+    const contentType = res.headers.get('content-type') ?? ''
+    const payload = contentType.includes('application/json')
+      ? await res.json().catch(() => ({}))
+      : { message: await res.text().catch(() => '') }
     if (!res.ok) {
       const raw = payload.error ?? payload.message ?? 'Import failed'
       importError =
-        typeof raw === 'string' && raw.includes('BODY_SIZE_LIMIT')
+        res.status === 413 ||
+        (typeof raw === 'string' &&
+          (raw.includes('BODY_SIZE_LIMIT') || raw.includes('Content-length')))
           ? 'Backup file is too large for the server upload limit. Increase BODY_SIZE_LIMIT (default 512M in Docker) and restart the container.'
-          : raw
+          : typeof raw === 'string'
+            ? raw
+            : 'Import failed'
       return
     }
     importSuccess = payload.manifest

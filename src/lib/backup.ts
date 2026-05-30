@@ -12,13 +12,13 @@ import {
   unlinkSync,
   writeFileSync
 } from 'fs'
-import { tmpdir } from 'os'
 import { join, dirname } from 'path'
 import { zipSync, unzipSync } from 'fflate'
 import { getAppVersion, getWikiName } from '$lib/wiki-identity.js'
 import {
   openDatabase,
   resetDatabaseConnection,
+  checkpointDatabaseConnection,
   resolveDatabasePath,
   applyExtensionSchemas
 } from '$lib/db/connection.js'
@@ -76,6 +76,26 @@ export class BackupError extends Error {
     super(message, options)
     this.name = 'BackupError'
   }
+}
+
+function rethrowImportError(error: unknown, context: string): never {
+  if (error instanceof BackupError) throw error
+
+  const code =
+    error instanceof Error && 'code' in error ? String((error as NodeJS.ErrnoException).code) : ''
+
+  if (code === 'EACCES' || code === 'EPERM') {
+    throw new BackupError(
+      `${context}: permission denied. Ensure /data and /uploads are writable by the container user (check PUID/PGID on Unraid).`,
+      { cause: error }
+    )
+  }
+
+  if (code === 'ENOSPC') {
+    throw new BackupError(`${context}: disk full.`, { cause: error })
+  }
+
+  throw error
 }
 
 /** Serializes a backup manifest to the standard text format. */
@@ -205,6 +225,7 @@ function collectUploadEntries(): Record<string, Uint8Array> {
   if (!existsSync(directory)) return entries
 
   for (const name of readdirSync(directory)) {
+    if (name.startsWith('.')) continue
     const filePath = join(directory, name)
     if (!statSync(filePath).isFile()) continue
     entries[`${BACKUP_UPLOADS_PREFIX}${name}`] = readFileSync(filePath)
@@ -216,7 +237,13 @@ function collectUploadEntries(): Record<string, Uint8Array> {
 function safeUploadFilename(zipPath: string): string | null {
   if (!zipPath.startsWith(BACKUP_UPLOADS_PREFIX)) return null
   const filename = zipPath.slice(BACKUP_UPLOADS_PREFIX.length)
-  if (!filename || filename.includes('/') || filename.includes('\\') || filename.includes('..')) {
+  if (
+    !filename ||
+    filename.startsWith('.') ||
+    filename.includes('/') ||
+    filename.includes('\\') ||
+    filename.includes('..')
+  ) {
     return null
   }
   return filename
@@ -260,32 +287,60 @@ function replacePathSync(source: string, destination: string): void {
   }
 }
 
+function listLiveUploadFilenames(directory: string): string[] {
+  if (!existsSync(directory)) return []
+
+  return readdirSync(directory).flatMap((name) => {
+    if (name.startsWith('.')) return []
+    const filePath = join(directory, name)
+    return statSync(filePath).isFile() ? [name] : []
+  })
+}
+
 function restoreUploads(uploadEntries: Array<[string, Uint8Array]>): void {
   if (uploadEntries.length === 0) return
 
   const liveDir = uploadsDirectory()
-  const preImportDir = `${liveDir}.pre-import-${Date.now()}`
-
-  if (existsSync(liveDir)) {
-    renameSync(liveDir, preImportDir)
-  }
-
   mkdirSync(liveDir, { recursive: true })
+
+  // Never rename the uploads directory itself — in Docker it is a volume mount point.
+  // Stage and roll back using subdirectories and file moves within the same volume.
+  const stamp = Date.now()
+  const stagingDir = join(liveDir, `.restore-staging-${stamp}`)
+  const backupDir = join(liveDir, `.pre-import-${stamp}`)
+  mkdirSync(stagingDir, { recursive: true })
 
   try {
     for (const [filename, data] of uploadEntries) {
-      writeFileSync(join(liveDir, filename), data)
+      writeFileSync(join(stagingDir, filename), data)
+    }
+
+    for (const name of listLiveUploadFilenames(liveDir)) {
+      mkdirSync(backupDir, { recursive: true })
+      replacePathSync(join(liveDir, name), join(backupDir, name))
+    }
+
+    for (const [filename] of uploadEntries) {
+      replacePathSync(join(stagingDir, filename), join(liveDir, filename))
     }
   } catch (error) {
-    rmSync(liveDir, { recursive: true, force: true })
-    if (existsSync(preImportDir)) {
-      renameSync(preImportDir, liveDir)
+    for (const [filename] of uploadEntries) {
+      const livePath = join(liveDir, filename)
+      if (existsSync(livePath)) unlinkSync(livePath)
     }
-    throw error
-  }
 
-  if (existsSync(preImportDir)) {
-    rmSync(preImportDir, { recursive: true, force: true })
+    if (existsSync(backupDir)) {
+      for (const name of readdirSync(backupDir)) {
+        const from = join(backupDir, name)
+        if (!statSync(from).isFile()) continue
+        replacePathSync(from, join(liveDir, name))
+      }
+    }
+
+    rethrowImportError(error, 'Could not restore uploaded files')
+  } finally {
+    rmSync(stagingDir, { recursive: true, force: true })
+    if (existsSync(backupDir)) rmSync(backupDir, { recursive: true, force: true })
   }
 }
 
@@ -342,7 +397,9 @@ export async function createBackupArchive(options: BackupOptions = {}): Promise<
 
   const includeUploads = options.includeUploads === true
   const includeMarkdown = options.includeMarkdown === true
-  const tempDir = mkdtempSync(join(tmpdir(), 'wiki-backup-'))
+  const dbDir = dirname(resolveDatabasePath())
+  mkdirSync(dbDir, { recursive: true })
+  const tempDir = mkdtempSync(join(dbDir, '.wiki-backup-'))
   const snapshotPath = join(tempDir, BACKUP_DATABASE_FILE)
 
   try {
@@ -389,6 +446,10 @@ export function importBackupArchive(
     throw new BackupError(`Backup file exceeds ${MAX_BACKUP_BYTES} bytes`)
   }
 
+  if (isDatabaseSwapInProgress()) {
+    throw new BackupError('Another backup import is already in progress')
+  }
+
   beginDatabaseImport()
 
   try {
@@ -416,6 +477,7 @@ export function importBackupArchive(
       copyFileSync(extractedDbPath, stagingPath)
       removeSidecarFiles(stagingPath)
 
+      checkpointDatabaseConnection()
       resetDatabaseConnection()
       runOnDatabaseReset()
 
@@ -462,10 +524,15 @@ export function importBackupArchive(
           }
         }
 
-        openDatabase({ duringImport: true })
+        try {
+          openDatabase({ duringImport: true })
+          applyExtensionSchemas(getExtensions())
+        } catch {
+          // Rollback opened the previous database file; avoid masking the original import error.
+        }
         invalidatePageSlugCache()
         runOnDatabaseReset()
-        throw error
+        rethrowImportError(error, 'Database import failed')
       } finally {
         if (importSucceeded && existsSync(preImportPath)) {
           unlinkSync(preImportPath)
@@ -473,6 +540,8 @@ export function importBackupArchive(
       }
 
       return { manifest, warnings }
+    } catch (error) {
+      rethrowImportError(error, 'Backup import failed')
     } finally {
       rmSync(tempDir, { recursive: true, force: true })
     }
