@@ -90,8 +90,8 @@ ENV NODE_ENV=production
 ENV DATABASE_PATH=/data/wiki.db
 ENV UPLOADS_DIR=/uploads
 ENV PORT=3000
-# adapter-node defaults to 512K; backups and uploads need more (see MAX_BACKUP_BYTES / MAX_UPLOAD_BYTES)
-ENV BODY_SIZE_LIMIT=500M
+# adapter-node defaults to 512K; Simple-Wiki sets 512M for backup restore and uploads (override with BODY_SIZE_LIMIT)
+ENV BODY_SIZE_LIMIT=512M
 
 EXPOSE 3000
 VOLUME ["/data", "/uploads"]

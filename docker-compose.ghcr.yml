@@ -21,8 +21,7 @@ services:
       UPLOADS_DIR: /uploads
       PORT: 3000
       NODE_ENV: production
-      # Max request body size for backup restore and file uploads (default adapter-node limit is 512K)
-      BODY_SIZE_LIMIT: 500M
+      # BODY_SIZE_LIMIT defaults to 512M in the image — override for larger backup uploads
       # Optional — set both on Unraid/NAS so appdata files match host ownership (e.g. 99:100)
       # PUID: "99"
       # PGID: "100"

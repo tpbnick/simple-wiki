@@ -13,7 +13,7 @@ import {
   writeFileSync
 } from 'fs'
 import { tmpdir } from 'os'
-import { join } from 'path'
+import { join, dirname } from 'path'
 import { zipSync, unzipSync } from 'fflate'
 import { getAppVersion, getWikiName } from '$lib/wiki-identity.js'
 import {
@@ -248,6 +248,18 @@ function removeSidecarFiles(dbPath: string): void {
   }
 }
 
+/** Move or copy a file into place; rename fails with EXDEV across mount points (e.g. /tmp -> /data). */
+function replacePathSync(source: string, destination: string): void {
+  try {
+    renameSync(source, destination)
+  } catch (error) {
+    const code = error instanceof Error && 'code' in error ? String(error.code) : ''
+    if (code !== 'EXDEV') throw error
+    copyFileSync(source, destination)
+    unlinkSync(source)
+  }
+}
+
 function restoreUploads(uploadEntries: Array<[string, Uint8Array]>): void {
   if (uploadEntries.length === 0) return
 
@@ -391,7 +403,10 @@ export function importBackupArchive(
     const uploadEntries = options.restoreUploads === true ? listUploadEntries(entries) : []
     const warnings = buildImportWarnings(manifest, options, uploadEntries)
 
-    const tempDir = mkdtempSync(join(tmpdir(), 'wiki-import-'))
+    const livePath = resolveDatabasePath()
+    const dbDir = dirname(livePath)
+    mkdirSync(dbDir, { recursive: true })
+    const tempDir = mkdtempSync(join(dbDir, '.wiki-import-'))
     const extractedDbPath = join(tempDir, BACKUP_DATABASE_FILE)
     const stagingPath = join(tempDir, `${BACKUP_DATABASE_FILE}.staging`)
 
@@ -401,20 +416,19 @@ export function importBackupArchive(
       copyFileSync(extractedDbPath, stagingPath)
       removeSidecarFiles(stagingPath)
 
-      const livePath = resolveDatabasePath()
       resetDatabaseConnection()
       runOnDatabaseReset()
 
       const preImportPath = `${livePath}.pre-import-${Date.now()}`
 
       if (existsSync(livePath)) {
-        renameSync(livePath, preImportPath)
+        replacePathSync(livePath, preImportPath)
       }
       removeSidecarFiles(livePath)
 
       let importSucceeded = false
       try {
-        renameSync(stagingPath, livePath)
+        replacePathSync(stagingPath, livePath)
         removeSidecarFiles(livePath)
         openDatabase({ duringImport: true })
         applyExtensionSchemas(getExtensions())
@@ -437,7 +451,7 @@ export function importBackupArchive(
 
         if (existsSync(preImportPath)) {
           try {
-            renameSync(preImportPath, livePath)
+            replacePathSync(preImportPath, livePath)
             removeSidecarFiles(livePath)
           } catch (rollbackError) {
             throw new BackupError(

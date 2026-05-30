@@ -64,7 +64,7 @@ async function submitImport() {
       const raw = payload.error ?? payload.message ?? 'Import failed'
       importError =
         typeof raw === 'string' && raw.includes('BODY_SIZE_LIMIT')
-          ? 'Backup file is too large for the server upload limit. Set BODY_SIZE_LIMIT=500M (or higher) and restart the container.'
+          ? 'Backup file is too large for the server upload limit. Increase BODY_SIZE_LIMIT (default 512M in Docker) and restart the container.'
           : raw
       return
     }

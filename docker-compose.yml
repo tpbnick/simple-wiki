@@ -11,7 +11,7 @@ services:
       UPLOADS_DIR: /uploads
       PORT: 3000
       COOKIE_SECURE: 'false'
-      BODY_SIZE_LIMIT: 500M
+      # BODY_SIZE_LIMIT defaults to 512M in the Docker image
     restart: unless-stopped
     healthcheck:
       test:
