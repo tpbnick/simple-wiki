@@ -14,12 +14,13 @@ import { isDatabaseSwapInProgress } from '$lib/db/swap-lock.js'
 import { databaseSwapInProgressHtml, prefersHtmlResponse } from '$lib/server/swap-response.js'
 import { redirect, type Handle } from '@sveltejs/kit'
 
-// Bundled extensions are compiled at build time and initialized before request handling.
-loadExtensions()
-
+// Validate paths before extensions open the database on startup.
 if (!import.meta.env.VITEST) {
   validateServerEnv()
 }
+
+// Bundled extensions are compiled at build time and initialized before request handling.
+loadExtensions()
 
 /**
  * Resolves the session, loads extensions, and guards admin write routes.

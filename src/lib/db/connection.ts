@@ -1,5 +1,6 @@
 import BetterSqlite3 from 'better-sqlite3'
-import { readFileSync } from 'fs'
+import { mkdirSync, readFileSync } from 'fs'
+import { dirname, resolve } from 'path'
 import { hashPassword } from '$lib/auth.js'
 import { resolveUploadPath, uploadContentHash } from '$lib/uploads.js'
 import type { WikiExtension } from '$lib/extensions/types.js'
@@ -18,7 +19,11 @@ let extensionSchemasApplied = false
 
 /** Resolved SQLite database file path. */
 export function resolveDatabasePath(): string {
-  return process.env.DATABASE_PATH ?? './wiki.db'
+  return resolve(process.env.DATABASE_PATH ?? './wiki.db')
+}
+
+function ensureDatabaseDirectory(): void {
+  mkdirSync(dirname(resolveDatabasePath()), { recursive: true })
 }
 
 /**
@@ -121,6 +126,7 @@ export function openDatabase(options?: { duringImport?: boolean }) {
     assertDatabaseAvailable()
   }
 
+  ensureDatabaseDirectory()
   const db = new BetterSqlite3(resolveDatabasePath())
   db.pragma('journal_mode = WAL')
   db.pragma('foreign_keys = ON')

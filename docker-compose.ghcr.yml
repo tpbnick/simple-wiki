@@ -1,0 +1,38 @@
+# Pull the published image from GitHub Container Registry (no local build).
+# CI publishes ghcr.io/tpbnick/simple-wiki:latest on pushes to main.
+#
+# Unraid: copy to /mnt/user/appdata/simple-wiki/docker-compose.yml and run:
+#   docker compose up -d
+#
+# Or add the container manually in the Unraid Docker UI (see README / deploy notes).
+
+services:
+  wiki:
+    image: ghcr.io/tpbnick/simple-wiki:latest
+    container_name: simple-wiki
+    ports:
+      - "3000:3000"
+    volumes:
+      # Unraid appdata paths — adjust if you prefer a different location
+      - /mnt/user/appdata/simple-wiki/data:/data
+      - /mnt/user/appdata/simple-wiki/uploads:/uploads
+    environment:
+      DATABASE_PATH: /data/wiki.db
+      UPLOADS_DIR: /uploads
+      PORT: 3000
+      NODE_ENV: production
+      # Plain HTTP on LAN — set to "true" if you put HTTPS in front (NPM, SWAG, etc.)
+      COOKIE_SECURE: "false"
+      # Optional: custom wiki name shown in admin / backups
+      # WIKI_NAME: My Wiki
+      # Optional: require login to read pages
+      # PUBLIC_READ: "false"
+      # Optional: behind a reverse proxy (NPM, SWAG, Caddy)
+      # ADDRESS_HEADER: x-forwarded-for
+      # XFF_DEPTH: "1"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
