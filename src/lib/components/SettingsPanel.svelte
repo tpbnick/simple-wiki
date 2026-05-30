@@ -1,8 +1,9 @@
 <script lang="ts">
-  import { Settings, HelpCircle } from 'lucide-svelte'
+  import { Settings, HelpCircle, Info } from 'lucide-svelte'
   import { settingsStore } from '$lib/stores/settings.svelte.js'
   import { FONTS, SIZES } from '$lib/reading-options.js'
   import { READING_WIDTH_OPTIONS, readingWidthIndex } from '$lib/reading-width.js'
+  import { aboutDialogStore } from '$lib/stores/about-dialog.svelte.js'
   import { onMount } from 'svelte'
 
   let open = $state(false)
@@ -109,7 +110,7 @@
         />
       </div>
 
-      <div class="border-t border-base-300 pt-3">
+      <div class="border-t border-base-300 pt-3 space-y-1">
         <a
           href="/wiki/help"
           onclick={() => (open = false)}
@@ -119,6 +120,18 @@
           <HelpCircle size={14} />
           Help
         </a>
+        <button
+          type="button"
+          onclick={() => {
+            open = false
+            aboutDialogStore.show()
+          }}
+          class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-base-content/60
+                 hover:bg-base-200 hover:text-base-content transition-colors text-left"
+        >
+          <Info size={14} />
+          About
+        </button>
       </div>
     </div>
   {/if}

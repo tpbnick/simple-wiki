@@ -14,6 +14,11 @@ RUN bun install --frozen-lockfile --ignore-scripts \
   && npm rebuild better-sqlite3
 
 COPY . .
+
+ARG GIT_COMMIT=unknown
+ARG GIT_COMMIT_DATE=
+ENV GIT_COMMIT=$GIT_COMMIT
+ENV GIT_COMMIT_DATE=$GIT_COMMIT_DATE
 RUN bun node_modules/@sveltejs/kit/svelte-kit.js sync && bun run build
 
 # ── Production ────────────────────────────────────────────

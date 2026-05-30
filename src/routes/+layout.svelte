@@ -9,6 +9,8 @@
   import { shouldShowReaderSidebar, isReaderViewPath } from '$lib/reader-view.js'
   import { page } from '$app/state'
   import { browser } from '$app/environment'
+  import AboutDialog from '$lib/components/AboutDialog.svelte'
+  import { aboutDialogStore } from '$lib/stores/about-dialog.svelte.js'
   import type { LayoutData } from './$types'
 
   interface Props {
@@ -45,3 +47,5 @@
     </main>
   </div>
 </div>
+
+<AboutDialog open={aboutDialogStore.isOpen} onClose={() => aboutDialogStore.close()} />

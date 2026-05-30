@@ -16,6 +16,18 @@ export function formatBytes(bytes: number): string {
 }
 
 /**
+ * Formats an ISO date string as a readable calendar date.
+ * @param isoDate - Date string from git metadata or the database.
+ */
+export function formatBuildDate(isoDate: string): string {
+  return new Date(isoDate).toLocaleDateString(wikiLocale(), {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+}
+
+/**
  * Formats an ISO date string as a readable date and time.
  * @param isoDate - Date string from the database.
  */
