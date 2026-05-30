@@ -1,0 +1,15 @@
+@import "tailwindcss";
+@import "photoswipe/style.css";
+@plugin "daisyui" {
+  themes: light, dark;
+}
+@plugin "@tailwindcss/typography";
+
+@import "./lib/styles/base.css";
+@import "./lib/styles/themes.css";
+@import "./lib/styles/article.css";
+@import "./lib/styles/infobox.css";
+@import "./lib/styles/imagebox.css";
+@import "./lib/styles/footnotes.css";
+@import "./lib/styles/ui.css";
+@import "./lib/styles/diff.css";

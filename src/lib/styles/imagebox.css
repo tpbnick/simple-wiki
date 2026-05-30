@@ -1,0 +1,284 @@
+/* ─────────────────────────────────────────────────────────
+   IMAGE BOX
+   ───────────────────────────────────────────────────────── */
+.wiki-imagebox {
+  margin: 1.25rem 0;
+  padding: 0.75rem;
+  background: var(--wiki-infobox-bg);
+  border: 1px solid var(--wiki-border-strong);
+  border-radius: 0.6rem;
+}
+
+.wiki-imagebox .imagebox-grid {
+  display: grid;
+  gap: 0.75rem 1.25rem;
+  align-items: start;
+}
+
+.wiki-imagebox.imagebox-long-captions .imagebox-grid {
+  gap: 1rem 1.5rem;
+}
+
+@media (max-width: 767px) {
+  .wiki-imagebox .imagebox-grid[style*="--imagebox-cols: 3"],
+  .wiki-imagebox .imagebox-grid[style*="--imagebox-cols: 4"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+.wiki-imagebox .imagebox-item {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  text-align: center;
+  min-width: 0;
+}
+
+.wiki-imagebox .imagebox-media {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.wiki-imagebox .imagebox-item img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 180px;
+  object-fit: contain;
+  margin: 0 auto;
+}
+
+.wiki-imagebox.imagebox-long-captions .imagebox-item img {
+  max-height: 220px;
+}
+
+.wiki-imagebox .imagebox-caption {
+  width: 100%;
+  margin-top: 0.4rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  text-align: center;
+  color: color-mix(in srgb, var(--color-base-content) 70%, transparent);
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+
+.wiki-imagebox .imagebox-caption-block {
+  display: block;
+}
+
+.wiki-imagebox .imagebox-caption-block + .imagebox-caption-block {
+  margin-top: 0.55rem;
+}
+
+.wiki-imagebox.imagebox-long-captions .imagebox-caption {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  padding-top: 0.15rem;
+}
+
+.wiki-imagebox .imagebox-empty {
+  padding: 1rem;
+  text-align: center;
+  font-size: 0.8125rem;
+  color: color-mix(in srgb, var(--color-base-content) 45%, transparent);
+}
+
+.wiki-imagebox-editor {
+  margin: 0 0 1.25rem;
+  width: 100%;
+  border: 1px solid var(--wiki-border-strong);
+  border-radius: 0.6rem;
+  background: var(--wiki-infobox-bg);
+  overflow: hidden;
+}
+
+.wiki-imagebox-editor .imagebox-editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid var(--wiki-border);
+  background: var(--wiki-infobox-header);
+}
+
+.wiki-imagebox-editor .imagebox-editor-title {
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: var(--wiki-infobox-header-text);
+}
+
+.wiki-imagebox-editor .imagebox-editor-columns {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  color: color-mix(in srgb, var(--color-base-content) 70%, transparent);
+}
+
+.wiki-imagebox-editor .imagebox-editor-columns-input {
+  width: 3rem;
+  text-align: center;
+}
+
+.wiki-imagebox-editor .imagebox-editor-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.wiki-imagebox-editor .imagebox-editor-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.65rem 0.75rem;
+  border-bottom: 1px solid var(--wiki-border);
+}
+
+.wiki-imagebox-editor .imagebox-editor-item[draggable='true'] {
+  cursor: grab;
+}
+
+.wiki-imagebox-editor .imagebox-editor-item.imagebox-item-dragging {
+  opacity: 0.55;
+}
+
+.wiki-imagebox-editor .imagebox-editor-item.imagebox-item-drop-target {
+  outline: 2px dashed var(--color-primary);
+  outline-offset: -2px;
+}
+
+.wiki-imagebox-editor .imagebox-drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.35rem;
+  color: color-mix(in srgb, var(--color-base-content) 35%, transparent);
+  cursor: grab;
+}
+
+.wiki-imagebox-editor .imagebox-editor-thumb {
+  flex-shrink: 0;
+  width: 5.5rem;
+}
+
+.wiki-imagebox-editor .imagebox-editor-thumb img {
+  display: block;
+  width: 100%;
+  max-height: 5rem;
+  object-fit: contain;
+  border-radius: 0.35rem;
+  background: var(--color-base-100);
+}
+
+.wiki-imagebox-editor .imagebox-image-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 4.5rem;
+  border: 1px dashed var(--wiki-border);
+  border-radius: 0.35rem;
+  background: var(--color-base-100);
+}
+
+.wiki-imagebox-editor .imagebox-editor-fields {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.wiki-imagebox-editor .imagebox-editor-filename {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--color-base-content) 75%, transparent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wiki-imagebox-editor .imagebox-editor-input {
+  width: 100%;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  padding: 0.2rem 0.35rem;
+  font: inherit;
+  font-size: 0.8125rem;
+  color: inherit;
+}
+
+.wiki-imagebox-editor .imagebox-editor-input:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-base-100) 80%, transparent);
+}
+
+.wiki-imagebox-editor .imagebox-editor-caption {
+  min-height: 3rem;
+  max-height: 14rem;
+  resize: vertical;
+  overflow-y: auto;
+  line-height: 1.45;
+  field-sizing: content;
+}
+
+.wiki-imagebox-editor .imagebox-editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.15rem;
+}
+
+.wiki-imagebox-editor .imagebox-upload-btn,
+.wiki-imagebox-editor .imagebox-add-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--wiki-border);
+  background: var(--color-base-100);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.wiki-imagebox-editor .imagebox-remove-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.45rem;
+  border: none;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: color-mix(in srgb, var(--color-base-content) 45%, transparent);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.wiki-imagebox-editor .imagebox-editor-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.55rem 0.75rem;
+}
+
+.wiki-imagebox-editor .imagebox-remove-box {
+  padding: 0.25rem 0.45rem;
+  border: none;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: color-mix(in srgb, var(--color-base-content) 45%, transparent);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+

@@ -1,0 +1,46 @@
+# Dependencies and build artifacts (rebuilt inside the image)
+node_modules/
+build/
+.svelte-kit/
+dist/
+
+# Git and CI
+.git/
+.gitignore
+.github/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Local runtime data
+*.db
+*.db-shm
+*.db-wal
+uploads/
+data/
+
+# Tests and tooling
+coverage/
+**/*.test.ts
+**/*.spec.ts
+vitest.config.ts
+playwright-report/
+test-results/
+
+# Documentation and editor
+README.md
+*.md
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Docker (not needed in build context)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
