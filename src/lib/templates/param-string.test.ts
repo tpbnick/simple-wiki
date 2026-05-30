@@ -14,9 +14,7 @@ describe('template param encoding', () => {
   })
 
   it('splits on unescaped pipes only', () => {
-    const parts = splitTemplateParamString(
-      'ImageBox|@id=x|@img0_cap=Hello\\|World|@order=@img0'
-    )
+    const parts = splitTemplateParamString('ImageBox|@id=x|@img0_cap=Hello\\|World|@order=@img0')
     expect(parts).toHaveLength(4)
     expect(partsToParamRecord(parts)['@img0_cap']).toBe('Hello|World')
   })

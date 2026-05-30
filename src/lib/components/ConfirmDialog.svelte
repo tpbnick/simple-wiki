@@ -1,56 +1,56 @@
 <script lang="ts">
-  import type { Snippet } from 'svelte'
+import type { Snippet } from 'svelte'
 
-  let {
-    open,
-    title,
-    titleId,
-    error = '',
-    loading = false,
-    confirmLabel = 'Confirm',
-    loadingLabel = 'Working…',
-    confirmClass = 'bg-error text-error-content hover:bg-error/90',
-    dialogEl = $bindable<HTMLDivElement | null>(null),
-    cancelBtn = $bindable<HTMLButtonElement | null>(null),
-    onClose,
-    onConfirm,
-    children,
-    actions
-  }: {
-    open: boolean
-    title: string
-    titleId: string
-    error?: string
-    loading?: boolean
-    confirmLabel?: string
-    loadingLabel?: string
-    confirmClass?: string
-    dialogEl?: HTMLDivElement | null
-    cancelBtn?: HTMLButtonElement | null
-    onClose: () => void
-    onConfirm?: () => void
-    children?: Snippet
-    actions?: Snippet
-  } = $props()
+let {
+  open,
+  title,
+  titleId,
+  error = '',
+  loading = false,
+  confirmLabel = 'Confirm',
+  loadingLabel = 'Working…',
+  confirmClass = 'bg-error text-error-content hover:bg-error/90',
+  dialogEl = $bindable<HTMLDivElement | null>(null),
+  cancelBtn = $bindable<HTMLButtonElement | null>(null),
+  onClose,
+  onConfirm,
+  children,
+  actions
+}: {
+  open: boolean
+  title: string
+  titleId: string
+  error?: string
+  loading?: boolean
+  confirmLabel?: string
+  loadingLabel?: string
+  confirmClass?: string
+  dialogEl?: HTMLDivElement | null
+  cancelBtn?: HTMLButtonElement | null
+  onClose: () => void
+  onConfirm?: () => void
+  children?: Snippet
+  actions?: Snippet
+} = $props()
 
-  function handleModalKeydown(e: KeyboardEvent) {
-    if (e.key === 'Escape') {
-      onClose()
-      return
-    }
-    if (e.key !== 'Tab' || !dialogEl) return
-    const focusable = [...dialogEl.querySelectorAll<HTMLElement>('button:not([disabled])')]
-    if (!focusable.length) return
-    const first = focusable[0]
-    const last = focusable[focusable.length - 1]
-    if (e.shiftKey && document.activeElement === first) {
-      e.preventDefault()
-      last.focus()
-    } else if (!e.shiftKey && document.activeElement === last) {
-      e.preventDefault()
-      first.focus()
-    }
+function handleModalKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape') {
+    onClose()
+    return
   }
+  if (e.key !== 'Tab' || !dialogEl) return
+  const focusable = [...dialogEl.querySelectorAll<HTMLElement>('button:not([disabled])')]
+  if (!focusable.length) return
+  const first = focusable[0]
+  const last = focusable[focusable.length - 1]
+  if (e.shiftKey && document.activeElement === first) {
+    e.preventDefault()
+    last.focus()
+  } else if (!e.shiftKey && document.activeElement === last) {
+    e.preventDefault()
+    first.focus()
+  }
+}
 </script>
 
 {#if open}

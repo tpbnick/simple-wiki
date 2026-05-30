@@ -354,7 +354,6 @@
   background: color-mix(in srgb, var(--color-base-content) 8%, transparent);
 }
 
-
 .wiki-infobox-editor .infobox-image-actions {
   display: flex;
   flex-wrap: wrap;
@@ -388,4 +387,3 @@
   font-size: 0.75rem;
   cursor: pointer;
 }
-

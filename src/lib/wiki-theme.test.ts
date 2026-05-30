@@ -12,7 +12,8 @@ describe('resolveWikiTheme', () => {
 
 describe('applyWikiHtmlShell', () => {
   it('replaces theme placeholders in the html shell', () => {
-    const html = '<html data-theme="%wiki.theme%"><meta name="theme-color" content="%wiki.theme-color%" /><style>%wiki.critical-theme-css%</style>'
+    const html =
+      '<html data-theme="%wiki.theme%"><meta name="theme-color" content="%wiki.theme-color%" /><style>%wiki.critical-theme-css%</style>'
     const out = applyWikiHtmlShell(html, 'wiki-dark')
 
     expect(out).toContain('data-theme="wiki-dark"')

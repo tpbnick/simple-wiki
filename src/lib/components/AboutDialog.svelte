@@ -1,29 +1,29 @@
 <script lang="ts">
-  import { base } from '$app/paths'
-  import { Github } from 'lucide-svelte'
-  import { getBuildInfo } from '$lib/build-info.js'
-  import { formatBuildDate } from '$lib/format.js'
+import { base } from '$app/paths'
+import { Github } from 'lucide-svelte'
+import { getBuildInfo } from '$lib/build-info.js'
+import { formatBuildDate } from '$lib/format.js'
 
-  let {
-    open,
-    onClose,
-    dialogEl = $bindable<HTMLDivElement | null>(null)
-  }: {
-    open: boolean
-    onClose: () => void
-    dialogEl?: HTMLDivElement | null
-  } = $props()
+let {
+  open,
+  onClose,
+  dialogEl = $bindable<HTMLDivElement | null>(null)
+}: {
+  open: boolean
+  onClose: () => void
+  dialogEl?: HTMLDivElement | null
+} = $props()
 
-  const buildInfo = getBuildInfo()
-  const hasCommit = buildInfo.commitSha !== 'unknown'
+const buildInfo = getBuildInfo()
+const hasCommit = buildInfo.commitSha !== 'unknown'
 
-  function handleModalKeydown(e: KeyboardEvent) {
-    if (e.key === 'Escape') onClose()
-  }
+function handleModalKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape') onClose()
+}
 
-  $effect(() => {
-    if (open) dialogEl?.focus()
-  })
+$effect(() => {
+  if (open) dialogEl?.focus()
+})
 </script>
 
 {#if open}
@@ -44,13 +44,7 @@
       tabindex="-1"
       onkeydown={handleModalKeydown}
     >
-      <img
-        src="{base}/logo.png"
-        alt=""
-        width="64"
-        height="64"
-        class="mx-auto mb-3 rounded-xl"
-      />
+      <img src="{base}/logo.png" alt="" width="64" height="64" class="mx-auto mb-3 rounded-xl" />
       <h2 id="about-dialog-title" class="text-lg font-bold text-base-content">Simple-Wiki</h2>
       <p class="text-sm text-base-content/60 mt-1 mb-5">A simple markdown wiki application</p>
 

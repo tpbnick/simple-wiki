@@ -12,7 +12,9 @@ function rebuildPagesFts(db: Database): void {
     db.prepare("INSERT INTO pages_fts(pages_fts) VALUES('rebuild')").run()
   } catch {
     db.prepare("INSERT INTO pages_fts(pages_fts) VALUES('delete-all')").run()
-    db.prepare('INSERT INTO pages_fts(rowid, title, content) SELECT id, title, content FROM pages').run()
+    db.prepare(
+      'INSERT INTO pages_fts(rowid, title, content) SELECT id, title, content FROM pages'
+    ).run()
   }
 }
 
@@ -37,9 +39,7 @@ const CORE_MIGRATIONS: Migration[] = [
   {
     id: '003_user_is_admin',
     up(db) {
-      const columns = db
-        .prepare("PRAGMA table_info('users')")
-        .all() as Array<{ name: string }>
+      const columns = db.prepare("PRAGMA table_info('users')").all() as Array<{ name: string }>
       if (!columns.some((column) => column.name === 'is_admin')) {
         db.exec('ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0')
       }
@@ -61,9 +61,7 @@ const CORE_MIGRATIONS: Migration[] = [
   {
     id: '005_upload_content_hash',
     up(db) {
-      const columns = db
-        .prepare("PRAGMA table_info('uploads')")
-        .all() as Array<{ name: string }>
+      const columns = db.prepare("PRAGMA table_info('uploads')").all() as Array<{ name: string }>
       if (!columns.some((column) => column.name === 'content_hash')) {
         db.exec('ALTER TABLE uploads ADD COLUMN content_hash TEXT')
       }
@@ -123,9 +121,7 @@ const CORE_MIGRATIONS: Migration[] = [
   {
     id: '009_revisions_title',
     up(db) {
-      const columns = db
-        .prepare("PRAGMA table_info('revisions')")
-        .all() as Array<{ name: string }>
+      const columns = db.prepare("PRAGMA table_info('revisions')").all() as Array<{ name: string }>
       if (!columns.some((column) => column.name === 'title')) {
         db.exec('ALTER TABLE revisions ADD COLUMN title TEXT')
       }
@@ -138,9 +134,9 @@ function isMigrationApplied(db: Database, id: string): boolean {
 }
 
 function isMigrationKeyApplied(db: Database, key: string): boolean {
-  const row = db
-    .prepare("SELECT value FROM app_meta WHERE key = ? LIMIT 1")
-    .get(key) as { value: string } | undefined
+  const row = db.prepare('SELECT value FROM app_meta WHERE key = ? LIMIT 1').get(key) as
+    | { value: string }
+    | undefined
   return row?.value === '1'
 }
 

@@ -16,14 +16,27 @@ import { tmpdir } from 'os'
 import { join } from 'path'
 import { zipSync, unzipSync } from 'fflate'
 import { getAppVersion, getWikiName } from '$lib/wiki-identity.js'
-import { openDatabase, resetDatabaseConnection, resolveDatabasePath, applyExtensionSchemas } from '$lib/db/connection.js'
+import {
+  openDatabase,
+  resetDatabaseConnection,
+  resolveDatabasePath,
+  applyExtensionSchemas
+} from '$lib/db/connection.js'
 import { getExtensions } from '$lib/extensions/server.js'
 import { uploadsDirectory } from '$lib/uploads.js'
-import { validateZipArchiveLimits, validateUnzippedEntrySizes, ZipSafetyError } from '$lib/zip-safety.js'
+import {
+  validateZipArchiveLimits,
+  validateUnzippedEntrySizes,
+  ZipSafetyError
+} from '$lib/zip-safety.js'
 import { getAllPages } from '$lib/db/index.js'
 import type { Page } from '$lib/db/types.js'
 import { invalidatePageSlugCache } from '$lib/db/slug-cache.js'
-import { beginDatabaseImport, endDatabaseImport, isDatabaseSwapInProgress } from '$lib/db/swap-lock.js'
+import {
+  beginDatabaseImport,
+  endDatabaseImport,
+  isDatabaseSwapInProgress
+} from '$lib/db/swap-lock.js'
 import { runOnDatabaseReset } from '$lib/extensions/server.js'
 
 export const BACKUP_MANIFEST_FILE = 'manifest.txt'
@@ -120,7 +133,10 @@ export function parseBackupManifest(text: string): BackupManifest {
   }
 }
 
-function createManifest(options: { includeUploads: boolean; includeMarkdown: boolean }): BackupManifest {
+function createManifest(options: {
+  includeUploads: boolean
+  includeMarkdown: boolean
+}): BackupManifest {
   return {
     wikiName: getWikiName(),
     wikiVersion: getAppVersion(),
@@ -168,7 +184,9 @@ function collectMarkdownEntries(): Record<string, Uint8Array> {
 
   for (const page of pages) {
     if (page.namespace === 'template') continue
-    entries[markdownZipPath(page.namespace, page.slug)] = encoder.encode(serializePageAsMarkdown(page))
+    entries[markdownZipPath(page.namespace, page.slug)] = encoder.encode(
+      serializePageAsMarkdown(page)
+    )
   }
 
   return entries
@@ -276,7 +294,9 @@ function buildImportWarnings(
   if (manifest.includesUploads && options.restoreUploads !== true) {
     warnings.push('Backup includes uploaded files, but they were not restored.')
   } else if (options.restoreUploads === true && uploadEntries.length === 0) {
-    warnings.push('Restore uploads was enabled, but the backup zip did not contain any upload files.')
+    warnings.push(
+      'Restore uploads was enabled, but the backup zip did not contain any upload files.'
+    )
   }
 
   return warnings
@@ -340,7 +360,11 @@ export async function createBackupArchive(options: BackupOptions = {}): Promise<
 /** Suggested filename for a downloaded backup archive. */
 export function backupDownloadFilename(date = new Date()): string {
   const stamp = date.toISOString().replaceAll(':', '-').replace(/\..+$/, '')
-  const slug = getWikiName().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'wiki'
+  const slug =
+    getWikiName()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'wiki'
   return `${slug}-backup-${stamp}.zip`
 }
 

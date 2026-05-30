@@ -1,10 +1,4 @@
-import {
-  getPage,
-  savePage,
-  PageConflictError,
-  VALID_NAMESPACES,
-  type Page
-} from '$lib/db/index.js'
+import { getPage, savePage, PageConflictError, VALID_NAMESPACES, type Page } from '$lib/db/index.js'
 import { slugify } from '$lib/slug.js'
 
 export type PageSaveFields = {
@@ -74,8 +68,7 @@ export function persistWikiPage(options: {
     }
   }
 
-  const slug =
-    options.routeSlug === 'new' ? slugify(options.fields.title) : options.routeSlug
+  const slug = options.routeSlug === 'new' ? slugify(options.fields.title) : options.routeSlug
 
   if (!slug) {
     return {

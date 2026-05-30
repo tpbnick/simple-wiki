@@ -2,7 +2,10 @@ import { generateSessionId } from '$lib/auth.js'
 import { openDatabase } from './connection.js'
 import type { User } from './types.js'
 
-export type UserSummary = Pick<User, 'id' | 'username' | 'must_change_pw' | 'is_admin' | 'created_at'>
+export type UserSummary = Pick<
+  User,
+  'id' | 'username' | 'must_change_pw' | 'is_admin' | 'created_at'
+>
 
 /** Returns a user by username, or null when not found. */
 export function getUserByName(username: string): User | null {

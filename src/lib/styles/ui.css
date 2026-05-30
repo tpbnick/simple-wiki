@@ -38,7 +38,9 @@
   font-size: 0.8125rem;
 }
 
-.wiki-toc a:hover { text-decoration: underline; }
+.wiki-toc a:hover {
+  text-decoration: underline;
+}
 
 /* ─────────────────────────────────────────────────────────
    TEMPLATE CALLOUTS (Note, Warning)
@@ -51,7 +53,7 @@
    SPLIT EDITOR
    ───────────────────────────────────────────────────────── */
 .editor-pane {
-  font-family: "JetBrains Mono", "Cascadia Code", "Fira Code", ui-monospace, monospace;
+  font-family: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', ui-monospace, monospace;
   font-size: 0.875rem;
   line-height: 1.65;
   resize: none;
@@ -66,7 +68,10 @@
   border: 1px solid var(--wiki-border);
   border-radius: var(--radius-box);
   box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+  transition:
+    box-shadow 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.15s ease;
 }
 
 /* Hover lift only on interactive cards (cards that are links/buttons or contain them) */
@@ -92,8 +97,13 @@
 /* ─────────────────────────────────────────────────────────
    SCROLLBAR
    ───────────────────────────────────────────────────────── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
 ::-webkit-scrollbar-thumb {
   background: var(--wiki-border-strong);
   border-radius: 3px;
@@ -163,4 +173,3 @@
   flex-direction: column;
   overflow: hidden;
 }
-

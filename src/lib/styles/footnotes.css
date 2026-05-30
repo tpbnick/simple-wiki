@@ -3,21 +3,25 @@
    ───────────────────────────────────────────────────────── */
 
 /* Inline citation superscript — renders as [1] */
-.wiki-content sup a[href^="#fn-"] {
+.wiki-content sup a[href^='#fn-'] {
   color: var(--wiki-link);
   text-decoration: none;
   font-size: 0.8em;
   font-weight: 500;
   padding: 0 0.5px;
 }
-.wiki-content sup a[href^="#fn-"]:hover {
+.wiki-content sup a[href^='#fn-']:hover {
   text-decoration: underline;
 }
-.wiki-content sup a[href^="#fn-"]::before { content: '['; }
-.wiki-content sup a[href^="#fn-"]::after  { content: ']'; }
+.wiki-content sup a[href^='#fn-']::before {
+  content: '[';
+}
+.wiki-content sup a[href^='#fn-']::after {
+  content: ']';
+}
 
 /* Inline citation target scroll offset (back-navigation) */
-.wiki-content a[id^="fnref-"] {
+.wiki-content a[id^='fnref-'] {
   scroll-margin-top: 5rem;
 }
 
@@ -70,11 +74,15 @@
 
 /* Highlight animation — triggered by JS (wiki-fn-highlight class) */
 @keyframes wiki-fn-highlight {
-  0%, 20% { background-color: color-mix(in srgb, var(--color-warning) 38%, transparent); }
-  100%     { background-color: transparent; }
+  0%,
+  20% {
+    background-color: color-mix(in srgb, var(--color-warning) 38%, transparent);
+  }
+  100% {
+    background-color: transparent;
+  }
 }
 
 .wiki-fn-highlight {
   animation: wiki-fn-highlight 2.2s ease-out forwards;
 }
-

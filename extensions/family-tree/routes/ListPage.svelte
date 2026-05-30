@@ -1,69 +1,69 @@
 <script lang="ts">
-  import { goto, invalidateAll } from '$app/navigation'
-  import ConfirmDialog from '$lib/components/ConfirmDialog.svelte'
-  import { createFamilyTree } from '$lib/family-tree/create-tree.js'
-  import { GitBranch, Plus, Trash2 } from 'lucide-svelte'
-  import type { ListPageData } from './types.js'
+import { goto, invalidateAll } from '$app/navigation'
+import ConfirmDialog from '$lib/components/ConfirmDialog.svelte'
+import { createFamilyTree } from '$lib/family-tree/create-tree.js'
+import { GitBranch, Plus, Trash2 } from 'lucide-svelte'
+import type { ListPageData } from './types.js'
 
-  let { data }: { data: ListPageData } = $props()
-  let title = $state('')
-  let creating = $state(false)
-  let error = $state('')
-  let deleteTarget = $state<{ slug: string; title: string } | null>(null)
-  let deleteLoading = $state(false)
-  let deleteError = $state('')
+let { data }: { data: ListPageData } = $props()
+let title = $state('')
+let creating = $state(false)
+let error = $state('')
+let deleteTarget = $state<{ slug: string; title: string } | null>(null)
+let deleteLoading = $state(false)
+let deleteError = $state('')
 
-  async function createTree() {
-    const trimmed = title.trim()
-    if (!trimmed) return
+async function createTree() {
+  const trimmed = title.trim()
+  if (!trimmed) return
 
-    creating = true
-    error = ''
+  creating = true
+  error = ''
 
-    try {
-      const payload = await createFamilyTree(trimmed)
-      await goto(`/family-tree/${payload.slug}`)
-    } catch (err) {
-      error = err instanceof Error ? err.message : 'Could not create tree'
-    } finally {
-      creating = false
+  try {
+    const payload = await createFamilyTree(trimmed)
+    await goto(`/family-tree/${payload.slug}`)
+  } catch (err) {
+    error = err instanceof Error ? err.message : 'Could not create tree'
+  } finally {
+    creating = false
+  }
+}
+
+function openDeleteModal(tree: { slug: string; title: string }) {
+  deleteTarget = tree
+  deleteError = ''
+}
+
+function closeDeleteModal() {
+  deleteTarget = null
+  deleteError = ''
+}
+
+async function submitDelete() {
+  if (!deleteTarget) return
+
+  deleteLoading = true
+  deleteError = ''
+
+  try {
+    const response = await fetch(`/api/family-tree/${encodeURIComponent(deleteTarget.slug)}`, {
+      method: 'DELETE'
+    })
+
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null)
+      throw new Error(payload?.message ?? 'Delete failed')
     }
+
+    closeDeleteModal()
+    await invalidateAll()
+  } catch (err) {
+    deleteError = err instanceof Error ? err.message : 'Delete failed'
+  } finally {
+    deleteLoading = false
   }
-
-  function openDeleteModal(tree: { slug: string; title: string }) {
-    deleteTarget = tree
-    deleteError = ''
-  }
-
-  function closeDeleteModal() {
-    deleteTarget = null
-    deleteError = ''
-  }
-
-  async function submitDelete() {
-    if (!deleteTarget) return
-
-    deleteLoading = true
-    deleteError = ''
-
-    try {
-      const response = await fetch(`/api/family-tree/${encodeURIComponent(deleteTarget.slug)}`, {
-        method: 'DELETE'
-      })
-
-      if (!response.ok) {
-        const payload = await response.json().catch(() => null)
-        throw new Error(payload?.message ?? 'Delete failed')
-      }
-
-      closeDeleteModal()
-      await invalidateAll()
-    } catch (err) {
-      deleteError = err instanceof Error ? err.message : 'Delete failed'
-    } finally {
-      deleteLoading = false
-    }
-  }
+}
 </script>
 
 <svelte:head>
@@ -72,7 +72,9 @@
 
 <div class="p-6 max-w-3xl">
   <div class="flex items-center gap-3 mb-8">
-    <div class="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
+    <div
+      class="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center"
+    >
       <GitBranch size={18} class="text-violet-600 dark:text-violet-300" />
     </div>
     <div>
@@ -82,7 +84,13 @@
   </div>
 
   {#if data.canEdit}
-    <form class="wiki-card p-4 mb-6 flex flex-col sm:flex-row gap-3" onsubmit={(e) => { e.preventDefault(); createTree() }}>
+    <form
+      class="wiki-card p-4 mb-6 flex flex-col sm:flex-row gap-3"
+      onsubmit={(e) => {
+        e.preventDefault()
+        createTree()
+      }}
+    >
       <label class="flex-1">
         <span class="sr-only">Tree title</span>
         <input

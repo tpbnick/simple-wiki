@@ -1,25 +1,25 @@
 <script lang="ts">
-  import { Settings, HelpCircle, Info } from 'lucide-svelte'
-  import { settingsStore } from '$lib/stores/settings.svelte.js'
-  import { FONTS, SIZES } from '$lib/reading-options.js'
-  import { READING_WIDTH_OPTIONS, readingWidthIndex } from '$lib/reading-width.js'
-  import { aboutDialogStore } from '$lib/stores/about-dialog.svelte.js'
-  import { onMount } from 'svelte'
+import { Settings, HelpCircle, Info } from 'lucide-svelte'
+import { settingsStore } from '$lib/stores/settings.svelte.js'
+import { FONTS, SIZES } from '$lib/reading-options.js'
+import { READING_WIDTH_OPTIONS, readingWidthIndex } from '$lib/reading-width.js'
+import { aboutDialogStore } from '$lib/stores/about-dialog.svelte.js'
+import { onMount } from 'svelte'
 
-  let open = $state(false)
-  let panel = $state<HTMLDivElement | null>(null)
+let open = $state(false)
+let panel = $state<HTMLDivElement | null>(null)
 
-  onMount(() => settingsStore.init())
+onMount(() => settingsStore.init())
 
-  function handleOutsideClick(e: MouseEvent) {
-    if (open && panel && !panel.contains(e.target as Node)) {
-      open = false
-    }
+function handleOutsideClick(e: MouseEvent) {
+  if (open && panel && !panel.contains(e.target as Node)) {
+    open = false
   }
+}
 
-  function handleKeydown(e: KeyboardEvent) {
-    if (e.key === 'Escape') open = false
-  }
+function handleKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape') open = false
+}
 </script>
 
 <svelte:window onclick={handleOutsideClick} onkeydown={handleKeydown} />
@@ -50,7 +50,9 @@
              rounded-xl shadow-xl p-4 space-y-5"
     >
       <div>
-        <p class="text-[0.65rem] font-bold uppercase tracking-widest text-base-content/40 mb-2">Font</p>
+        <p class="text-[0.65rem] font-bold uppercase tracking-widest text-base-content/40 mb-2">
+          Font
+        </p>
         <div class="space-y-1">
           {#each FONTS as font}
             <button
@@ -74,7 +76,9 @@
       </div>
 
       <div>
-        <p class="text-[0.65rem] font-bold uppercase tracking-widest text-base-content/40 mb-2">Text size</p>
+        <p class="text-[0.65rem] font-bold uppercase tracking-widest text-base-content/40 mb-2">
+          Text size
+        </p>
         <div class="flex gap-1">
           {#each SIZES as size}
             <button
@@ -93,7 +97,9 @@
       </div>
 
       <div>
-        <p class="text-[0.65rem] font-bold uppercase tracking-widest text-base-content/40 mb-2">Width</p>
+        <p class="text-[0.65rem] font-bold uppercase tracking-widest text-base-content/40 mb-2">
+          Width
+        </p>
         <input
           id="reading-width"
           type="range"

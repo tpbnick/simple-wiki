@@ -1,17 +1,17 @@
 <script lang="ts">
-  import { Eye, EyeOff } from 'lucide-svelte'
+import { Eye, EyeOff } from 'lucide-svelte'
 
-  let {
-    title = $bindable(),
-    namespace = $bindable(),
-    showPreview,
-    onTogglePreview
-  }: {
-    title: string
-    namespace: string
-    showPreview: boolean
-    onTogglePreview: () => void
-  } = $props()
+let {
+  title = $bindable(),
+  namespace = $bindable(),
+  showPreview,
+  onTogglePreview
+}: {
+  title: string
+  namespace: string
+  showPreview: boolean
+  onTogglePreview: () => void
+} = $props()
 </script>
 
 <div class="flex items-center gap-3 px-4 py-2 border-b border-base-300 bg-base-100 shrink-0">

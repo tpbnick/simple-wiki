@@ -1,6 +1,4 @@
-import {
-  Bold, Italic, Link2, Hash, Code2, Info, AlertTriangle
-} from 'lucide-svelte'
+import { Bold, Italic, Link2, Hash, Code2, Info, AlertTriangle } from 'lucide-svelte'
 
 export type ToolbarAction = {
   icon:
@@ -26,6 +24,10 @@ export function createMarkdownToolbarActions(handlers: {
     { icon: Hash, label: 'Heading', action: () => handlers.insertAt('\n## ') },
     { icon: Code2, label: 'Code', action: () => handlers.wrap('`') },
     { icon: Info, label: 'Note', action: () => handlers.insertAt('\n{{Note|Your note here}}\n') },
-    { icon: AlertTriangle, label: 'Warning', action: () => handlers.insertAt('\n{{Warning|Your warning here}}\n') }
+    {
+      icon: AlertTriangle,
+      label: 'Warning',
+      action: () => handlers.insertAt('\n{{Warning|Your warning here}}\n')
+    }
   ] as ToolbarAction[]
 }

@@ -10,7 +10,11 @@ import { getPage } from '$lib/db/index.js'
 import { slugify } from '$lib/slug.js'
 import { escapeHtml } from '$lib/html.js'
 import { renderMarkdownSync } from '$lib/markdown/index.js'
-import { getRenderContext, getTemplateDepth, withTemplateDepth } from '$lib/markdown/render-context.js'
+import {
+  getRenderContext,
+  getTemplateDepth,
+  withTemplateDepth
+} from '$lib/markdown/render-context.js'
 import { runOnTemplateParse } from '$lib/extensions/server.js'
 import type { TemplateResolver } from '$lib/markdown/index.js'
 

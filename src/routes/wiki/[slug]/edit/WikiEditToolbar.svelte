@@ -1,65 +1,67 @@
 <script lang="ts">
-  import { ChevronDown, GitBranch, Images, LayoutList, Upload } from 'lucide-svelte'
-  import type { ToolbarAction } from '$lib/wiki-edit/toolbar-actions.js'
+import { ChevronDown, GitBranch, Images, LayoutList, Upload } from 'lucide-svelte'
+import type { ToolbarAction } from '$lib/wiki-edit/toolbar-actions.js'
 
-  let {
-    toolbarActions,
-    hasInfoboxInContent,
-    showInfoboxAddMenu = $bindable(),
-    showFamilyTreeMenu = $bindable(),
-    hasFamilyTreeTool,
-    familyTrees,
-    newFamilyTreeTitle = $bindable(),
-    creatingFamilyTree,
-    familyTreeError,
-    uploading,
-    uploadError,
-    onInsertInfobox,
-    onInsertImageBox,
-    onInsertFamilyTree,
-    onCreateFamilyTree,
-    onUploadClick,
-    onCloseFamilyTreeMenu
-  }: {
-    toolbarActions: ToolbarAction[]
-    hasInfoboxInContent: boolean
-    showInfoboxAddMenu: boolean
-    showFamilyTreeMenu: boolean
-    hasFamilyTreeTool: boolean
-    familyTrees: Array<{ slug: string; title: string }>
-    newFamilyTreeTitle: string
-    creatingFamilyTree: boolean
-    familyTreeError: string
-    uploading: boolean
-    uploadError: string
-    onInsertInfobox: (variant?: string) => void
-    onInsertImageBox: () => void
-    onInsertFamilyTree: (slug: string) => void
-    onCreateFamilyTree: () => void | Promise<void>
-    onUploadClick: () => void
-    onCloseFamilyTreeMenu: () => void
-  } = $props()
+let {
+  toolbarActions,
+  hasInfoboxInContent,
+  showInfoboxAddMenu = $bindable(),
+  showFamilyTreeMenu = $bindable(),
+  hasFamilyTreeTool,
+  familyTrees,
+  newFamilyTreeTitle = $bindable(),
+  creatingFamilyTree,
+  familyTreeError,
+  uploading,
+  uploadError,
+  onInsertInfobox,
+  onInsertImageBox,
+  onInsertFamilyTree,
+  onCreateFamilyTree,
+  onUploadClick,
+  onCloseFamilyTreeMenu
+}: {
+  toolbarActions: ToolbarAction[]
+  hasInfoboxInContent: boolean
+  showInfoboxAddMenu: boolean
+  showFamilyTreeMenu: boolean
+  hasFamilyTreeTool: boolean
+  familyTrees: Array<{ slug: string; title: string }>
+  newFamilyTreeTitle: string
+  creatingFamilyTree: boolean
+  familyTreeError: string
+  uploading: boolean
+  uploadError: string
+  onInsertInfobox: (variant?: string) => void
+  onInsertImageBox: () => void
+  onInsertFamilyTree: (slug: string) => void
+  onCreateFamilyTree: () => void | Promise<void>
+  onUploadClick: () => void
+  onCloseFamilyTreeMenu: () => void
+} = $props()
 
-  function closeInfoboxAddMenu() {
+function closeInfoboxAddMenu() {
+  showInfoboxAddMenu = false
+}
+
+function toggleInfoboxMenu() {
+  showInfoboxAddMenu = !showInfoboxAddMenu
+  if (showInfoboxAddMenu) {
+    showFamilyTreeMenu = false
+  }
+}
+
+function toggleFamilyTreeMenu() {
+  showFamilyTreeMenu = !showFamilyTreeMenu
+  if (showFamilyTreeMenu) {
     showInfoboxAddMenu = false
   }
-
-  function toggleInfoboxMenu() {
-    showInfoboxAddMenu = !showInfoboxAddMenu
-    if (showInfoboxAddMenu) {
-      showFamilyTreeMenu = false
-    }
-  }
-
-  function toggleFamilyTreeMenu() {
-    showFamilyTreeMenu = !showFamilyTreeMenu
-    if (showFamilyTreeMenu) {
-      showInfoboxAddMenu = false
-    }
-  }
+}
 </script>
 
-<div class="flex items-center gap-0.5 px-2 py-1 border-b border-base-300 bg-base-200 shrink-0 flex-wrap">
+<div
+  class="flex items-center gap-0.5 px-2 py-1 border-b border-base-300 bg-base-200 shrink-0 flex-wrap"
+>
   {#each toolbarActions as { icon: Icon, label, action }}
     <button
       type="button"
@@ -86,21 +88,45 @@
     >
       <LayoutList size={14} />
       <span class="hidden sm:inline text-xs">Infobox</span>
-      <ChevronDown size={12} class="opacity-60 transition-transform {showInfoboxAddMenu ? 'rotate-180' : ''}" />
+      <ChevronDown
+        size={12}
+        class="opacity-60 transition-transform {showInfoboxAddMenu ? 'rotate-180' : ''}"
+      />
     </button>
 
     {#if showInfoboxAddMenu && !hasInfoboxInContent}
       <div class="infobox-toolbar-menu" role="menu">
-        <button type="button" role="menuitem" onmousedown={(e) => e.preventDefault()}
-          onclick={() => { onInsertInfobox(); closeInfoboxAddMenu() }}>
+        <button
+          type="button"
+          role="menuitem"
+          onmousedown={(e) => e.preventDefault()}
+          onclick={() => {
+            onInsertInfobox()
+            closeInfoboxAddMenu()
+          }}
+        >
           Basic infobox
         </button>
-        <button type="button" role="menuitem" onmousedown={(e) => e.preventDefault()}
-          onclick={() => { onInsertInfobox('Person'); closeInfoboxAddMenu() }}>
+        <button
+          type="button"
+          role="menuitem"
+          onmousedown={(e) => e.preventDefault()}
+          onclick={() => {
+            onInsertInfobox('Person')
+            closeInfoboxAddMenu()
+          }}
+        >
           Person infobox
         </button>
-        <button type="button" role="menuitem" onmousedown={(e) => e.preventDefault()}
-          onclick={() => { onInsertInfobox('Country'); closeInfoboxAddMenu() }}>
+        <button
+          type="button"
+          role="menuitem"
+          onmousedown={(e) => e.preventDefault()}
+          onclick={() => {
+            onInsertInfobox('Country')
+            closeInfoboxAddMenu()
+          }}
+        >
           Country infobox
         </button>
       </div>
@@ -130,13 +156,18 @@
       >
         <GitBranch size={14} />
         <span class="hidden sm:inline text-xs">Family tree</span>
-        <ChevronDown size={12} class="opacity-60 transition-transform {showFamilyTreeMenu ? 'rotate-180' : ''}" />
+        <ChevronDown
+          size={12}
+          class="opacity-60 transition-transform {showFamilyTreeMenu ? 'rotate-180' : ''}"
+        />
       </button>
 
       {#if showFamilyTreeMenu}
         <div class="infobox-toolbar-menu family-tree-toolbar-menu" role="menu">
           {#if familyTrees.length > 0}
-            <p class="px-3 pt-1 pb-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-base-content/40">
+            <p
+              class="px-3 pt-1 pb-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-base-content/40"
+            >
               Insert existing
             </p>
             {#each familyTrees as tree}
@@ -151,7 +182,9 @@
             {/each}
             <div class="border-t border-base-300 my-1"></div>
           {/if}
-          <p class="px-3 pt-1 pb-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-base-content/40">
+          <p
+            class="px-3 pt-1 pb-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-base-content/40"
+          >
             Create new
           </p>
           <form

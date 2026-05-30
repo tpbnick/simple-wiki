@@ -2,8 +2,9 @@ const WIKI_LINK_PATTERN = /\[\[([^\]|]+?)(?:\|([^\]]+?))?\]\]/g
 
 /** Plain-text label for a person name that may contain wiki link syntax. */
 export function personDisplayName(name: string): string {
-  return name.replace(WIKI_LINK_PATTERN, (_, target: string, label?: string) =>
-    (label?.trim() || target.trim())
+  return name.replace(
+    WIKI_LINK_PATTERN,
+    (_, target: string, label?: string) => label?.trim() || target.trim()
   )
 }
 

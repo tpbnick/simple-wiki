@@ -21,11 +21,12 @@ function readUint16(data: Uint8Array, offset: number): number {
 
 function readUint32(data: Uint8Array, offset: number): number {
   return (
-    data[offset] |
-    (data[offset + 1] << 8) |
-    (data[offset + 2] << 16) |
-    (data[offset + 3] << 24)
-  ) >>> 0
+    (data[offset] |
+      (data[offset + 1] << 8) |
+      (data[offset + 2] << 16) |
+      (data[offset + 3] << 24)) >>>
+    0
+  )
 }
 
 function findEndOfCentralDirectory(data: Uint8Array): number {

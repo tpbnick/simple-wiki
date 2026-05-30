@@ -127,7 +127,17 @@ export function openDatabase(options?: { duringImport?: boolean }) {
   }
 
   ensureDatabaseDirectory()
-  const db = new BetterSqlite3(resolveDatabasePath())
+  const dbPath = resolveDatabasePath()
+  let db: BetterSqlite3.Database
+  try {
+    db = new BetterSqlite3(dbPath)
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error)
+    throw new Error(
+      `Failed to open SQLite database at ${dbPath}: ${detail}. ` +
+        'Check DATABASE_PATH and that /data is writable by the container.'
+    )
+  }
   db.pragma('journal_mode = WAL')
   db.pragma('foreign_keys = ON')
   db.exec(SCHEMA)

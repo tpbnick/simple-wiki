@@ -16,7 +16,13 @@ const UPLOAD_LIMIT = 30
 const UPLOAD_WINDOW_MS = 15 * 60 * 1000
 
 export const POST: RequestHandler = async ({ request, locals, getClientAddress }) => {
-  enforceAuthenticatedWriteRateLimit(locals, getClientAddress, 'upload', UPLOAD_LIMIT, UPLOAD_WINDOW_MS)
+  enforceAuthenticatedWriteRateLimit(
+    locals,
+    getClientAddress,
+    'upload',
+    UPLOAD_LIMIT,
+    UPLOAD_WINDOW_MS
+  )
 
   const formData = await request.formData()
   const file = formData.get('file')

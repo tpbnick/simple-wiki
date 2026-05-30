@@ -69,7 +69,13 @@ describe('renderFamilyTreeEmbed', () => {
 
   it('does not embed wiki page slugs in HTML (loaded client-side)', () => {
     createFamilyTree('Steighner', 'steighner')
-    savePage('steighner-family', 'Steighner Family', '{{FamilyTree|family=steighner}}', 'article', 'create')
+    savePage(
+      'steighner-family',
+      'Steighner Family',
+      '{{FamilyTree|family=steighner}}',
+      'article',
+      'create'
+    )
 
     const html = renderFamilyTreeEmbed({ family: 'steighner' })
 

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { ArrowLeft } from 'lucide-svelte'
-  import { extensionsAdminUrl } from '$lib/extensions/admin-url.js'
+import { ArrowLeft } from 'lucide-svelte'
+import { extensionsAdminUrl } from '$lib/extensions/admin-url.js'
 </script>
 
 <a

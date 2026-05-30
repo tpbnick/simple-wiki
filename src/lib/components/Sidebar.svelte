@@ -1,128 +1,127 @@
 <script lang="ts">
-  import { afterNavigate } from '$app/navigation'
-  import { onMount } from 'svelte'
-  import { tocStore } from '$lib/stores/toc.svelte.js'
-  import { sidebarStore } from '$lib/stores/sidebar.svelte.js'
+import { afterNavigate } from '$app/navigation'
+import { onMount } from 'svelte'
+import { tocStore } from '$lib/stores/toc.svelte.js'
+import { sidebarStore } from '$lib/stores/sidebar.svelte.js'
 
-  let activeId = $state<string | null>(null)
-  let observer: IntersectionObserver | null = null
-  let retryTimer: ReturnType<typeof setTimeout> | null = null
+let activeId = $state<string | null>(null)
+let observer: IntersectionObserver | null = null
+let retryTimer: ReturnType<typeof setTimeout> | null = null
 
-  function setupObserver(entries: typeof tocStore.entries, attempt = 0) {
+function setupObserver(entries: typeof tocStore.entries, attempt = 0) {
+  observer?.disconnect()
+  if (retryTimer) {
+    clearTimeout(retryTimer)
+    retryTimer = null
+  }
+  if (entries.length === 0) {
+    activeId = null
+    return
+  }
+
+  const ids = entries.map((entry) => entry.id)
+  const headings = ids.map((id) => document.getElementById(id)).filter(Boolean) as HTMLElement[]
+
+  if (headings.length === 0) {
+    activeId = null
+    if (attempt < 5) {
+      retryTimer = setTimeout(() => setupObserver(entries, attempt + 1), 100)
+    }
+    return
+  }
+
+  const above = new Set<string>()
+
+  observer = new IntersectionObserver(
+    (records) => {
+      for (const rec of records) {
+        if (rec.isIntersecting) {
+          above.delete(rec.target.id)
+        } else if (rec.boundingClientRect.top < 0) {
+          above.add(rec.target.id)
+        }
+      }
+      const aboveList = ids.filter((id) => above.has(id))
+      activeId = aboveList.length > 0 ? aboveList[aboveList.length - 1] : ids[0]
+    },
+    { rootMargin: '-58px 0px 0px 0px', threshold: 0 }
+  )
+
+  for (const heading of headings) observer.observe(heading)
+}
+
+$effect(() => {
+  const entries = tocStore.entries
+  if (typeof window !== 'undefined') {
+    requestAnimationFrame(() => setupObserver(entries))
+  }
+  return () => {
     observer?.disconnect()
     if (retryTimer) {
       clearTimeout(retryTimer)
       retryTimer = null
     }
-    if (entries.length === 0) {
-      activeId = null
-      return
-    }
-
-    const ids = entries.map((entry) => entry.id)
-    const headings = ids
-      .map((id) => document.getElementById(id))
-      .filter(Boolean) as HTMLElement[]
-
-    if (headings.length === 0) {
-      activeId = null
-      if (attempt < 5) {
-        retryTimer = setTimeout(() => setupObserver(entries, attempt + 1), 100)
-      }
-      return
-    }
-
-    const above = new Set<string>()
-
-    observer = new IntersectionObserver(
-      (records) => {
-        for (const rec of records) {
-          if (rec.isIntersecting) {
-            above.delete(rec.target.id)
-          } else if (rec.boundingClientRect.top < 0) {
-            above.add(rec.target.id)
-          }
-        }
-        const aboveList = ids.filter((id) => above.has(id))
-        activeId =
-          aboveList.length > 0 ? aboveList[aboveList.length - 1] : ids[0]
-      },
-      { rootMargin: '-58px 0px 0px 0px', threshold: 0 }
-    )
-
-    for (const heading of headings) observer.observe(heading)
   }
+})
 
-  $effect(() => {
-    const entries = tocStore.entries
-    if (typeof window !== 'undefined') {
-      requestAnimationFrame(() => setupObserver(entries))
-    }
-    return () => {
-      observer?.disconnect()
-      if (retryTimer) {
-        clearTimeout(retryTimer)
-        retryTimer = null
-      }
-    }
+function getActiveParentId(entries: typeof tocStore.entries, active: string | null) {
+  if (!active) return null
+  const idx = entries.findIndex((entry) => entry.id === active)
+  if (idx < 0) return null
+  if (entries[idx].level <= 2) return null
+  for (let i = idx - 1; i >= 0; i--) {
+    if (entries[i].level <= 2) return entries[i].id
+  }
+  return null
+}
+
+function closeMobileToc() {
+  sidebarStore.close()
+}
+
+function scrollToHeading(id: string, mobile: boolean, event: MouseEvent) {
+  event.preventDefault()
+  scrollToId(id)
+  if (mobile) {
+    requestAnimationFrame(() => closeMobileToc())
+  }
+}
+
+function scrollToId(id: string) {
+  const scroll = () => {
+    const heading = document.getElementById(id)
+    if (!heading) return false
+    heading.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    history.replaceState(null, '', `#${id}`)
+    activeId = id
+    return true
+  }
+  if (scroll()) return
+  requestAnimationFrame(() => {
+    scroll()
   })
+}
 
-  function getActiveParentId(entries: typeof tocStore.entries, active: string | null) {
-    if (!active) return null
-    const idx = entries.findIndex((entry) => entry.id === active)
-    if (idx < 0) return null
-    if (entries[idx].level <= 2) return null
-    for (let i = idx - 1; i >= 0; i--) {
-      if (entries[i].level <= 2) return entries[i].id
-    }
-    return null
+function scrollToLocationHash() {
+  const id = window.location.hash.slice(1)
+  if (id) scrollToId(id)
+}
+
+function handleKeydown(event: KeyboardEvent) {
+  if (event.key === 'Escape' && sidebarStore.isOpen) {
+    closeMobileToc()
   }
+}
 
-  function closeMobileToc() {
-    sidebarStore.close()
-  }
+onMount(() => {
+  scrollToLocationHash()
+})
 
-  function scrollToHeading(id: string, mobile: boolean, event: MouseEvent) {
-    event.preventDefault()
-    scrollToId(id)
-    if (mobile) {
-      requestAnimationFrame(() => closeMobileToc())
-    }
-  }
+afterNavigate(() => {
+  scrollToLocationHash()
+})
 
-  function scrollToId(id: string) {
-    const scroll = () => {
-      const heading = document.getElementById(id)
-      if (!heading) return false
-      heading.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      history.replaceState(null, '', `#${id}`)
-      activeId = id
-      return true
-    }
-    if (scroll()) return
-    requestAnimationFrame(() => { scroll() })
-  }
-
-  function scrollToLocationHash() {
-    const id = window.location.hash.slice(1)
-    if (id) scrollToId(id)
-  }
-
-  function handleKeydown(event: KeyboardEvent) {
-    if (event.key === 'Escape' && sidebarStore.isOpen) {
-      closeMobileToc()
-    }
-  }
-
-  onMount(() => {
-    scrollToLocationHash()
-  })
-
-  afterNavigate(() => {
-    scrollToLocationHash()
-  })
-
-  const hasToc = $derived(tocStore.entries.length > 0)
+const hasToc = $derived(tocStore.entries.length > 0)
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
@@ -174,7 +173,9 @@
 {#snippet sidebarContent(mobile: boolean)}
   {#if hasToc}
     <div>
-      <p class="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-base-content/40 mb-4 px-1">
+      <p
+        class="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-base-content/40 mb-4 px-1"
+      >
         Contents
       </p>
       {@render tocNav(mobile)}
@@ -187,7 +188,10 @@
   class="wiki-sidebar shrink-0 hidden lg:block"
   style="width: {sidebarStore.isOpen ? '15rem' : '0'}; overflow: clip;"
 >
-  <div class="sticky top-14 overflow-y-auto py-6 px-4" style="height: calc(100vh - 3.5rem); width: 15rem;">
+  <div
+    class="sticky top-14 overflow-y-auto py-6 px-4"
+    style="height: calc(100vh - 3.5rem); width: 15rem;"
+  >
     {@render sidebarContent(false)}
   </div>
 </aside>

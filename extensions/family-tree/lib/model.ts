@@ -46,7 +46,10 @@ export function updatePerson(
   }
 }
 
-function linkSpouses(a: FamilyTreePerson, b: FamilyTreePerson): [FamilyTreePerson, FamilyTreePerson] {
+function linkSpouses(
+  a: FamilyTreePerson,
+  b: FamilyTreePerson
+): [FamilyTreePerson, FamilyTreePerson] {
   return [
     { ...a, spouseId: b.id },
     { ...b, spouseId: a.id }
@@ -171,7 +174,11 @@ export function addParent(data: FamilyTreeData, childId: string, name = 'Parent'
 }
 
 /** Returns true when `candidateId` is the same person or a descendant of `personId`. */
-export function isDescendantOf(data: FamilyTreeData, personId: string, candidateId: string): boolean {
+export function isDescendantOf(
+  data: FamilyTreeData,
+  personId: string,
+  candidateId: string
+): boolean {
   if (personId === candidateId) return true
 
   const queue = [personId]
@@ -203,7 +210,11 @@ export function listLinkableParents(data: FamilyTreeData, childId: string): Fami
 }
 
 /** Links an existing person as a parent of the given child. */
-export function linkParent(data: FamilyTreeData, childId: string, parentId: string): FamilyTreeData {
+export function linkParent(
+  data: FamilyTreeData,
+  childId: string,
+  parentId: string
+): FamilyTreeData {
   if (!canLinkParent(data, childId, parentId)) return data
 
   const child = data.people[childId]

@@ -1,29 +1,29 @@
 <script lang="ts">
-  import { enhance } from '$app/forms'
-  import { Settings2 } from 'lucide-svelte'
+import { enhance } from '$app/forms'
+import { Settings2 } from 'lucide-svelte'
 
-  let {
-    revisionRetention,
-    formAction,
-    form = null,
-    showFeedback = true
-  }: {
-    revisionRetention: number | null
-    formAction: string
-    form?: {
-      retentionUpdated?: boolean
-      revisionRetention?: number | null
-      prunedCount?: number
-      retentionError?: string
-    } | null
-    showFeedback?: boolean
-  } = $props()
+let {
+  revisionRetention,
+  formAction,
+  form = null,
+  showFeedback = true
+}: {
+  revisionRetention: number | null
+  formAction: string
+  form?: {
+    retentionUpdated?: boolean
+    revisionRetention?: number | null
+    prunedCount?: number
+    retentionError?: string
+  } | null
+  showFeedback?: boolean
+} = $props()
 
-  let retentionInput = $state('')
+let retentionInput = $state('')
 
-  $effect(() => {
-    retentionInput = revisionRetention == null ? '' : String(revisionRetention)
-  })
+$effect(() => {
+  retentionInput = revisionRetention == null ? '' : String(revisionRetention)
+})
 </script>
 
 <div class="rounded-xl border border-base-200 p-5">
@@ -81,6 +81,7 @@
     </button>
   </form>
   <p class="text-xs text-base-content/45 mt-3">
-    Leave blank for unlimited history. The current page content is always kept; this only limits stored past versions.
+    Leave blank for unlimited history. The current page content is always kept; this only limits
+    stored past versions.
   </p>
 </div>

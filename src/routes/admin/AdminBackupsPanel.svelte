@@ -1,78 +1,78 @@
 <script lang="ts">
-  import { invalidateAll } from '$app/navigation'
-  import { Download, FileText, Upload } from 'lucide-svelte'
-  import { formatDateTime } from '$lib/format.js'
+import { invalidateAll } from '$app/navigation'
+import { Download, FileText, Upload } from 'lucide-svelte'
+import { formatDateTime } from '$lib/format.js'
 
-  let {
-    wikiName,
-    appVersion,
-    uploadCount,
-    pageCount
-  }: {
-    wikiName: string
-    appVersion: string
-    uploadCount: number
-    pageCount: number
-  } = $props()
+let {
+  wikiName,
+  appVersion,
+  uploadCount,
+  pageCount
+}: {
+  wikiName: string
+  appVersion: string
+  uploadCount: number
+  pageCount: number
+} = $props()
 
-  let includeUploadsInBackup = $state(false)
-  let includeMarkdownInBackup = $state(false)
-  let restoreUploadsOnImport = $state(false)
-  let importConfirm = $state(false)
-  let importLoading = $state(false)
-  let importError = $state('')
-  let importSuccess = $state<{
-    wikiName: string
-    wikiVersion: string
-    createdAt: string
-    includesUploads: boolean
-    includesMarkdown: boolean
-  } | null>(null)
-  let importWarnings = $state<string[]>([])
-  let importInput = $state<HTMLInputElement | null>(null)
+let includeUploadsInBackup = $state(false)
+let includeMarkdownInBackup = $state(false)
+let restoreUploadsOnImport = $state(false)
+let importConfirm = $state(false)
+let importLoading = $state(false)
+let importError = $state('')
+let importSuccess = $state<{
+  wikiName: string
+  wikiVersion: string
+  createdAt: string
+  includesUploads: boolean
+  includesMarkdown: boolean
+} | null>(null)
+let importWarnings = $state<string[]>([])
+let importInput = $state<HTMLInputElement | null>(null)
 
-  const backupDownloadUrl = $derived.by(() => {
-    const params = new URLSearchParams()
-    if (includeUploadsInBackup) params.set('includeUploads', '1')
-    if (includeMarkdownInBackup) params.set('includeMarkdown', '1')
-    const query = params.toString()
-    return query ? `/api/admin/backup?${query}` : '/api/admin/backup'
-  })
+const backupDownloadUrl = $derived.by(() => {
+  const params = new URLSearchParams()
+  if (includeUploadsInBackup) params.set('includeUploads', '1')
+  if (includeMarkdownInBackup) params.set('includeMarkdown', '1')
+  const query = params.toString()
+  return query ? `/api/admin/backup?${query}` : '/api/admin/backup'
+})
 
-  async function submitImport() {
-    importError = ''
-    importSuccess = null
-    importWarnings = []
-    const file = importInput?.files?.[0]
-    if (!file) {
-      importError = 'Choose a backup zip file first'
-      return
-    }
-    if (!importConfirm) {
-      importError = 'Confirm that you want to replace the current database'
-      return
-    }
-
-    importLoading = true
-    try {
-      const body = new FormData()
-      body.set('backup', file)
-      if (restoreUploadsOnImport) body.set('restoreUploads', 'on')
-      const res = await fetch('/api/admin/backup', { method: 'POST', body })
-      const payload = await res.json().catch(() => ({}))
-      if (!res.ok) {
-        importError = payload.error ?? payload.message ?? 'Import failed'
-        return
-      }
-      importSuccess = payload.manifest
-      importWarnings = Array.isArray(payload.warnings) ? payload.warnings : []
-      importConfirm = false
-      if (importInput) importInput.value = ''
-      await invalidateAll()
-    } finally {
-      importLoading = false
-    }
+async function submitImport() {
+  importError = ''
+  importSuccess = null
+  importWarnings = []
+  const file = importInput?.files?.[0]
+  if (!file) {
+    importError = 'Choose a backup zip file first'
+    return
   }
+  if (!importConfirm) {
+    importError = 'Confirm that you want to replace the current database'
+    return
+  }
+
+  importLoading = true
+  try {
+    const body = new FormData()
+    body.set('backup', file)
+    if (restoreUploadsOnImport) body.set('restoreUploads', 'on')
+    const res = await fetch('/api/admin/backup', { method: 'POST', body })
+    const payload = await res.json().catch(() => ({}))
+    if (!res.ok) {
+      importError = payload.error ?? payload.message ?? 'Import failed'
+      return
+    }
+    importSuccess = payload.manifest
+    importWarnings = Array.isArray(payload.warnings) ? payload.warnings : []
+    importConfirm = false
+    if (importInput) importInput.value = ''
+    await invalidateAll()
+  } finally {
+    importLoading = false
+  }
+}
 </script>
 
 <div class="grid gap-6 lg:grid-cols-2">
@@ -85,8 +85,8 @@
         <h2 class="font-semibold text-base-content">Download backup</h2>
         <p class="text-sm text-base-content/60 mt-1">
           Creates a zip with <code class="text-xs bg-base-200 px-1 py-0.5 rounded">wiki.db</code>,
-          <code class="text-xs bg-base-200 px-1 py-0.5 rounded">manifest.txt</code>,
-          and optional uploads or raw markdown exports.
+          <code class="text-xs bg-base-200 px-1 py-0.5 rounded">manifest.txt</code>, and optional
+          uploads or raw markdown exports.
         </p>
       </div>
     </div>
@@ -119,7 +119,9 @@
             Include markdown folder ({pageCount} pages)
           </span>
           <span class="block text-xs text-base-content/45 mt-0.5">
-            Exports raw page content under <code class="font-mono bg-base-200 px-1 rounded">markdown/</code> with YAML frontmatter.
+            Exports raw page content under <code class="font-mono bg-base-200 px-1 rounded"
+              >markdown/</code
+            > with YAML frontmatter.
           </span>
         </span>
       </label>
@@ -142,14 +144,17 @@
       <div>
         <h2 class="font-semibold text-base-content">Import backup</h2>
         <p class="text-sm text-base-content/60 mt-1">
-          Replaces the current database with the one from a backup zip. Uploaded files can be restored separately.
+          Replaces the current database with the one from a backup zip. Uploaded files can be
+          restored separately.
         </p>
       </div>
     </div>
 
     {#if importSuccess}
       <div class="alert alert-success mb-4 text-sm">
-        <p>Backup imported from <strong>{importSuccess.wikiName}</strong> (app {importSuccess.wikiVersion}).</p>
+        <p>
+          Backup imported from <strong>{importSuccess.wikiName}</strong> (app {importSuccess.wikiVersion}).
+        </p>
         <p class="text-xs mt-1 opacity-80">
           Created {formatDateTime(importSuccess.createdAt)}
           {#if importSuccess.includesUploads}
@@ -195,11 +200,7 @@
         </span>
       </label>
       <label class="flex items-start gap-2 text-sm">
-        <input
-          type="checkbox"
-          bind:checked={importConfirm}
-          class="checkbox checkbox-sm mt-0.5"
-        />
+        <input type="checkbox" bind:checked={importConfirm} class="checkbox checkbox-sm mt-0.5" />
         <span class="text-base-content/70">
           I understand this will replace the current wiki database
           {#if restoreUploadsOnImport}

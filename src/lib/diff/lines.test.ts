@@ -11,9 +11,7 @@ import {
 
 describe('diffLines', () => {
   it('marks removed and added lines', () => {
-    const diff = changedLinesOnly(
-      diffLines('alpha\nbeta\ngamma', 'alpha\ndelta\ngamma')
-    )
+    const diff = changedLinesOnly(diffLines('alpha\nbeta\ngamma', 'alpha\ndelta\ngamma'))
 
     expect(diff).toEqual([
       { type: 'remove', text: 'beta' },
@@ -68,7 +66,10 @@ describe('newerRevisionContent', () => {
 
 describe('newerRevisionTitle', () => {
   it('uses current page title for the newest stored revision', () => {
-    const revisions = [{ title: 'Old', content: '' }, { title: 'Older', content: '' }]
+    const revisions = [
+      { title: 'Old', content: '' },
+      { title: 'Older', content: '' }
+    ]
     expect(newerRevisionTitle(revisions, 0, 'Live')).toBe('Live')
     expect(newerRevisionTitle(revisions, 1, 'Live')).toBe('Old')
   })

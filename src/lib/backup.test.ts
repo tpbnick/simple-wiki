@@ -40,12 +40,14 @@ describe('backup manifest', () => {
   })
 
   it('defaults includes_uploads to false when omitted', () => {
-    const parsed = parseBackupManifest([
-      'wiki_name=Wiki',
-      'wiki_version=0.1.0',
-      'backup_format=1',
-      'created_at=2026-05-28T12:00:00.000Z'
-    ].join('\n'))
+    const parsed = parseBackupManifest(
+      [
+        'wiki_name=Wiki',
+        'wiki_version=0.1.0',
+        'backup_format=1',
+        'created_at=2026-05-28T12:00:00.000Z'
+      ].join('\n')
+    )
 
     expect(parsed.includesUploads).toBe(false)
     expect(parsed.includesMarkdown).toBe(false)

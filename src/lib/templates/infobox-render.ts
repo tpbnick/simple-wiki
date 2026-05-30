@@ -39,10 +39,7 @@ const VARIANT_CONFIGS: Record<string, InfoboxConfig> = {
  * @param params - Template parameters from the wiki source.
  * @param variant - Optional named variant, such as `Country` or `Person`.
  */
-export function renderInfobox(
-  params: Record<string, string>,
-  variant?: string
-): string {
+export function renderInfobox(params: Record<string, string>, variant?: string): string {
   const templateName = variant ? `Infobox ${variant}` : 'Infobox'
   const data = infoboxDataFromParams(params, templateName)
 

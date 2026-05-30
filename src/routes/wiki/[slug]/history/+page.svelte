@@ -1,51 +1,51 @@
 <script lang="ts">
-  import { tick } from 'svelte'
-  import { enhance } from '$app/forms'
-  import ConfirmDialog from '$lib/components/ConfirmDialog.svelte'
-  import RevisionDiffView from '$lib/components/RevisionDiffView.svelte'
-  import { History, Clock, ArrowLeft, RotateCcw } from 'lucide-svelte'
-  import type { PageData } from './$types'
-  import { formatDateTime, formatTimeAgo, toDatetimeAttr } from '$lib/format.js'
-  import {
-    buildChangedLineDiff,
-    DIFF_TOO_LARGE_MESSAGE,
-    newerRevisionContent,
-    newerRevisionTitle
-  } from '$lib/diff/lines.js'
+import { tick } from 'svelte'
+import { enhance } from '$app/forms'
+import ConfirmDialog from '$lib/components/ConfirmDialog.svelte'
+import RevisionDiffView from '$lib/components/RevisionDiffView.svelte'
+import { History, Clock, ArrowLeft, RotateCcw } from 'lucide-svelte'
+import type { PageData } from './$types'
+import { formatDateTime, formatTimeAgo, toDatetimeAttr } from '$lib/format.js'
+import {
+  buildChangedLineDiff,
+  DIFF_TOO_LARGE_MESSAGE,
+  newerRevisionContent,
+  newerRevisionTitle
+} from '$lib/diff/lines.js'
 
-  let { data, form }: { data: PageData; form: import('./$types').ActionData } = $props()
+let { data, form }: { data: PageData; form: import('./$types').ActionData } = $props()
 
-  function getRevisionDiff(index: number) {
-    const rev = data.revisions[index]
-    const newer = newerRevisionContent(data.revisions, index, data.page.content)
-    return buildChangedLineDiff(rev.content ?? '', newer ?? '')
-  }
+function getRevisionDiff(index: number) {
+  const rev = data.revisions[index]
+  const newer = newerRevisionContent(data.revisions, index, data.page.content)
+  return buildChangedLineDiff(rev.content ?? '', newer ?? '')
+}
 
-  function getRevisionTitleChange(index: number): { from: string; to: string } | null {
-    const rev = data.revisions[index]
-    const from = rev.title
-    if (!from) return null
-    const to = newerRevisionTitle(data.revisions, index, data.page.title)
-    return from !== to ? { from, to } : null
-  }
+function getRevisionTitleChange(index: number): { from: string; to: string } | null {
+  const rev = data.revisions[index]
+  const from = rev.title
+  if (!from) return null
+  const to = newerRevisionTitle(data.revisions, index, data.page.title)
+  return from !== to ? { from, to } : null
+}
 
-  let expanded = $state<number | null>(null)
+let expanded = $state<number | null>(null)
 
-  let restoreTarget = $state<{ revisionId: number; revisionNumber: number } | null>(null)
-  let restoreDialogEl = $state<HTMLDivElement | null>(null)
-  let restoreCancelBtn = $state<HTMLButtonElement | null>(null)
-  let restoreDialogTrigger: HTMLElement | null = null
+let restoreTarget = $state<{ revisionId: number; revisionNumber: number } | null>(null)
+let restoreDialogEl = $state<HTMLDivElement | null>(null)
+let restoreCancelBtn = $state<HTMLButtonElement | null>(null)
+let restoreDialogTrigger: HTMLElement | null = null
 
-  function openRestoreModal(revisionId: number, revisionNumber: number) {
-    restoreTarget = { revisionId, revisionNumber }
-    restoreDialogTrigger = document.activeElement as HTMLElement
-    tick().then(() => restoreCancelBtn?.focus())
-  }
+function openRestoreModal(revisionId: number, revisionNumber: number) {
+  restoreTarget = { revisionId, revisionNumber }
+  restoreDialogTrigger = document.activeElement as HTMLElement
+  tick().then(() => restoreCancelBtn?.focus())
+}
 
-  function closeRestoreModal() {
-    restoreTarget = null
-    restoreDialogTrigger?.focus()
-  }
+function closeRestoreModal() {
+  restoreTarget = null
+  restoreDialogTrigger?.focus()
+}
 </script>
 
 <svelte:head>
@@ -84,7 +84,9 @@
         <History size={24} class="text-base-content/30" />
       </div>
       <p class="text-base-content/50 text-sm">No revisions recorded yet.</p>
-      <p class="text-base-content/35 text-xs mt-1">Revisions are saved each time the page is edited.</p>
+      <p class="text-base-content/35 text-xs mt-1">
+        Revisions are saved each time the page is edited.
+      </p>
     </div>
   {:else}
     <div class="space-y-2">
@@ -97,7 +99,9 @@
             onclick={() => (expanded = expanded === rev.id ? null : rev.id)}
           >
             <div class="flex items-start gap-3 min-w-0">
-              <div class="w-7 h-7 rounded-full bg-base-200 flex items-center justify-center shrink-0 mt-0.5">
+              <div
+                class="w-7 h-7 rounded-full bg-base-200 flex items-center justify-center shrink-0 mt-0.5"
+              >
                 <RotateCcw size={12} class="text-base-content/40" />
               </div>
               <div class="min-w-0">
@@ -106,7 +110,10 @@
                 </p>
                 <p class="text-xs text-base-content/40 flex items-center gap-1 mt-0.5">
                   <Clock size={10} />
-                  <time datetime={toDatetimeAttr(rev.created_at)} title={formatDateTime(rev.created_at)}>
+                  <time
+                    datetime={toDatetimeAttr(rev.created_at)}
+                    title={formatDateTime(rev.created_at)}
+                  >
                     {formatTimeAgo(rev.created_at)}
                   </time>
                   <span class="text-base-content/20 mx-1">·</span>
@@ -138,7 +145,9 @@
               {:else if diff.lines.length > 0}
                 <RevisionDiffView lines={diff.lines} />
               {:else if !titleChange}
-                <p class="text-xs text-base-content/50 italic">No content or title changes recorded.</p>
+                <p class="text-xs text-base-content/50 italic">
+                  No content or title changes recorded.
+                </p>
               {/if}
               {#if data.canEdit}
                 <button

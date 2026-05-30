@@ -41,13 +41,13 @@ bun run start
 
 ### Scripts
 
-| Command | Description |
-|---|---|
-| `bun run dev` | Development server with hot reload |
-| `bun run build` | Production build |
-| `bun run start` | Run the production server |
-| `bun run check` | Typecheck (Svelte + TypeScript) |
-| `bun run test` | Run tests |
+| Command         | Description                        |
+| --------------- | ---------------------------------- |
+| `bun run dev`   | Development server with hot reload |
+| `bun run build` | Production build                   |
+| `bun run start` | Run the production server          |
+| `bun run check` | Typecheck (Svelte + TypeScript)    |
+| `bun run test`  | Run tests                          |
 
 ## Docker
 
@@ -65,50 +65,72 @@ Pre-built images are published to GitHub Container Registry on pushes to `main`:
 docker pull ghcr.io/tpbnick/simple-wiki:latest
 ```
 
+### Unraid / NAS
+
+Optionally set **`PUID`** and **`PGID`** together so files in appdata match host ownership. On Unraid, `99` / `100` (`nobody:users`) is typical:
+
+| Variable | Unraid example | Description              |
+| -------- | -------------- | ------------------------ |
+| `PUID`   | `99`           | User ID the app runs as  |
+| `PGID`   | `100`          | Group ID the app runs as |
+
+Both must be set when overriding IDs. If omitted, the container uses its built-in `wiki` user.
+
+On startup the entrypoint fixes ownership of `/data` and `/uploads`, then runs the app as that user. Map volumes in the Unraid Docker UI:
+
+| Host path                               | Container path |
+| --------------------------------------- | -------------- |
+| `/mnt/user/appdata/simple-wiki/data`    | `/data`        |
+| `/mnt/user/appdata/simple-wiki/uploads` | `/uploads`     |
+
+Required env vars: `DATABASE_PATH=/data/wiki.db`, `UPLOADS_DIR=/uploads`.
+
+See `docker-compose.ghcr.yml` for a full compose example. Set `PUID=0` and `PGID=0` only if you intentionally want the process to run as root.
+
 ## Environment variables
 
 Copy `.env.example` to `.env` and uncomment or set values as needed.
 
 ### Paths & server
 
-| Variable | Default | Description |
-|---|---|---|
-| `DATABASE_PATH` | `./wiki.db` | SQLite database file |
-| `UPLOADS_DIR` | `./uploads` | Directory for uploaded files |
-| `PORT` | `3000` | Port for `bun run start` / production server |
+| Variable        | Default     | Description                                  |
+| --------------- | ----------- | -------------------------------------------- |
+| `DATABASE_PATH` | `./wiki.db` | SQLite database file                         |
+| `UPLOADS_DIR`   | `./uploads` | Directory for uploaded files                 |
+| `PORT`          | `3000`      | Port for `bun run start` / production server |
 
 ### Wiki identity
 
-| Variable | Default | Description |
-|---|---|---|
-| `WIKI_NAME` | `Wiki` | Display name shown in the admin UI and backups |
+| Variable    | Default | Description                                    |
+| ----------- | ------- | ---------------------------------------------- |
+| `WIKI_NAME` | `Wiki`  | Display name shown in the admin UI and backups |
 
 ### Access control
 
-| Variable | Default | Description |
-|---|---|---|
+| Variable      | Default | Description                                                     |
+| ------------- | ------- | --------------------------------------------------------------- |
 | `PUBLIC_READ` | enabled | Set to `false` to require login for reading pages and read APIs |
 
 ### Sessions & cookies
 
-| Variable | Default | Description |
-|---|---|---|
-| `NODE_ENV` | — | Set to `production` for production deployments |
+| Variable        | Default              | Description                                                                |
+| --------------- | -------------------- | -------------------------------------------------------------------------- |
+| `NODE_ENV`      | —                    | Set to `production` for production deployments                             |
 | `COOKIE_SECURE` | `true` in production | Set to `false` for plain HTTP (e.g. local Docker). Use `true` behind HTTPS |
 
 ### Reverse proxy
 
 When the wiki runs behind a proxy (Caddy, nginx, Traefik), set these so rate limits use the real client IP:
 
-| Variable | Example | Description |
-|---|---|---|
+| Variable         | Example           | Description                     |
+| ---------------- | ----------------- | ------------------------------- |
 | `ADDRESS_HEADER` | `x-forwarded-for` | Header containing the client IP |
-| `XFF_DEPTH` | `1` | How many proxy hops to trust |
+| `XFF_DEPTH`      | `1`               | How many proxy hops to trust    |
 
 ### Localization
 
-| Variable | Default | Description |
-|---|---|---|
+| Variable             | Default | Description                                         |
+| -------------------- | ------- | --------------------------------------------------- |
 | `PUBLIC_WIKI_LOCALE` | `en-US` | BCP 47 locale for formatted dates (client + server) |
 
 ## Extensions

@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { enhance } from '$app/forms'
-  import { BookOpen, Eye, EyeOff } from 'lucide-svelte'
-  import type { PageData, ActionData } from './$types'
+import { enhance } from '$app/forms'
+import { BookOpen, Eye, EyeOff } from 'lucide-svelte'
+import type { PageData, ActionData } from './$types'
 
-  let { data, form }: { data: PageData; form: ActionData } = $props()
+let { data, form }: { data: PageData; form: ActionData } = $props()
 
-  let pending = $state(false)
-  let showPassword = $state(false)
+let pending = $state(false)
+let showPassword = $state(false)
 </script>
 
 <svelte:head>
@@ -15,11 +15,12 @@
 
 <div class="min-h-[calc(100vh-3.5rem)] flex items-center justify-center bg-base-200 p-4">
   <div class="w-full max-w-sm">
-
     <!-- Logo -->
     <div class="text-center mb-8">
-      <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600
-                  flex items-center justify-center shadow-lg mx-auto mb-4">
+      <div
+        class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600
+                  flex items-center justify-center shadow-lg mx-auto mb-4"
+      >
         <BookOpen size={22} class="text-white" />
       </div>
       <h1 class="text-2xl font-bold text-base-content">Welcome back</h1>
@@ -29,8 +30,11 @@
     <!-- Card -->
     <div class="bg-base-100 rounded-2xl border border-base-200 shadow-lg p-6">
       {#if form?.error}
-        <div class="flex items-start gap-2.5 px-3 py-2.5 rounded-lg bg-error/10
-                    border border-error/20 text-error text-sm mb-4" role="alert">
+        <div
+          class="flex items-start gap-2.5 px-3 py-2.5 rounded-lg bg-error/10
+                    border border-error/20 text-error text-sm mb-4"
+          role="alert"
+        >
           {form.error}
         </div>
       {/if}
@@ -52,7 +56,10 @@
         <input type="hidden" name="next" value={data.next} />
 
         <div>
-          <label for="username" class="block text-xs font-semibold text-base-content/60 uppercase tracking-wider mb-1.5">
+          <label
+            for="username"
+            class="block text-xs font-semibold text-base-content/60 uppercase tracking-wider mb-1.5"
+          >
             Username
           </label>
           <input
@@ -70,7 +77,10 @@
         </div>
 
         <div>
-          <label for="password" class="block text-xs font-semibold text-base-content/60 uppercase tracking-wider mb-1.5">
+          <label
+            for="password"
+            class="block text-xs font-semibold text-base-content/60 uppercase tracking-wider mb-1.5"
+          >
             Password
           </label>
           <div class="relative">

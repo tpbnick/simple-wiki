@@ -1,110 +1,110 @@
 <script lang="ts">
-  import { Upload, X, ImageIcon, Type, GripVertical } from 'lucide-svelte'
-  import {
-    createImageEntry,
-    createTextEntry,
-    infoboxImageSizeStyle,
-    type InfoboxData,
-    type InfoboxEntry
-  } from '$lib/templates/infobox-editor.js'
+import { Upload, X, ImageIcon, Type, GripVertical } from 'lucide-svelte'
+import {
+  createImageEntry,
+  createTextEntry,
+  infoboxImageSizeStyle,
+  type InfoboxData,
+  type InfoboxEntry
+} from '$lib/templates/infobox-editor.js'
 
-  interface Props {
-    data: InfoboxData
-    uploading?: boolean
-    uploadingEntryIndex?: number | null
-    onupdate: (data: InfoboxData) => void
-    onremove?: () => void
-    onupload: (files: FileList | null, entryIndex: number) => void
-  }
+interface Props {
+  data: InfoboxData
+  uploading?: boolean
+  uploadingEntryIndex?: number | null
+  onupdate: (data: InfoboxData) => void
+  onremove?: () => void
+  onupload: (files: FileList | null, entryIndex: number) => void
+}
 
-  let {
-    data,
-    uploading = false,
-    uploadingEntryIndex = null,
-    onupdate,
-    onremove,
-    onupload
-  }: Props = $props()
+let {
+  data,
+  uploading = false,
+  uploadingEntryIndex = null,
+  onupdate,
+  onremove,
+  onupload
+}: Props = $props()
 
-  let imageInputs: Record<number, HTMLInputElement> = {}
-  let draggedIndex = $state<number | null>(null)
-  let dropIndex = $state<number | null>(null)
+let imageInputs: Record<number, HTMLInputElement> = {}
+let draggedIndex = $state<number | null>(null)
+let dropIndex = $state<number | null>(null)
 
-  function update(partial: Partial<InfoboxData>) {
-    onupdate({ ...data, ...partial })
-  }
+function update(partial: Partial<InfoboxData>) {
+  onupdate({ ...data, ...partial })
+}
 
-  function updateEntry(index: number, entry: InfoboxEntry) {
-    const entries = data.entries.map((existing, entryIndex) =>
-      entryIndex === index ? entry : existing
-    )
-    onupdate({ ...data, entries })
-  }
+function updateEntry(index: number, entry: InfoboxEntry) {
+  const entries = data.entries.map((existing, entryIndex) =>
+    entryIndex === index ? entry : existing
+  )
+  onupdate({ ...data, entries })
+}
 
-  function addEntry(kind: 'text' | 'image') {
-    const entry = kind === 'text' ? createTextEntry() : createImageEntry()
-    onupdate({ ...data, entries: [...data.entries, entry] })
-  }
+function addEntry(kind: 'text' | 'image') {
+  const entry = kind === 'text' ? createTextEntry() : createImageEntry()
+  onupdate({ ...data, entries: [...data.entries, entry] })
+}
 
-  function removeEntry(index: number) {
-    if (data.entries.length <= 1) return
-    onupdate({
-      ...data,
-      entries: data.entries.filter((_, entryIndex) => entryIndex !== index)
-    })
-  }
+function removeEntry(index: number) {
+  if (data.entries.length <= 1) return
+  onupdate({
+    ...data,
+    entries: data.entries.filter((_, entryIndex) => entryIndex !== index)
+  })
+}
 
-  function moveEntry(fromIndex: number, toIndex: number) {
-    if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0) return
-    if (fromIndex >= data.entries.length || toIndex >= data.entries.length) return
+function moveEntry(fromIndex: number, toIndex: number) {
+  if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0) return
+  if (fromIndex >= data.entries.length || toIndex >= data.entries.length) return
 
-    const entries = [...data.entries]
-    const [moved] = entries.splice(fromIndex, 1)
-    entries.splice(toIndex, 0, moved)
-    onupdate({ ...data, entries })
-  }
+  const entries = [...data.entries]
+  const [moved] = entries.splice(fromIndex, 1)
+  entries.splice(toIndex, 0, moved)
+  onupdate({ ...data, entries })
+}
 
-  function openImageUpload(index: number) {
-    imageInputs[index]?.click()
-  }
+function openImageUpload(index: number) {
+  imageInputs[index]?.click()
+}
 
-  function entryKey(entry: InfoboxEntry, index: number): string {
-    return entry.id ?? `row-${index}`
-  }
+function entryKey(entry: InfoboxEntry, index: number): string {
+  return entry.id ?? `row-${index}`
+}
 
-  function handleDragStart(index: number, event: DragEvent) {
-    draggedIndex = index
-    dropIndex = index
-    event.dataTransfer?.setData('text/plain', String(index))
-    if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move'
-  }
+function handleDragStart(index: number, event: DragEvent) {
+  draggedIndex = index
+  dropIndex = index
+  event.dataTransfer?.setData('text/plain', String(index))
+  if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move'
+}
 
-  function handleDragOver(index: number, event: DragEvent) {
-    event.preventDefault()
-    dropIndex = index
-    if (event.dataTransfer) event.dataTransfer.dropEffect = 'move'
-  }
+function handleDragOver(index: number, event: DragEvent) {
+  event.preventDefault()
+  dropIndex = index
+  if (event.dataTransfer) event.dataTransfer.dropEffect = 'move'
+}
 
-  function handleDrop(index: number, event: DragEvent) {
-    event.preventDefault()
-    if (draggedIndex === null) return
-    moveEntry(draggedIndex, index)
-    draggedIndex = null
-    dropIndex = null
-  }
+function handleDrop(index: number, event: DragEvent) {
+  event.preventDefault()
+  if (draggedIndex === null) return
+  moveEntry(draggedIndex, index)
+  draggedIndex = null
+  dropIndex = null
+}
 
-  function handleDragEnd() {
-    draggedIndex = null
-    dropIndex = null
-  }
+function handleDragEnd() {
+  draggedIndex = null
+  dropIndex = null
+}
 
-  function parseSizeInput(value: string): number | undefined {
-    const trimmed = value.trim()
-    if (!trimmed) return undefined
-    const parsed = Number.parseInt(trimmed, 10)
-    if (!Number.isFinite(parsed)) return undefined
-    return Math.min(100, Math.max(1, parsed))
-  }
+function parseSizeInput(value: string): number | undefined {
+  const trimmed = value.trim()
+  if (!trimmed) return undefined
+  const parsed = Number.parseInt(trimmed, 10)
+  if (!Number.isFinite(parsed)) return undefined
+  return Math.min(100, Math.max(1, parsed))
+}
 </script>
 
 <aside class="wiki-infobox wiki-infobox-editor not-prose">
@@ -128,7 +128,9 @@
           <tr
             class="infobox-editor-row"
             class:infobox-row-dragging={draggedIndex === index}
-            class:infobox-row-drop-target={dropIndex === index && draggedIndex !== null && draggedIndex !== index}
+            class:infobox-row-drop-target={dropIndex === index &&
+              draggedIndex !== null &&
+              draggedIndex !== index}
             draggable={data.entries.length > 1}
             ondragstart={(event) => handleDragStart(index, event)}
             ondragover={(event) => handleDragOver(index, event)}
@@ -181,7 +183,9 @@
           <tr
             class="infobox-editor-row"
             class:infobox-row-dragging={draggedIndex === index}
-            class:infobox-row-drop-target={dropIndex === index && draggedIndex !== null && draggedIndex !== index}
+            class:infobox-row-drop-target={dropIndex === index &&
+              draggedIndex !== null &&
+              draggedIndex !== index}
             draggable={data.entries.length > 1}
             ondragstart={(event) => handleDragStart(index, event)}
             ondragover={(event) => handleDragOver(index, event)}
@@ -292,19 +296,11 @@
       <tr>
         <td colspan="3" class="infobox-add-row-cell">
           <div class="infobox-add-row-actions">
-            <button
-              type="button"
-              class="infobox-add-row-option"
-              onclick={() => addEntry('text')}
-            >
+            <button type="button" class="infobox-add-row-option" onclick={() => addEntry('text')}>
               <Type size={14} />
               Text row
             </button>
-            <button
-              type="button"
-              class="infobox-add-row-option"
-              onclick={() => addEntry('image')}
-            >
+            <button type="button" class="infobox-add-row-option" onclick={() => addEntry('image')}>
               <ImageIcon size={14} />
               Image row
             </button>

@@ -1,5 +1,13 @@
 import type BetterSqlite3 from 'better-sqlite3'
-import type { Page, PageSummary, Revision, SearchResult, SearchSuggestion, Upload, User } from './types.js'
+import type {
+  Page,
+  PageSummary,
+  Revision,
+  SearchResult,
+  SearchSuggestion,
+  Upload,
+  User
+} from './types.js'
 
 export const SEARCHABLE_NAMESPACE_SQL = "p.namespace != 'template'"
 
@@ -44,9 +52,7 @@ export function buildStatements(db: Database) {
       SELECT r.* FROM revisions r JOIN pages p ON p.id = r.page_id
       WHERE p.slug = ? ORDER BY r.created_at DESC, r.id DESC
     `),
-    getRevisionById: db.prepare<[number], Revision>(
-      'SELECT * FROM revisions WHERE id = ? LIMIT 1'
-    ),
+    getRevisionById: db.prepare<[number], Revision>('SELECT * FROM revisions WHERE id = ? LIMIT 1'),
     getRevisionDiffContext: db.prepare<
       [number],
       {
@@ -70,14 +76,17 @@ export function buildStatements(db: Database) {
       WHERE r.id = ?
       LIMIT 1
     `),
-    getRecentRevisions: db.prepare<[number], {
-      id: number
-      summary: string
-      created_at: string
-      slug: string
-      title: string
-      namespace: string
-    }>(`
+    getRecentRevisions: db.prepare<
+      [number],
+      {
+        id: number
+        summary: string
+        created_at: string
+        slug: string
+        title: string
+        namespace: string
+      }
+    >(`
       SELECT r.id, r.summary, r.created_at, p.slug, p.title, p.namespace
       FROM revisions r
       INNER JOIN pages p ON p.id = r.page_id
@@ -134,9 +143,7 @@ export function buildStatements(db: Database) {
       WHERE content LIKE ? OR content LIKE ?
       ORDER BY title ASC
     `),
-    bulkReplaceContent: db.prepare(
-      'UPDATE pages SET content = replace(content, ?, ?)'
-    ),
+    bulkReplaceContent: db.prepare('UPDATE pages SET content = replace(content, ?, ?)'),
     getUserByName: db.prepare<[string], User>('SELECT * FROM users WHERE username = ? LIMIT 1'),
     getUserById: db.prepare<[number], User>('SELECT * FROM users WHERE id = ? LIMIT 1'),
     createUser: db.prepare(
@@ -153,24 +160,25 @@ export function buildStatements(db: Database) {
     ),
     deleteSession: db.prepare('DELETE FROM sessions WHERE id = ?'),
     deleteUserSessions: db.prepare('DELETE FROM sessions WHERE user_id = ?'),
-    deleteUserSessionsExcept: db.prepare(
-      'DELETE FROM sessions WHERE user_id = ? AND id != ?'
-    ),
+    deleteUserSessionsExcept: db.prepare('DELETE FROM sessions WHERE user_id = ? AND id != ?'),
     pruneExpiredSessions: db.prepare("DELETE FROM sessions WHERE expires_at < datetime('now')"),
     insertUpload: db.prepare(
       'INSERT OR IGNORE INTO uploads (filename, original_name, size, mime_type, content_hash) VALUES (?, ?, ?, ?, ?)'
     ),
     getAllUploads: db.prepare<[], Upload>('SELECT * FROM uploads ORDER BY created_at DESC'),
-    getUploadByName: db.prepare<[string], Upload>('SELECT * FROM uploads WHERE filename = ? LIMIT 1'),
+    getUploadByName: db.prepare<[string], Upload>(
+      'SELECT * FROM uploads WHERE filename = ? LIMIT 1'
+    ),
     getUploadByContentHash: db.prepare<[string], Upload>(
       'SELECT * FROM uploads WHERE content_hash = ? LIMIT 1'
     ),
     updateUploadContentHash: db.prepare('UPDATE uploads SET content_hash = ? WHERE filename = ?'),
     renameUpload: db.prepare('UPDATE uploads SET filename = ? WHERE filename = ?'),
     deleteUpload: db.prepare('DELETE FROM uploads WHERE filename = ?'),
-    listUsers: db.prepare<[], Pick<User, 'id' | 'username' | 'must_change_pw' | 'is_admin' | 'created_at'>>(
-      'SELECT id, username, must_change_pw, is_admin, created_at FROM users ORDER BY username ASC'
-    ),
+    listUsers: db.prepare<
+      [],
+      Pick<User, 'id' | 'username' | 'must_change_pw' | 'is_admin' | 'created_at'>
+    >('SELECT id, username, must_change_pw, is_admin, created_at FROM users ORDER BY username ASC'),
     getRateLimit: db.prepare<[string], { count: number; reset_at: number }>(
       'SELECT count, reset_at FROM rate_limits WHERE key = ? LIMIT 1'
     ),
@@ -178,7 +186,9 @@ export function buildStatements(db: Database) {
       INSERT INTO rate_limits (key, count, reset_at) VALUES (?, 1, ?)
       ON CONFLICT(key) DO UPDATE SET count = 1, reset_at = excluded.reset_at
     `),
-    incrementRateLimit: db.prepare<[string]>('UPDATE rate_limits SET count = count + 1 WHERE key = ?'),
+    incrementRateLimit: db.prepare<[string]>(
+      'UPDATE rate_limits SET count = count + 1 WHERE key = ?'
+    ),
     deleteExpiredRateLimits: db.prepare<[number]>('DELETE FROM rate_limits WHERE reset_at <= ?'),
     deleteAllRateLimits: db.prepare('DELETE FROM rate_limits'),
     getRateLimitResetAt: db.prepare<[string], { reset_at: number }>(

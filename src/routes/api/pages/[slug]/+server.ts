@@ -27,8 +27,7 @@ export const PUT: RequestHandler = async ({ params, request, locals, getClientAd
     content: typeof body.content === 'string' ? body.content : '',
     namespace: typeof body.namespace === 'string' ? body.namespace : 'article',
     summary: typeof body.summary === 'string' ? body.summary : '',
-    expectedUpdatedAt:
-      typeof body.expectedUpdatedAt === 'string' ? body.expectedUpdatedAt : null
+    expectedUpdatedAt: typeof body.expectedUpdatedAt === 'string' ? body.expectedUpdatedAt : null
   }
 
   const result = persistWikiPage({

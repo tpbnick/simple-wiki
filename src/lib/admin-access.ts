@@ -10,10 +10,7 @@ export function requireAdmin(locals: App.Locals): void {
 }
 
 /** Requires an authenticated admin user for admin pages (redirects when not signed in). */
-export function requireAdminPage(
-  locals: App.Locals,
-  options: { next?: string } = {}
-): void {
+export function requireAdminPage(locals: App.Locals, options: { next?: string } = {}): void {
   if (!locals.user) {
     const next = options.next ?? '/admin'
     redirect(303, `/login?next=${encodeURIComponent(next)}`)

@@ -45,9 +45,9 @@ function mountError(target: HTMLElement, title: string, message: string): Mounte
   })
 }
 
-function parseEmbeddedPayload(payload: string):
-  | { ok: true; data: FamilyTreeData }
-  | { ok: false; title: string; message: string } {
+function parseEmbeddedPayload(
+  payload: string
+): { ok: true; data: FamilyTreeData } | { ok: false; title: string; message: string } {
   if (!payload.trim()) {
     return {
       ok: false,
@@ -85,7 +85,12 @@ async function mountFromApi(
 
   try {
     const response = await fetch(`/api/family-tree/${encodeURIComponent(slug)}`)
-    if (isCancelled()) return mountError(target, 'Family tree load cancelled', 'Navigation interrupted the tree load.')
+    if (isCancelled())
+      return mountError(
+        target,
+        'Family tree load cancelled',
+        'Navigation interrupted the tree load.'
+      )
 
     if (response.status === 404) {
       return mountError(
@@ -96,12 +101,21 @@ async function mountFromApi(
     }
 
     if (!response.ok) {
-      return mountError(target, 'Could not load family tree', `The server returned HTTP ${response.status}.`)
+      return mountError(
+        target,
+        'Could not load family tree',
+        `The server returned HTTP ${response.status}.`
+      )
     }
 
     const body = await response.json().catch(() => null)
     const result = validateFamilyTreeData(body?.data)
-    if (isCancelled()) return mountError(target, 'Family tree load cancelled', 'Navigation interrupted the tree load.')
+    if (isCancelled())
+      return mountError(
+        target,
+        'Family tree load cancelled',
+        'Navigation interrupted the tree load.'
+      )
 
     if (!result.ok) {
       return mountError(target, 'Family tree data is corrupt', result.message)
@@ -111,7 +125,11 @@ async function mountFromApi(
     return mountCanvas(target, result.data, existingPageSlugs, true)
   } catch {
     if (isCancelled()) {
-      return mountError(target, 'Family tree load cancelled', 'Navigation interrupted the tree load.')
+      return mountError(
+        target,
+        'Family tree load cancelled',
+        'Navigation interrupted the tree load.'
+      )
     }
     return mountError(
       target,
@@ -130,7 +148,9 @@ export function mountFamilyTreeEmbeds(root: HTMLElement): Cleanup {
     const existingPageSlugs = await fetchWikiPageSlugs()
     if (cancelled) return
 
-    for (const element of root.querySelectorAll<HTMLElement>('.wiki-family-tree-embed[data-family]')) {
+    for (const element of root.querySelectorAll<HTMLElement>(
+      '.wiki-family-tree-embed[data-family]'
+    )) {
       if (cancelled) return
       if (element.dataset.ftMounted === 'true') continue
 
@@ -181,7 +201,9 @@ export function mountFamilyTreeEmbeds(root: HTMLElement): Cleanup {
       if (handle.instance) unmount(handle.instance)
     }
 
-    for (const element of root.querySelectorAll<HTMLElement>('.wiki-family-tree-embed[data-ft-mounted="true"]')) {
+    for (const element of root.querySelectorAll<HTMLElement>(
+      '.wiki-family-tree-embed[data-ft-mounted="true"]'
+    )) {
       delete element.dataset.ftMounted
     }
   }

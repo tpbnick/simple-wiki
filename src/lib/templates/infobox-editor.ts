@@ -4,7 +4,11 @@ import {
   partsToParamRecord,
   splitTemplateParamString
 } from '$lib/templates/param-string.js'
-import { newEditorId, orderParamFromRecord, TEMPLATE_ORDER_PARAM_KEYS } from '$lib/templates/template-editor-shared.js'
+import {
+  newEditorId,
+  orderParamFromRecord,
+  TEMPLATE_ORDER_PARAM_KEYS
+} from '$lib/templates/template-editor-shared.js'
 
 export interface InfoboxTextEntry {
   type: 'text'
@@ -38,13 +42,7 @@ export interface InfoboxMatch {
 }
 
 const INFOBOX_PATTERN = /\{\{(Infobox(?:\s+[A-Za-z]+)?)\|([^}]+)\}\}/g
-const RESERVED_KEYS = new Set([
-  'title',
-  'name',
-  'image',
-  'caption',
-  ...TEMPLATE_ORDER_PARAM_KEYS
-])
+const RESERVED_KEYS = new Set(['title', 'name', 'image', 'caption', ...TEMPLATE_ORDER_PARAM_KEYS])
 const IMAGE_KEY_PATTERN = /^@img\d+(_cap|_size)?$/
 const ROW_KEY_PATTERN = /^@row\d+(_label)?$/
 
@@ -109,9 +107,8 @@ function infoboxImageSizeAttr(size?: number): string {
  * @param content - Raw page markdown source.
  */
 export function normalizeInfoboxForRender(content: string): string {
-  const orderFixed = content.replace(
-    /\{\{(Infobox(?:\s+[A-Za-z]+)?\|[^}]+)\}\}/g,
-    (match) => match.replace(/\|__order__=/g, '|@order=')
+  const orderFixed = content.replace(/\{\{(Infobox(?:\s+[A-Za-z]+)?\|[^}]+)\}\}/g, (match) =>
+    match.replace(/\|__order__=/g, '|@order=')
   )
   return moveInfoboxToTop(orderFixed)
 }
@@ -298,10 +295,7 @@ export function renderInfoboxHtml(data: InfoboxData): string {
 </aside>`
 }
 
-function entryFromOrderToken(
-  token: string,
-  params: Record<string, string>
-): InfoboxEntry | null {
+function entryFromOrderToken(token: string, params: Record<string, string>): InfoboxEntry | null {
   if (token.startsWith('@img')) {
     const size = parseImageSize(params[`${token}_size`])
     return {
@@ -355,7 +349,11 @@ function parseInfoboxParamString(templateName: string, paramString: string): Inf
     const key = part.slice(0, equalsIndex).trim()
     const value = decodeTemplateParamValue(part.slice(equalsIndex + 1).trim())
 
-    if (key === 'title' || key === 'name' || TEMPLATE_ORDER_PARAM_KEYS.includes(key as (typeof TEMPLATE_ORDER_PARAM_KEYS)[number]))
+    if (
+      key === 'title' ||
+      key === 'name' ||
+      TEMPLATE_ORDER_PARAM_KEYS.includes(key as (typeof TEMPLATE_ORDER_PARAM_KEYS)[number])
+    )
       continue
     if (ROW_KEY_PATTERN.test(key)) continue
 

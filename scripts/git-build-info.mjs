@@ -38,12 +38,9 @@ export function getBuildInfo() {
     (commitSha !== 'unknown' ? commitSha.slice(0, 7) : 'unknown')
 
   const commitDate =
-    process.env.GIT_COMMIT_DATE?.trim() ||
-    git('log -1 --format=%cI') ||
-    new Date().toISOString()
+    process.env.GIT_COMMIT_DATE?.trim() || git('log -1 --format=%cI') || new Date().toISOString()
 
-  const commitUrl =
-    commitSha !== 'unknown' ? `${REPO_URL}/commit/${commitSha}` : REPO_URL
+  const commitUrl = commitSha !== 'unknown' ? `${REPO_URL}/commit/${commitSha}` : REPO_URL
 
   return {
     version: getAppVersion(),

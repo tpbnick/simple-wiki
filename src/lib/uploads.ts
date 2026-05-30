@@ -1,5 +1,13 @@
 import { createHash } from 'crypto'
-import { createReadStream, existsSync, mkdirSync, openSync, closeSync, writeSync, readFileSync } from 'fs'
+import {
+  createReadStream,
+  existsSync,
+  mkdirSync,
+  openSync,
+  closeSync,
+  writeSync,
+  readFileSync
+} from 'fs'
 import { resolve, extname, join, basename } from 'path'
 
 /** Maximum upload size in bytes (50 MB). */
@@ -32,9 +40,15 @@ const MAGIC_SIGNATURES: Record<string, number[][]> = {
   'image/png': [[0x89, 0x50, 0x4e, 0x47]],
   'image/gif': [[0x47, 0x49, 0x46, 0x38]],
   'application/pdf': [[0x25, 0x50, 0x44, 0x46]],
-  'application/zip': [[0x50, 0x4b, 0x03, 0x04], [0x50, 0x4b, 0x05, 0x06]],
+  'application/zip': [
+    [0x50, 0x4b, 0x03, 0x04],
+    [0x50, 0x4b, 0x05, 0x06]
+  ],
   'video/webm': [[0x1a, 0x45, 0xdf, 0xa3]],
-  'audio/mpeg': [[0xff, 0xfb], [0x49, 0x44, 0x33]],
+  'audio/mpeg': [
+    [0xff, 0xfb],
+    [0x49, 0x44, 0x33]
+  ],
   'audio/ogg': [[0x4f, 0x67, 0x67, 0x53]]
 }
 
@@ -80,8 +94,7 @@ export function resolveUploadPath(filename: string): string | null {
  */
 export function normalizeUploadFilename(name: string): string {
   const trimmed = name.trim()
-  const base =
-    trimmed.includes('/') || trimmed.includes('\\') ? basename(trimmed) : trimmed
+  const base = trimmed.includes('/') || trimmed.includes('\\') ? basename(trimmed) : trimmed
   if (!base || base === '.' || base === '..' || base.includes('\0')) {
     return 'file'
   }
@@ -286,7 +299,10 @@ export function validateUpload(
     return { ok: false, error: 'Could not verify file contents' }
   }
 
-  if (detectedMime !== extensionMime && !(extensionMime.startsWith('text/') && detectedMime.startsWith('text/'))) {
+  if (
+    detectedMime !== extensionMime &&
+    !(extensionMime.startsWith('text/') && detectedMime.startsWith('text/'))
+  ) {
     if (extensionMime.startsWith('audio/') && detectedMime.startsWith('audio/')) {
       // Accept common audio signature mismatches across audio formats.
     } else {

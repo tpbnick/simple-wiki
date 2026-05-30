@@ -14,14 +14,28 @@ describe('text-editing helpers', () => {
   it('insertAtSelection inserts at the cursor', () => {
     let content = 'hello world'
     const textarea = fakeTextarea(5)
-    insertAtSelection(textarea, content, (next) => { content = next }, ' brave')
+    insertAtSelection(
+      textarea,
+      content,
+      (next) => {
+        content = next
+      },
+      ' brave'
+    )
     expect(content).toBe('hello brave world')
   })
 
   it('wrapSelection wraps the current selection', () => {
     let content = 'hello world'
     const textarea = fakeTextarea(0, 5)
-    wrapSelection(textarea, content, (next) => { content = next }, '**')
+    wrapSelection(
+      textarea,
+      content,
+      (next) => {
+        content = next
+      },
+      '**'
+    )
     expect(content).toBe('**hello** world')
   })
 })

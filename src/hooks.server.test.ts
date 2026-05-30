@@ -9,12 +9,14 @@ import { installTempWikiEnv } from '$lib/test/db-env.js'
 
 installTempWikiEnv('wiki-hooks-')
 
-function mockEvent(overrides: {
-  pathname?: string
-  method?: string
-  accept?: string
-  user?: App.Locals['user']
-} = {}) {
+function mockEvent(
+  overrides: {
+    pathname?: string
+    method?: string
+    accept?: string
+    user?: App.Locals['user']
+  } = {}
+) {
   const pathname = overrides.pathname ?? '/wiki/home'
   const url = new URL(`http://localhost${pathname}`)
   const headers = new Headers()

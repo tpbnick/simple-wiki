@@ -6,12 +6,7 @@ import { validateFamilyTreeData } from '../lib/validate.js'
 import { requireReadAccess } from '$lib/read-access.js'
 import { enforceReadRateLimit } from '$lib/read-rate-limit.js'
 import { enforceAuthenticatedWriteRateLimit } from '$lib/api-rate-limit.js'
-import {
-  deleteFamilyTree,
-  FamilyTreeConflictError,
-  getFamilyTree,
-  saveFamilyTree
-} from '../db.js'
+import { deleteFamilyTree, FamilyTreeConflictError, getFamilyTree, saveFamilyTree } from '../db.js'
 
 const MAX_FAMILY_TREE_BODY_BYTES = 2 * 1024 * 1024
 

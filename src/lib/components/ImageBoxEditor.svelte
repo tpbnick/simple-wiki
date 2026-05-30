@@ -1,142 +1,140 @@
 <script lang="ts">
-  import { Upload, X, ImageIcon, GripVertical, Plus } from 'lucide-svelte'
-  import {
-    createImageBoxItem,
-    imageFilename,
-    type ImageBoxData,
-    type ImageBoxItem
-  } from '$lib/templates/imagebox-editor.js'
+import { Upload, X, ImageIcon, GripVertical, Plus } from 'lucide-svelte'
+import {
+  createImageBoxItem,
+  imageFilename,
+  type ImageBoxData,
+  type ImageBoxItem
+} from '$lib/templates/imagebox-editor.js'
 
-  interface Props {
-    data: ImageBoxData
-    uploading?: boolean
-    uploadingItemIndex?: number | null
-    onupdate: (data: ImageBoxData) => void
-    onremove?: () => void
-    onupload: (files: FileList | null, itemIndex: number) => void
+interface Props {
+  data: ImageBoxData
+  uploading?: boolean
+  uploadingItemIndex?: number | null
+  onupdate: (data: ImageBoxData) => void
+  onremove?: () => void
+  onupload: (files: FileList | null, itemIndex: number) => void
+}
+
+let {
+  data,
+  uploading = false,
+  uploadingItemIndex = null,
+  onupdate,
+  onremove,
+  onupload
+}: Props = $props()
+
+let imageInputs: Record<number, HTMLInputElement> = {}
+let draggedIndex = $state<number | null>(null)
+let dropIndex = $state<number | null>(null)
+
+function updateItem(index: number, item: ImageBoxItem) {
+  const images = data.images.map((existing, itemIndex) => (itemIndex === index ? item : existing))
+  onupdate({ ...data, images })
+}
+
+function addItem() {
+  onupdate({ ...data, images: [...data.images, createImageBoxItem()] })
+}
+
+function removeItem(index: number) {
+  if (data.images.length <= 1) return
+  onupdate({
+    ...data,
+    images: data.images.filter((_, itemIndex) => itemIndex !== index)
+  })
+}
+
+function moveItem(fromIndex: number, toIndex: number) {
+  if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0) return
+  if (fromIndex >= data.images.length || toIndex >= data.images.length) return
+
+  const images = [...data.images]
+  const [moved] = images.splice(fromIndex, 1)
+  images.splice(toIndex, 0, moved)
+  onupdate({ ...data, images })
+}
+
+function openImageUpload(index: number) {
+  imageInputs[index]?.click()
+}
+
+function itemKey(item: ImageBoxItem, index: number): string {
+  return item.id ?? `item-${index}`
+}
+
+function handleDragStart(index: number, event: DragEvent) {
+  draggedIndex = index
+  dropIndex = index
+  event.dataTransfer?.setData('text/plain', String(index))
+  if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move'
+}
+
+function handleDragOver(index: number, event: DragEvent) {
+  event.preventDefault()
+  dropIndex = index
+  if (event.dataTransfer) event.dataTransfer.dropEffect = 'move'
+}
+
+function handleDrop(index: number, event: DragEvent) {
+  event.preventDefault()
+  if (draggedIndex === null) return
+  moveItem(draggedIndex, index)
+  draggedIndex = null
+  dropIndex = null
+}
+
+function handleDragEnd() {
+  draggedIndex = null
+  dropIndex = null
+}
+
+function parseColumnsInput(value: string): number {
+  const parsed = Number.parseInt(value, 10)
+  if (!Number.isFinite(parsed)) return 4
+  return Math.min(4, Math.max(1, parsed))
+}
+
+function resizeCaptionField(node: HTMLTextAreaElement) {
+  const resize = () => {
+    node.style.height = 'auto'
+    node.style.height = `${node.scrollHeight}px`
   }
 
-  let {
-    data,
-    uploading = false,
-    uploadingItemIndex = null,
-    onupdate,
-    onremove,
-    onupload
-  }: Props = $props()
-
-  let imageInputs: Record<number, HTMLInputElement> = {}
-  let draggedIndex = $state<number | null>(null)
-  let dropIndex = $state<number | null>(null)
-
-  function updateItem(index: number, item: ImageBoxItem) {
-    const images = data.images.map((existing, itemIndex) =>
-      itemIndex === index ? item : existing
-    )
-    onupdate({ ...data, images })
-  }
-
-  function addItem() {
-    onupdate({ ...data, images: [...data.images, createImageBoxItem()] })
-  }
-
-  function removeItem(index: number) {
-    if (data.images.length <= 1) return
-    onupdate({
-      ...data,
-      images: data.images.filter((_, itemIndex) => itemIndex !== index)
-    })
-  }
-
-  function moveItem(fromIndex: number, toIndex: number) {
-    if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0) return
-    if (fromIndex >= data.images.length || toIndex >= data.images.length) return
-
-    const images = [...data.images]
-    const [moved] = images.splice(fromIndex, 1)
-    images.splice(toIndex, 0, moved)
-    onupdate({ ...data, images })
-  }
-
-  function openImageUpload(index: number) {
-    imageInputs[index]?.click()
-  }
-
-  function itemKey(item: ImageBoxItem, index: number): string {
-    return item.id ?? `item-${index}`
-  }
-
-  function handleDragStart(index: number, event: DragEvent) {
-    draggedIndex = index
-    dropIndex = index
-    event.dataTransfer?.setData('text/plain', String(index))
-    if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move'
-  }
-
-  function handleDragOver(index: number, event: DragEvent) {
-    event.preventDefault()
-    dropIndex = index
-    if (event.dataTransfer) event.dataTransfer.dropEffect = 'move'
-  }
-
-  function handleDrop(index: number, event: DragEvent) {
-    event.preventDefault()
-    if (draggedIndex === null) return
-    moveItem(draggedIndex, index)
-    draggedIndex = null
-    dropIndex = null
-  }
-
-  function handleDragEnd() {
-    draggedIndex = null
-    dropIndex = null
-  }
-
-  function parseColumnsInput(value: string): number {
-    const parsed = Number.parseInt(value, 10)
-    if (!Number.isFinite(parsed)) return 4
-    return Math.min(4, Math.max(1, parsed))
-  }
-
-  function resizeCaptionField(node: HTMLTextAreaElement) {
-    const resize = () => {
-      node.style.height = 'auto'
-      node.style.height = `${node.scrollHeight}px`
-    }
-
-    resize()
-    node.addEventListener('input', resize)
-    return {
-      update: resize,
-      destroy() {
-        node.removeEventListener('input', resize)
-      }
+  resize()
+  node.addEventListener('input', resize)
+  return {
+    update: resize,
+    destroy() {
+      node.removeEventListener('input', resize)
     }
   }
+}
 
-  function handleCaptionKeydown(
-    index: number,
-    item: ImageBoxItem,
-    event: KeyboardEvent & { currentTarget: HTMLTextAreaElement }
-  ) {
-    if (event.key !== 'Enter') return
+function handleCaptionKeydown(
+  index: number,
+  item: ImageBoxItem,
+  event: KeyboardEvent & { currentTarget: HTMLTextAreaElement }
+) {
+  if (event.key !== 'Enter') return
 
-    event.preventDefault()
-    const textarea = event.currentTarget
-    const start = textarea.selectionStart ?? item.caption.length
-    const end = textarea.selectionEnd ?? start
-    const insert = event.shiftKey ? '\n\n' : '\n'
-    const caption = item.caption.slice(0, start) + insert + item.caption.slice(end)
+  event.preventDefault()
+  const textarea = event.currentTarget
+  const start = textarea.selectionStart ?? item.caption.length
+  const end = textarea.selectionEnd ?? start
+  const insert = event.shiftKey ? '\n\n' : '\n'
+  const caption = item.caption.slice(0, start) + insert + item.caption.slice(end)
 
-    updateItem(index, { ...item, caption })
+  updateItem(index, { ...item, caption })
 
-    requestAnimationFrame(() => {
-      textarea.selectionStart = start + insert.length
-      textarea.selectionEnd = start + insert.length
-      textarea.style.height = 'auto'
-      textarea.style.height = `${textarea.scrollHeight}px`
-    })
-  }
+  requestAnimationFrame(() => {
+    textarea.selectionStart = start + insert.length
+    textarea.selectionEnd = start + insert.length
+    textarea.style.height = 'auto'
+    textarea.style.height = `${textarea.scrollHeight}px`
+  })
+}
 </script>
 
 <section class="wiki-imagebox-editor not-prose" aria-label="Image box editor">
@@ -163,7 +161,9 @@
       <li
         class="imagebox-editor-item"
         class:imagebox-item-dragging={draggedIndex === index}
-        class:imagebox-item-drop-target={dropIndex === index && draggedIndex !== null && draggedIndex !== index}
+        class:imagebox-item-drop-target={dropIndex === index &&
+          draggedIndex !== null &&
+          draggedIndex !== index}
         draggable={data.images.length > 1}
         ondragstart={(event) => handleDragStart(index, event)}
         ondragover={(event) => handleDragOver(index, event)}
@@ -205,8 +205,7 @@
             placeholder="Image URL"
             aria-label="Image URL for item {index + 1}"
             class="imagebox-editor-input"
-            oninput={(event) =>
-              updateItem(index, { ...item, image: event.currentTarget.value })}
+            oninput={(event) => updateItem(index, { ...item, image: event.currentTarget.value })}
           />
 
           <textarea
@@ -216,8 +215,7 @@
             class="imagebox-editor-input imagebox-editor-caption"
             rows={2}
             use:resizeCaptionField
-            oninput={(event) =>
-              updateItem(index, { ...item, caption: event.currentTarget.value })}
+            oninput={(event) => updateItem(index, { ...item, caption: event.currentTarget.value })}
             onkeydown={(event) => handleCaptionKeydown(index, item, event)}
           ></textarea>
 

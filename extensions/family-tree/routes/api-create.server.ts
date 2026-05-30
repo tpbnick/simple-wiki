@@ -3,10 +3,7 @@ import { readJsonBody } from '$lib/http.js'
 import { slugify } from '$lib/slug.js'
 import { enforceAuthenticatedWriteRateLimit } from '$lib/api-rate-limit.js'
 import type { RequestHandler } from '@sveltejs/kit'
-import {
-  createFamilyTree,
-  FamilyTreeConflictError
-} from '../db.js'
+import { createFamilyTree, FamilyTreeConflictError } from '../db.js'
 
 export const POST: RequestHandler = async ({ request, locals, getClientAddress }) => {
   enforceAuthenticatedWriteRateLimit(locals, getClientAddress, 'family-tree-create')

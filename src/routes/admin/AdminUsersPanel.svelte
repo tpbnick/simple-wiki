@@ -1,49 +1,47 @@
 <script lang="ts">
-  import { enhance } from '$app/forms'
-  import { Check, Copy, KeyRound, Search, Shield, UserPlus, Users } from 'lucide-svelte'
-  import { formatDateTime, formatTimeAgo, toDatetimeAttr } from '$lib/format.js'
-  import type { ActionData } from './$types'
+import { enhance } from '$app/forms'
+import { Check, Copy, KeyRound, Search, Shield, UserPlus, Users } from 'lucide-svelte'
+import { formatDateTime, formatTimeAgo, toDatetimeAttr } from '$lib/format.js'
+import type { ActionData } from './$types'
 
-  let {
-    users,
-    form
-  }: {
-    users: Array<{
-      username: string
-      is_admin: number
-      must_change_pw: number
-      created_at: string
-    }>
-    form: ActionData
-  } = $props()
+let {
+  users,
+  form
+}: {
+  users: Array<{
+    username: string
+    is_admin: number
+    must_change_pw: number
+    created_at: string
+  }>
+  form: ActionData
+} = $props()
 
-  let filter = $state('')
-  let copiedPassword = $state(false)
+let filter = $state('')
+let copiedPassword = $state(false)
 
-  const filtered = $derived(
-    users.filter(user =>
-      !filter || user.username.toLowerCase().includes(filter.toLowerCase())
-    )
-  )
+const filtered = $derived(
+  users.filter((user) => !filter || user.username.toLowerCase().includes(filter.toLowerCase()))
+)
 
-  const adminCount = $derived(users.filter(user => user.is_admin).length)
-  const editorCount = $derived(users.length - adminCount)
+const adminCount = $derived(users.filter((user) => user.is_admin).length)
+const editorCount = $derived(users.length - adminCount)
 
-  function userInitial(username: string): string {
-    return username.slice(0, 1).toUpperCase()
+function userInitial(username: string): string {
+  return username.slice(0, 1).toUpperCase()
+}
+
+async function copyPassword(password: string) {
+  try {
+    await navigator.clipboard.writeText(password)
+    copiedPassword = true
+    setTimeout(() => {
+      copiedPassword = false
+    }, 2000)
+  } catch {
+    // Clipboard may be unavailable outside secure context.
   }
-
-  async function copyPassword(password: string) {
-    try {
-      await navigator.clipboard.writeText(password)
-      copiedPassword = true
-      setTimeout(() => {
-        copiedPassword = false
-      }, 2000)
-    } catch {
-      // Clipboard may be unavailable outside secure context.
-    }
-  }
+}
 </script>
 
 <div class="grid gap-6 lg:grid-cols-[minmax(0,22rem)_1fr]">
@@ -66,7 +64,9 @@
           Created <strong>{form.userCreated.username}</strong>
         </p>
         <div class="mt-2 flex items-center gap-2">
-          <code class="flex-1 font-mono text-xs bg-base-100/80 px-2 py-1.5 rounded border border-base-200 break-all">
+          <code
+            class="flex-1 font-mono text-xs bg-base-100/80 px-2 py-1.5 rounded border border-base-200 break-all"
+          >
             {form.userCreated.password}
           </code>
           <button
@@ -112,7 +112,9 @@
         <input type="checkbox" name="isAdmin" class="checkbox checkbox-sm mt-0.5" />
         <span class="text-base-content/70">
           Grant admin access
-          <span class="block text-xs text-base-content/45 mt-0.5">Can manage pages, files, users, and backups.</span>
+          <span class="block text-xs text-base-content/45 mt-0.5"
+            >Can manage pages, files, users, and backups.</span
+          >
         </span>
       </label>
       <button
@@ -129,7 +131,10 @@
   <section>
     <div class="flex flex-wrap items-center gap-3 mb-4">
       <div class="relative flex-1 min-w-[12rem] max-w-xs">
-        <Search size={13} class="absolute left-2.5 top-1/2 -translate-y-1/2 text-base-content/40 pointer-events-none" />
+        <Search
+          size={13}
+          class="absolute left-2.5 top-1/2 -translate-y-1/2 text-base-content/40 pointer-events-none"
+        />
         <input
           type="search"
           placeholder="Filter users…"
@@ -139,15 +144,21 @@
         />
       </div>
       <div class="flex items-center gap-2 ml-auto text-xs">
-        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-base-200 text-base-content/65 font-medium">
+        <span
+          class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-base-200 text-base-content/65 font-medium"
+        >
           <Users size={12} />
           {users.length} total
         </span>
-        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-primary/10 text-primary font-medium">
+        <span
+          class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-primary/10 text-primary font-medium"
+        >
           <Shield size={12} />
           {adminCount} admin{adminCount === 1 ? '' : 's'}
         </span>
-        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-base-200 text-base-content/65 font-medium">
+        <span
+          class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-base-200 text-base-content/65 font-medium"
+        >
           {editorCount} editor{editorCount === 1 ? '' : 's'}
         </span>
       </div>
@@ -157,10 +168,22 @@
       <table class="w-full text-sm">
         <thead>
           <tr class="bg-base-200/60 border-b border-base-200">
-            <th class="text-left px-4 py-2.5 font-semibold text-base-content/60 text-xs uppercase tracking-wider">User</th>
-            <th class="text-left px-3 py-2.5 font-semibold text-base-content/60 text-xs uppercase tracking-wider">Role</th>
-            <th class="text-left px-3 py-2.5 font-semibold text-base-content/60 text-xs uppercase tracking-wider">Status</th>
-            <th class="text-left px-3 py-2.5 font-semibold text-base-content/60 text-xs uppercase tracking-wider">Created</th>
+            <th
+              class="text-left px-4 py-2.5 font-semibold text-base-content/60 text-xs uppercase tracking-wider"
+              >User</th
+            >
+            <th
+              class="text-left px-3 py-2.5 font-semibold text-base-content/60 text-xs uppercase tracking-wider"
+              >Role</th
+            >
+            <th
+              class="text-left px-3 py-2.5 font-semibold text-base-content/60 text-xs uppercase tracking-wider"
+              >Status</th
+            >
+            <th
+              class="text-left px-3 py-2.5 font-semibold text-base-content/60 text-xs uppercase tracking-wider"
+              >Created</th
+            >
           </tr>
         </thead>
         <tbody class="divide-y divide-base-200">
@@ -170,7 +193,9 @@
                 <div class="flex items-center gap-3">
                   <div
                     class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold shrink-0
-                           {user.is_admin ? 'bg-primary/15 text-primary' : 'bg-base-200 text-base-content/60'}"
+                           {user.is_admin
+                      ? 'bg-primary/15 text-primary'
+                      : 'bg-base-200 text-base-content/60'}"
                   >
                     {userInitial(user.username)}
                   </div>
@@ -182,30 +207,41 @@
               </td>
               <td class="px-3 py-3">
                 {#if user.is_admin}
-                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs bg-primary/10 text-primary font-medium">
+                  <span
+                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs bg-primary/10 text-primary font-medium"
+                  >
                     <Shield size={11} />
                     Admin
                   </span>
                 {:else}
-                  <span class="px-2 py-0.5 rounded-md text-xs bg-base-200 text-base-content/60 font-medium">
+                  <span
+                    class="px-2 py-0.5 rounded-md text-xs bg-base-200 text-base-content/60 font-medium"
+                  >
                     Editor
                   </span>
                 {/if}
               </td>
               <td class="px-3 py-3">
                 {#if user.must_change_pw}
-                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs bg-warning/10 text-warning font-medium">
+                  <span
+                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs bg-warning/10 text-warning font-medium"
+                  >
                     <KeyRound size={11} />
                     Must change password
                   </span>
                 {:else}
-                  <span class="px-2 py-0.5 rounded-md text-xs bg-success/10 text-success font-medium">
+                  <span
+                    class="px-2 py-0.5 rounded-md text-xs bg-success/10 text-success font-medium"
+                  >
                     Active
                   </span>
                 {/if}
               </td>
               <td class="px-3 py-3 text-base-content/50 text-xs">
-                <time datetime={toDatetimeAttr(user.created_at)} title={formatDateTime(user.created_at)}>
+                <time
+                  datetime={toDatetimeAttr(user.created_at)}
+                  title={formatDateTime(user.created_at)}
+                >
                   {formatTimeAgo(user.created_at, 'short')}
                 </time>
               </td>
@@ -213,7 +249,9 @@
           {/each}
           {#if filtered.length === 0}
             <tr>
-              <td colspan="4" class="text-center py-12 text-base-content/30 text-sm">No users found</td>
+              <td colspan="4" class="text-center py-12 text-base-content/30 text-sm"
+                >No users found</td
+              >
             </tr>
           {/if}
         </tbody>

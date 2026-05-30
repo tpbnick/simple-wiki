@@ -1,9 +1,5 @@
 import { openDatabase } from './connection.js'
-import {
-  invalidatePageSlugCache,
-  readCachedPageSlugs,
-  writeCachedPageSlugs
-} from './slug-cache.js'
+import { invalidatePageSlugCache, readCachedPageSlugs, writeCachedPageSlugs } from './slug-cache.js'
 import { getRevisionRetentionLimit } from './settings.js'
 import {
   PageConflictError,
@@ -21,7 +17,9 @@ export function getAllPageSlugs(): Set<string> {
   if (cached) return cached
 
   const slugs = new Set(
-    openDatabase().statements.getAllSlugs.all().map((row) => row.slug)
+    openDatabase()
+      .statements.getAllSlugs.all()
+      .map((row) => row.slug)
   )
   writeCachedPageSlugs(slugs)
   return slugs
@@ -45,11 +43,13 @@ export function getAllPageSummaries(): PageSummary[] {
 }
 
 /** Returns page metadata for article/help pages with optional search and pagination. */
-export function searchContentPageSummaries(options: {
-  query?: string
-  limit?: number
-  offset?: number
-} = {}): { pages: PageSummary[]; total: number } {
+export function searchContentPageSummaries(
+  options: {
+    query?: string
+    limit?: number
+    offset?: number
+  } = {}
+): { pages: PageSummary[]; total: number } {
   const query = options.query?.trim() ?? ''
   const limit = options.limit ?? 100
   const offset = options.offset ?? 0
@@ -57,13 +57,7 @@ export function searchContentPageSummaries(options: {
   const { statements } = openDatabase()
 
   const total = statements.countContentPageSummaries.get(query, pattern, pattern)?.count ?? 0
-  const pages = statements.searchContentPageSummaries.all(
-    query,
-    pattern,
-    pattern,
-    limit,
-    offset
-  )
+  const pages = statements.searchContentPageSummaries.all(query, pattern, pattern, limit, offset)
 
   return { pages, total }
 }
@@ -105,11 +99,7 @@ export function savePage(
 
   const page = db.transaction(() => {
     const existingPage = statements.getPage.get(slug)
-    if (
-      existingPage &&
-      expectedUpdatedAt &&
-      existingPage.updated_at !== expectedUpdatedAt
-    ) {
+    if (existingPage && expectedUpdatedAt && existingPage.updated_at !== expectedUpdatedAt) {
       throw new PageConflictError()
     }
 
@@ -125,11 +115,7 @@ export function savePage(
       )
       const retentionLimit = getRevisionRetentionLimit()
       if (retentionLimit != null) {
-        statements.prunePageRevisionsOverLimit.run(
-          existingPage.id,
-          existingPage.id,
-          retentionLimit
-        )
+        statements.prunePageRevisionsOverLimit.run(existingPage.id, existingPage.id, retentionLimit)
       }
     }
 

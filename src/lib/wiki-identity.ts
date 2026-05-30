@@ -9,7 +9,9 @@ let cachedVersion: string | null = null
 /** Application version from package.json. */
 export function getAppVersion(): string {
   if (cachedVersion) return cachedVersion
-  const pkg = JSON.parse(readFileSync(join(repoRoot, 'package.json'), 'utf8')) as { version?: string }
+  const pkg = JSON.parse(readFileSync(join(repoRoot, 'package.json'), 'utf8')) as {
+    version?: string
+  }
   cachedVersion = pkg.version ?? '0.0.0'
   return cachedVersion
 }

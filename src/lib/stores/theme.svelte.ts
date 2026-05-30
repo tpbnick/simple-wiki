@@ -7,12 +7,18 @@ function createThemeStore() {
   let current = $state<Theme>('wiki-light')
 
   return {
-    get current() { return current },
-    get isDark() { return current === 'wiki-dark' },
+    get current() {
+      return current
+    },
+    get isDark() {
+      return current === 'wiki-dark'
+    },
 
     init() {
       if (typeof document === 'undefined') return
-      const saved = document.cookie.match(new RegExp(`${WIKI_THEME_COOKIE}=([^;]+)`))?.[1] as Theme | undefined
+      const saved = document.cookie.match(new RegExp(`${WIKI_THEME_COOKIE}=([^;]+)`))?.[1] as
+        | Theme
+        | undefined
       if (saved === 'wiki-light' || saved === 'wiki-dark') {
         current = saved
         document.documentElement.setAttribute('data-theme', saved)

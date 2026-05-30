@@ -6,7 +6,11 @@ import {
   partsToParamRecord,
   splitTemplateParamString
 } from '$lib/templates/param-string.js'
-import { newEditorId, orderParamFromRecord, TEMPLATE_ORDER_PARAM_KEYS } from '$lib/templates/template-editor-shared.js'
+import {
+  newEditorId,
+  orderParamFromRecord,
+  TEMPLATE_ORDER_PARAM_KEYS
+} from '$lib/templates/template-editor-shared.js'
 
 export interface ImageBoxItem {
   id?: string
@@ -102,7 +106,11 @@ function parseImageBoxParamString(paramString: string): ImageBoxData {
     const key = part.slice(0, equalsIndex).trim()
     const value = part.slice(equalsIndex + 1).trim()
 
-    if (key === '@id' || key === 'columns' || TEMPLATE_ORDER_PARAM_KEYS.includes(key as (typeof TEMPLATE_ORDER_PARAM_KEYS)[number]))
+    if (
+      key === '@id' ||
+      key === 'columns' ||
+      TEMPLATE_ORDER_PARAM_KEYS.includes(key as (typeof TEMPLATE_ORDER_PARAM_KEYS)[number])
+    )
       continue
     if (IMAGE_KEY_PATTERN.test(key)) continue
 

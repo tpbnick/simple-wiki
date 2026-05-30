@@ -28,10 +28,7 @@ function getStore(): RenderStore {
  */
 export function withRenderContext<T>(context: RenderContext, run: () => T): T {
   const parent = renderStore.getStore()
-  return renderStore.run(
-    { context, templateDepth: parent?.templateDepth ?? 0 },
-    run
-  )
+  return renderStore.run({ context, templateDepth: parent?.templateDepth ?? 0 }, run)
 }
 
 /**
@@ -62,8 +59,5 @@ export function getTemplateDepth(): number {
 /** Runs a function while incrementing nested template depth. */
 export function withTemplateDepth<T>(run: () => T): T {
   const store = getStore()
-  return renderStore.run(
-    { context: store.context, templateDepth: store.templateDepth + 1 },
-    run
-  )
+  return renderStore.run({ context: store.context, templateDepth: store.templateDepth + 1 }, run)
 }

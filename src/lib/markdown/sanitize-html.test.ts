@@ -9,8 +9,7 @@ describe('sanitizeWikiHtml', () => {
   })
 
   it('strips data-tree from arbitrary divs to block injected family-tree payloads', () => {
-    const html =
-      '<div class="not-a-tree" data-family="evil" data-tree="payload">Injected</div>'
+    const html = '<div class="not-a-tree" data-family="evil" data-tree="payload">Injected</div>'
     const sanitized = sanitizeWikiHtml(html)
     expect(sanitized).not.toContain('data-tree')
     expect(sanitized).not.toContain('dataTree')

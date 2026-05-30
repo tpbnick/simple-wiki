@@ -1,8 +1,8 @@
 /* ─────────────────────────────────────────────────────────
    WIKI LIGHT THEME
    ───────────────────────────────────────────────────────── */
-[data-theme="wiki-light"],
-html:not([data-theme="wiki-dark"]) {
+[data-theme='wiki-light'],
+html:not([data-theme='wiki-dark']) {
   color-scheme: light;
 
   /* Reading settings — overridden at runtime by SettingsPanel via JS */
@@ -36,20 +36,20 @@ html:not([data-theme="wiki-dark"]) {
   --color-error-content: #ffffff;
 
   /* Wiki-specific tokens */
-  --wiki-link:            #2563eb;
-  --wiki-link-hover:      #1d4ed8;
-  --wiki-link-visited:    #7c3aed;
-  --wiki-link-red:        #ba0000;
-  --wiki-link-red-hover:  #990000;
-  --wiki-border:          #e5e7eb;
-  --wiki-border-strong:   #d1d5db;
-  --wiki-infobox-bg:      #f9fafb;
-  --wiki-infobox-header:  #dbeafe;
+  --wiki-link: #2563eb;
+  --wiki-link-hover: #1d4ed8;
+  --wiki-link-visited: #7c3aed;
+  --wiki-link-red: #ba0000;
+  --wiki-link-red-hover: #990000;
+  --wiki-border: #e5e7eb;
+  --wiki-border-strong: #d1d5db;
+  --wiki-infobox-bg: #f9fafb;
+  --wiki-infobox-header: #dbeafe;
   --wiki-infobox-header-text: #1e3a8a;
-  --wiki-sidebar-bg:      #f4f5f7;
-  --wiki-code-bg:         #f3f4f6;
-  --wiki-header-bg:       rgba(255,255,255,0.85);
-  --wiki-header-border:   rgba(0,0,0,0.08);
+  --wiki-sidebar-bg: #f4f5f7;
+  --wiki-code-bg: #f3f4f6;
+  --wiki-header-bg: rgba(255, 255, 255, 0.85);
+  --wiki-header-border: rgba(0, 0, 0, 0.08);
 
   /* Rounding & shadow */
   --radius-box: 0.75rem;
@@ -63,7 +63,7 @@ html:not([data-theme="wiki-dark"]) {
 /* ─────────────────────────────────────────────────────────
    WIKI DARK THEME
    ───────────────────────────────────────────────────────── */
-[data-theme="wiki-dark"] {
+[data-theme='wiki-dark'] {
   color-scheme: dark;
 
   --color-base-100: #13151a;
@@ -89,20 +89,20 @@ html:not([data-theme="wiki-dark"]) {
   --color-error: #f87171;
   --color-error-content: #0f172a;
 
-  --wiki-link:            #60a5fa;
-  --wiki-link-hover:      #93c5fd;
-  --wiki-link-visited:    #c4b5fd;
-  --wiki-link-red:        #ff6666;
-  --wiki-link-red-hover:  #ff9999;
-  --wiki-border:          #2d3748;
-  --wiki-border-strong:   #3d4c63;
-  --wiki-infobox-bg:      #1c1f27;
-  --wiki-infobox-header:  #1e3a5f;
+  --wiki-link: #60a5fa;
+  --wiki-link-hover: #93c5fd;
+  --wiki-link-visited: #c4b5fd;
+  --wiki-link-red: #ff6666;
+  --wiki-link-red-hover: #ff9999;
+  --wiki-border: #2d3748;
+  --wiki-border-strong: #3d4c63;
+  --wiki-infobox-bg: #1c1f27;
+  --wiki-infobox-header: #1e3a5f;
   --wiki-infobox-header-text: #e2e8f0;
-  --wiki-sidebar-bg:      #1c1f27;
-  --wiki-code-bg:         #1e2230;
-  --wiki-header-bg:       rgba(19,21,26,0.9);
-  --wiki-header-border:   rgba(255,255,255,0.07);
+  --wiki-sidebar-bg: #1c1f27;
+  --wiki-code-bg: #1e2230;
+  --wiki-header-bg: rgba(19, 21, 26, 0.9);
+  --wiki-header-border: rgba(255, 255, 255, 0.07);
 
   --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.3);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3);

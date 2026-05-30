@@ -1,8 +1,5 @@
 import { fail } from '@sveltejs/kit'
-import {
-  getRecentRevisions,
-  getRevisionRetentionLimit
-} from '$lib/db/index.js'
+import { getRecentRevisions, getRevisionRetentionLimit } from '$lib/db/index.js'
 import { handleRevisionRetentionAction } from '$lib/server/revision-retention-action.js'
 import { requireReadAccess } from '$lib/read-access.js'
 import type { Actions, PageServerLoad } from './$types'

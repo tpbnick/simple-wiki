@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { RevisionDiffLine } from '$lib/db/revisions.js'
+import type { RevisionDiffLine } from '$lib/db/revisions.js'
 
-  let { lines }: { lines: RevisionDiffLine[] } = $props()
+let { lines }: { lines: RevisionDiffLine[] } = $props()
 </script>
 
 {#if lines.length > 0}

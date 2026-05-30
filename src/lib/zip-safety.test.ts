@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { validateZipArchiveLimits, validateUnzippedEntrySizes, ZipSafetyError } from '$lib/zip-safety.js'
+import {
+  validateZipArchiveLimits,
+  validateUnzippedEntrySizes,
+  ZipSafetyError
+} from '$lib/zip-safety.js'
 import { zipSync } from 'fflate'
 
 describe('validateZipArchiveLimits', () => {

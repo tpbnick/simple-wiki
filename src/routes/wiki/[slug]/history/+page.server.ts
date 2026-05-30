@@ -1,9 +1,4 @@
-import {
-  getPage,
-  getRevisions,
-  restoreRevision,
-  PageConflictError
-} from '$lib/db/index.js'
+import { getPage, getRevisions, restoreRevision, PageConflictError } from '$lib/db/index.js'
 import { requireReadAccess } from '$lib/read-access.js'
 import { enforceFormWriteRateLimit } from '$lib/server/form-rate-limit.js'
 import { error, fail, redirect, isRedirect } from '@sveltejs/kit'

@@ -19,7 +19,11 @@ function isSafeImageUrl(url: string): boolean {
 function isPerson(value: unknown): value is FamilyTreePerson {
   if (!value || typeof value !== 'object') return false
   const person = value as Partial<FamilyTreePerson>
-  return typeof person.id === 'string' && typeof person.name === 'string' && Array.isArray(person.parentIds)
+  return (
+    typeof person.id === 'string' &&
+    typeof person.name === 'string' &&
+    Array.isArray(person.parentIds)
+  )
 }
 
 /** Validates parsed tree JSON before rendering or saving. */
@@ -51,13 +55,23 @@ export function validateFamilyTreeData(data: unknown): FamilyTreeValidationResul
     }
     for (const parentId of person.parentIds) {
       if (typeof parentId !== 'string' || !record.people[parentId]) {
-        return { ok: false, message: `Tree data is corrupt: person "${id}" references a missing parent.` }
+        return {
+          ok: false,
+          message: `Tree data is corrupt: person "${id}" references a missing parent.`
+        }
       }
     }
     if (person.spouseId && !record.people[person.spouseId]) {
-      return { ok: false, message: `Tree data is corrupt: person "${id}" references a missing spouse.` }
+      return {
+        ok: false,
+        message: `Tree data is corrupt: person "${id}" references a missing spouse.`
+      }
     }
-    if (person.imageUrl !== undefined && person.imageUrl !== '' && !isSafeImageUrl(person.imageUrl)) {
+    if (
+      person.imageUrl !== undefined &&
+      person.imageUrl !== '' &&
+      !isSafeImageUrl(person.imageUrl)
+    ) {
       return { ok: false, message: `Tree data is corrupt: person "${id}" has an unsafe image URL.` }
     }
   }

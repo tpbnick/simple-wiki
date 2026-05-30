@@ -113,7 +113,10 @@ function parentUnitKeyForChild(child: FamilyTreePerson, data: FamilyTreeData): s
   return unitKey(parents[0])
 }
 
-function clusterBounds(ids: string[], positions: Map<string, { x: number; y: number; generation: number }>) {
+function clusterBounds(
+  ids: string[],
+  positions: Map<string, { x: number; y: number; generation: number }>
+) {
   const xs = ids.map((id) => positions.get(id)!.x)
   return {
     left: Math.min(...xs),
@@ -126,7 +129,10 @@ function resolveGenerationClusterOverlaps(
   positions: Map<string, { x: number; y: number; generation: number }>,
   childUnits: Map<string, string[]>
 ): void {
-  const clustersByGeneration = new Map<number, Array<{ ids: string[]; left: number; right: number }>>()
+  const clustersByGeneration = new Map<
+    number,
+    Array<{ ids: string[]; left: number; right: number }>
+  >()
 
   for (const ids of childUnits.values()) {
     const uniqueIds = [...new Set(ids)]
@@ -318,7 +324,10 @@ export function layoutFamilyTree(data: FamilyTreeData): TreeLayout {
   )
   const generationY = buildGenerationY(generations, personHeights)
   const positions = new Map<string, { x: number; y: number; generation: number }>()
-  const unitPositions = new Map<string, { x: number; y: number; width: number; generation: number }>()
+  const unitPositions = new Map<
+    string,
+    { x: number; y: number; width: number; generation: number }
+  >()
 
   const generationLevels = [...unitsByGeneration.keys()].sort((a, b) => a - b)
   let maxWidth = 0

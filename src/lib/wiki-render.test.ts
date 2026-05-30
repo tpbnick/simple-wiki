@@ -17,22 +17,26 @@ afterEach(() => {
 })
 
 describe('renderWikiPage', () => {
-  it('preserves family tree embeds through extension and re-sanitize passes', { timeout: 10_000 }, async () => {
-    createFamilyTree('Steighner', 'steighner')
+  it(
+    'preserves family tree embeds through extension and re-sanitize passes',
+    { timeout: 10_000 },
+    async () => {
+      createFamilyTree('Steighner', 'steighner')
 
-    const { html } = await renderWikiPage({
-      id: 1,
-      slug: 'demo',
-      title: 'Demo',
-      content: '{{FamilyTree|family=steighner}}',
-      namespace: 'article',
-      created_at: '',
-      updated_at: ''
-    })
+      const { html } = await renderWikiPage({
+        id: 1,
+        slug: 'demo',
+        title: 'Demo',
+        content: '{{FamilyTree|family=steighner}}',
+        namespace: 'article',
+        created_at: '',
+        updated_at: ''
+      })
 
-    expect(html).toContain('wiki-family-tree-embed')
-    expect(html).toContain('data-family="steighner"')
-    expect(html).not.toContain('data-tree="')
-    expect(html).not.toContain('<script')
-  })
+      expect(html).toContain('wiki-family-tree-embed')
+      expect(html).toContain('data-family="steighner"')
+      expect(html).not.toContain('data-tree="')
+      expect(html).not.toContain('<script')
+    }
+  )
 })

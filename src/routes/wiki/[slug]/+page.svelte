@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { Pencil, History, FilePlus, Clock } from 'lucide-svelte'
-  import WikiArticleBody from '$lib/components/WikiArticleBody.svelte'
-  import { tocStore } from '$lib/stores/toc.svelte.js'
-  import type { PageData } from './$types'
-  import { formatTimeAgo, formatDateTime, toDatetimeAttr } from '$lib/format.js'
+import { Pencil, History, FilePlus, Clock } from 'lucide-svelte'
+import WikiArticleBody from '$lib/components/WikiArticleBody.svelte'
+import { tocStore } from '$lib/stores/toc.svelte.js'
+import type { PageData } from './$types'
+import { formatTimeAgo, formatDateTime, toDatetimeAttr } from '$lib/format.js'
 
-  let { data }: { data: PageData } = $props()
+let { data }: { data: PageData } = $props()
 
-  $effect(() => {
-    tocStore.set(data.toc ?? [])
-  })
+$effect(() => {
+  tocStore.set(data.toc ?? [])
+})
 </script>
 
 <svelte:head>
@@ -25,9 +25,7 @@
       </div>
       <h1 class="text-xl font-bold mb-2">{data.suggestedTitle} not found</h1>
       {#if data.canEdit}
-        <p class="text-base-content/60 text-sm mb-5">
-          Do you want to create it?
-        </p>
+        <p class="text-base-content/60 text-sm mb-5">Do you want to create it?</p>
         <a
           href="/wiki/{data.slug}/edit?title={encodeURIComponent(data.suggestedTitle)}"
           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary
@@ -38,7 +36,8 @@
         </a>
       {:else}
         <p class="text-base-content/60 text-sm">This page doesn't exist.</p>
-        <a href="/" class="mt-4 inline-block text-primary hover:underline text-sm">← Back to home</a>
+        <a href="/" class="mt-4 inline-block text-primary hover:underline text-sm">← Back to home</a
+        >
       {/if}
     </div>
   </div>
@@ -46,7 +45,6 @@
   <!-- ── Article view ──────────────────────────── -->
   <div class="flex min-h-full">
     <article class="wiki-article-container flex-1 min-w-0 px-6 py-6 lg:px-10 lg:py-8">
-
       <!-- Article header -->
       <header class="mb-6 pb-4 border-b border-base-200">
         <div class="flex items-start justify-between gap-4">
@@ -80,7 +78,10 @@
         </div>
         <div class="flex items-center gap-1.5 mt-2 text-xs text-base-content/40">
           <Clock size={11} />
-          <time datetime={toDatetimeAttr(data.page.updated_at)} title={formatDateTime(data.page.updated_at)}>
+          <time
+            datetime={toDatetimeAttr(data.page.updated_at)}
+            title={formatDateTime(data.page.updated_at)}
+          >
             Last edited {formatTimeAgo(data.page.updated_at)}
           </time>
         </div>
@@ -88,7 +89,6 @@
 
       <!-- Article body -->
       <WikiArticleBody html={data.html} />
-
     </article>
   </div>
 {/if}

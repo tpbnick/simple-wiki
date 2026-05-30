@@ -1,10 +1,10 @@
 <script lang="ts">
-  interface Props {
-    title?: string
-    message: string
-  }
+interface Props {
+  title?: string
+  message: string
+}
 
-  let { title = 'Family tree could not be displayed', message }: Props = $props()
+let { title = 'Family tree could not be displayed', message }: Props = $props()
 </script>
 
 <div class="wiki-family-tree-error" role="alert">

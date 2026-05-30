@@ -79,9 +79,7 @@ export function getExtensions(): WikiExtension[] {
 
 /** Returns editor toolbar items contributed by loaded extensions. */
 export function getEditorToolbarItems(): EditorToolbarItem[] {
-  return loadedExtensions.flatMap(
-    (extension) => extension.hooks.onEditorToolbarItems?.() ?? []
-  )
+  return loadedExtensions.flatMap((extension) => extension.hooks.onEditorToolbarItems?.() ?? [])
 }
 
 /** Runs page-render hooks from loaded extensions. */
@@ -94,10 +92,7 @@ export function runOnPageRender(html: string, page: Page): string {
 }
 
 /** Runs template-parse hooks from loaded extensions. */
-export function runOnTemplateParse(
-  name: string,
-  params: Record<string, string>
-): string | null {
+export function runOnTemplateParse(name: string, params: Record<string, string>): string | null {
   for (const extension of loadedExtensions) {
     if (!extension.hooks.onTemplateParse) continue
     const result = extension.hooks.onTemplateParse(name, params)

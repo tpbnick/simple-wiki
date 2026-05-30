@@ -42,7 +42,9 @@ describe('renderWikiInlineMarkdown', () => {
   })
 
   it('marks missing wiki pages as red links', () => {
-    expect(renderWikiInlineMarkdown('[[Missing Person]]', { existingPages: new Set(['home']) })).toBe(
+    expect(
+      renderWikiInlineMarkdown('[[Missing Person]]', { existingPages: new Set(['home']) })
+    ).toBe(
       '<a href="/wiki/missing-person?title=Missing%20Person" class="redlink">Missing Person</a>'
     )
   })

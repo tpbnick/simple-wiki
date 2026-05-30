@@ -5,10 +5,7 @@ import { getRenderContext } from '$lib/markdown/render-context.js'
 import { escapeHtml } from '$lib/html.js'
 import { parseTemplateBody } from '$lib/templates/param-string.js'
 
-export type TemplateResolver = (
-  name: string,
-  params: Record<string, string>
-) => string | null
+export type TemplateResolver = (name: string, params: Record<string, string>) => string | null
 
 const TEMPLATE_PATTERN = /\{\{([^{}]+?)\}\}/g
 const BLOCK_TEMPLATE_PATTERN = /^\s*\{\{([^{}]+?)\}\}\s*$/

@@ -44,7 +44,10 @@ export function searchPageSuggestions(query: string, limit = 8): SearchSuggestio
   try {
     return openDatabase().statements.searchSuggestions.all(buildFtsQuery(trimmed), limit)
   } catch (error) {
-    console.error('[search] suggestion query failed:', error instanceof Error ? error.message : error)
+    console.error(
+      '[search] suggestion query failed:',
+      error instanceof Error ? error.message : error
+    )
     throw new SearchError()
   }
 }

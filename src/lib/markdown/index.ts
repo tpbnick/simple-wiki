@@ -35,11 +35,7 @@ let basicProcessor: ReturnType<typeof buildProcessor> | null = null
 let tocProcessor: ReturnType<typeof buildTocProcessor> | null = null
 
 function buildTocProcessor() {
-  return unified()
-    .use(remarkParse)
-    .use(remarkTemplates)
-    .use(remarkGfm)
-    .use(remarkWikiLinks)
+  return unified().use(remarkParse).use(remarkTemplates).use(remarkGfm).use(remarkWikiLinks)
 }
 
 function getTocProcessor(): ReturnType<typeof buildTocProcessor> {

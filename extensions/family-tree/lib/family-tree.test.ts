@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest'
-import { addChild, addParent, addSpouse, createEmptyTree, getPerson, linkParent, listLinkableParents, removePerson } from './model.js'
+import {
+  addChild,
+  addParent,
+  addSpouse,
+  createEmptyTree,
+  getPerson,
+  linkParent,
+  listLinkableParents,
+  removePerson
+} from './model.js'
 import { layoutFamilyTree } from './layout.js'
 import { NODE_HEIGHT } from './types.js'
 
@@ -77,7 +86,9 @@ describe('family tree model', () => {
     data = addParent(data, rootId, 'Parent')
     const parentId = Object.values(data.people).find((person) => person.name === 'Parent')!.id
     data = addParent(data, parentId, 'Grandparent')
-    const grandparentId = Object.values(data.people).find((person) => person.name === 'Grandparent')!.id
+    const grandparentId = Object.values(data.people).find(
+      (person) => person.name === 'Grandparent'
+    )!.id
 
     data = removePerson(data, parentId)
     expect(getPerson(data, rootId)?.parentIds).toEqual([])
@@ -96,7 +107,9 @@ describe('family tree model', () => {
     data = addChild(data, rootId, 'Child')
     const childId = Object.values(data.people).find((person) => person.name === 'Child')!.id
     data = addChild(data, childId, 'Grandchild')
-    const grandchildId = Object.values(data.people).find((person) => person.name === 'Grandchild')!.id
+    const grandchildId = Object.values(data.people).find(
+      (person) => person.name === 'Grandchild'
+    )!.id
 
     data = {
       ...data,
@@ -139,7 +152,11 @@ describe('layoutFamilyTree', () => {
     let data = createEmptyTree('Root')
     data = addSpouse(data, data.rootId, 'Partner')
     data = addChild(data, data.rootId, 'Child')
-    data = addSpouse(data, Object.values(data.people).find((p) => p.name === 'Child')!.id, 'Child spouse')
+    data = addSpouse(
+      data,
+      Object.values(data.people).find((p) => p.name === 'Child')!.id,
+      'Child spouse'
+    )
 
     const layout = layoutFamilyTree(data)
     const child = layout.nodes.find((node) => node.person.name === 'Child')!

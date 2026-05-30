@@ -53,8 +53,7 @@ export function estimateNodeHeight(person: FamilyTreePerson): number {
   const nameLines = countNameLines(person.name)
   const hasYears = Boolean(person.birthYear?.trim() || person.deathYear?.trim())
 
-  let height =
-    NODE_PADDING_Y * 2 + PHOTO_HEIGHT + NODE_INNER_GAP + nameLines * NAME_LINE_HEIGHT
+  let height = NODE_PADDING_Y * 2 + PHOTO_HEIGHT + NODE_INNER_GAP + nameLines * NAME_LINE_HEIGHT
 
   if (hasYears) {
     height += NODE_INNER_GAP + YEARS_LINE_HEIGHT

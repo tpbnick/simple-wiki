@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { openDatabase, resetDatabaseConnection } from '$lib/db/connection.js'
-import { DatabaseSwapInProgressError, beginDatabaseImport, endDatabaseImport } from '$lib/db/swap-lock.js'
+import {
+  DatabaseSwapInProgressError,
+  beginDatabaseImport,
+  endDatabaseImport
+} from '$lib/db/swap-lock.js'
 import { installTempWikiEnv } from '$lib/test/db-env.js'
 
 installTempWikiEnv('wiki-swap-lock-')

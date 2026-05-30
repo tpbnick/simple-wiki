@@ -9,6 +9,8 @@
     "preview": "vite preview",
     "start": "node build/index.js",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "node node_modules/.bin/vitest run"
   },
   "devDependencies": {
@@ -22,6 +24,8 @@
     "bun-types": "^1.2.0",
     "daisyui": "^5.0.0",
     "lucide-svelte": "^0.511.0",
+    "prettier": "^3.8.3",
+    "prettier-plugin-svelte": "^4.0.1",
     "svelte": "^5.33.0",
     "svelte-check": "^4.4.8",
     "typescript": "^5.8.3",

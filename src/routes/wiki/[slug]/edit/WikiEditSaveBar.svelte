@@ -1,22 +1,22 @@
 <script lang="ts">
-  import { enhance } from '$app/forms'
-  import type { SubmitFunction } from '@sveltejs/kit'
+import { enhance } from '$app/forms'
+import type { SubmitFunction } from '@sveltejs/kit'
 
-  let {
-    summary = $bindable(),
-    formError,
-    cancelHref,
-    isNew,
-    saving = $bindable(),
-    onEnhance
-  }: {
-    summary: string
-    formError?: string
-    cancelHref: string
-    isNew: boolean
-    saving: boolean
-    onEnhance: SubmitFunction
-  } = $props()
+let {
+  summary = $bindable(),
+  formError,
+  cancelHref,
+  isNew,
+  saving = $bindable(),
+  onEnhance
+}: {
+  summary: string
+  formError?: string
+  cancelHref: string
+  isNew: boolean
+  saving: boolean
+  onEnhance: SubmitFunction
+} = $props()
 </script>
 
 <form

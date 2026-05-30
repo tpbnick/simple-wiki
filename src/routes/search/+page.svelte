@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { PageData } from './$types'
+import type { PageData } from './$types'
 
-  let { data }: { data: PageData } = $props()
+let { data }: { data: PageData } = $props()
 </script>
 
 <svelte:head>
@@ -20,7 +20,10 @@
     {#if data.results.length === 0}
       <p class="text-base-content/60">No pages matched your search.</p>
       {#if data.canEdit}
-        <a href="/wiki/new/edit?title={encodeURIComponent(data.q)}" class="btn btn-primary btn-sm mt-4">
+        <a
+          href="/wiki/new/edit?title={encodeURIComponent(data.q)}"
+          class="btn btn-primary btn-sm mt-4"
+        >
           Create "{data.q}"
         </a>
       {/if}
@@ -32,7 +35,11 @@
         {#each data.results as result}
           <li>
             <a href="/wiki/{result.slug}" class="wiki-card block p-4 group overflow-hidden min-w-0">
-              <p class="font-medium text-base text-primary group-hover:underline transition-colors break-words">{result.title}</p>
+              <p
+                class="font-medium text-base text-primary group-hover:underline transition-colors break-words"
+              >
+                {result.title}
+              </p>
               {#if result.snippet}
                 <p class="search-snippet text-sm text-base-content/70 mt-1">
                   <!-- eslint-disable-next-line svelte/no-at-html-tags -->
@@ -49,15 +56,15 @@
 </div>
 
 <style>
-  :global(mark) {
-    background: color-mix(in srgb, var(--color-primary) 25%, transparent);
-    color: inherit;
-    border-radius: 2px;
-    padding: 0 1px;
-  }
+:global(mark) {
+  background: color-mix(in srgb, var(--color-primary) 25%, transparent);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 1px;
+}
 
-  :global(.search-snippet) {
-    overflow-wrap: anywhere;
-    word-break: break-word;
-  }
+:global(.search-snippet) {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
 </style>

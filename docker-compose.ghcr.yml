@@ -11,7 +11,7 @@ services:
     image: ghcr.io/tpbnick/simple-wiki:latest
     container_name: simple-wiki
     ports:
-      - "3000:3000"
+      - '3000:3000'
     volumes:
       # Unraid appdata paths — adjust if you prefer a different location
       - /mnt/user/appdata/simple-wiki/data:/data
@@ -21,8 +21,11 @@ services:
       UPLOADS_DIR: /uploads
       PORT: 3000
       NODE_ENV: production
+      # Optional — set both on Unraid/NAS so appdata files match host ownership (e.g. 99:100)
+      # PUID: "99"
+      # PGID: "100"
       # Plain HTTP on LAN — set to "true" if you put HTTPS in front (NPM, SWAG, etc.)
-      COOKIE_SECURE: "false"
+      COOKIE_SECURE: 'false'
       # Optional: custom wiki name shown in admin / backups
       # WIKI_NAME: My Wiki
       # Optional: require login to read pages
@@ -32,7 +35,13 @@ services:
       # XFF_DEPTH: "1"
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ]
       interval: 30s
       timeout: 10s
       retries: 3

@@ -22,14 +22,7 @@ describe('savePage conflict detection', () => {
     savePage('conflict-page', 'Conflict', 'Version 2', 'article', 'edit')
 
     expect(() =>
-      savePage(
-        'conflict-page',
-        'Conflict',
-        'Version 3',
-        'article',
-        'edit',
-        '2000-01-01 00:00:00'
-      )
+      savePage('conflict-page', 'Conflict', 'Version 3', 'article', 'edit', '2000-01-01 00:00:00')
     ).toThrow(PageConflictError)
 
     expect(getPage('conflict-page')?.content).toBe('Version 2')
@@ -38,14 +31,7 @@ describe('savePage conflict detection', () => {
   it('allows save when expectedUpdatedAt matches the current page', () => {
     const page = savePage('fresh-page', 'Fresh', 'Draft', 'article', 'create')
 
-    const updated = savePage(
-      'fresh-page',
-      'Fresh',
-      'Draft v2',
-      'article',
-      'edit',
-      page.updated_at
-    )
+    const updated = savePage('fresh-page', 'Fresh', 'Draft v2', 'article', 'edit', page.updated_at)
 
     expect(updated.content).toBe('Draft v2')
   })
