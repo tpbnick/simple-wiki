@@ -1,4 +1,5 @@
 export interface BuildInfo {
+  version: string
   commitSha: string
   shortCommit: string
   commitDate: string
@@ -9,6 +10,7 @@ export interface BuildInfo {
 declare const __BUILD_INFO__: BuildInfo | undefined
 
 const FALLBACK: BuildInfo = {
+  version: '0.0.0',
   commitSha: 'unknown',
   shortCommit: 'unknown',
   commitDate: new Date().toISOString(),

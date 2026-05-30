@@ -1,6 +1,20 @@
 import { execSync } from 'node:child_process'
+import { readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const REPO_URL = 'https://github.com/tpbnick/simple-wiki'
+const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..')
+
+/** @returns {string} */
+function getAppVersion() {
+  try {
+    const pkg = JSON.parse(readFileSync(join(repoRoot, 'package.json'), 'utf8'))
+    return typeof pkg.version === 'string' ? pkg.version : '0.0.0'
+  } catch {
+    return '0.0.0'
+  }
+}
 
 /** @param {string} cmd */
 function git(cmd) {
@@ -11,7 +25,7 @@ function git(cmd) {
   }
 }
 
-/** @returns {{ commitSha: string, shortCommit: string, commitDate: string, commitUrl: string, repositoryUrl: string }} */
+/** @returns {{ version: string, commitSha: string, shortCommit: string, commitDate: string, commitUrl: string, repositoryUrl: string }} */
 export function getBuildInfo() {
   const envCommit = process.env.GIT_COMMIT?.trim()
   const commitSha =
@@ -32,6 +46,7 @@ export function getBuildInfo() {
     commitSha !== 'unknown' ? `${REPO_URL}/commit/${commitSha}` : REPO_URL
 
   return {
+    version: getAppVersion(),
     commitSha,
     shortCommit,
     commitDate,

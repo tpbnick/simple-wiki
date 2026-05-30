@@ -56,6 +56,10 @@
 
       <dl class="text-sm text-base-content/70 space-y-2 mb-6 text-left">
         <div class="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between">
+          <dt class="text-base-content/50">Version</dt>
+          <dd class="font-mono font-medium text-base-content">v{buildInfo.version}</dd>
+        </div>
+        <div class="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between">
           <dt class="text-base-content/50">Last update</dt>
           <dd class="font-medium text-base-content">{formatBuildDate(buildInfo.commitDate)}</dd>
         </div>
