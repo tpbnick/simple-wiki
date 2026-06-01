@@ -20,7 +20,7 @@ import { getDatabase } from '$lib/db/connection.js'
 import { SCHEMA } from '$lib/db/schema.js'
 import { loadExtensions } from '$lib/extensions/server.js'
 import { installTempWikiEnv } from '$lib/test/db-env.js'
-import { uploadsDirectory } from '$lib/uploads.js'
+import { uploadsDirectory } from '$lib/uploads.server.js'
 
 installTempWikiEnv('wiki-backup-test-', { wikiName: 'Test Wiki' })
 

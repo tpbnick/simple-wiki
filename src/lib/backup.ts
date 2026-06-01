@@ -23,7 +23,7 @@ import {
   applyExtensionSchemas
 } from '$lib/db/connection.js'
 import { getExtensions } from '$lib/extensions/server.js'
-import { uploadsDirectory } from '$lib/uploads.js'
+import { uploadsDirectory } from '$lib/uploads.server.js'
 import {
   validateZipArchiveLimits,
   validateUnzippedEntrySizes,

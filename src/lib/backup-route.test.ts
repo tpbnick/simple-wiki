@@ -5,7 +5,7 @@ import { POST } from '../routes/api/admin/backup/+server.js'
 import { createBackupArchive } from '$lib/backup.js'
 import { getPage, savePage } from '$lib/db/index.js'
 import { installTempWikiEnv } from '$lib/test/db-env.js'
-import { uploadsDirectory } from '$lib/uploads.js'
+import { uploadsDirectory } from '$lib/uploads.server.js'
 
 installTempWikiEnv('wiki-backup-route-')
 

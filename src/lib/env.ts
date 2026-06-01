@@ -1,7 +1,7 @@
 import { accessSync, constants, mkdirSync } from 'fs'
 import { dirname } from 'path'
 import { resolveDatabasePath } from '$lib/db/connection.js'
-import { uploadsDirectory } from '$lib/uploads.js'
+import { uploadsDirectory } from '$lib/uploads.server.js'
 
 let validated = false
 

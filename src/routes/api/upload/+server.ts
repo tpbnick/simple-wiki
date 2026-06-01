@@ -1,13 +1,12 @@
 import { json, error } from '@sveltejs/kit'
 import { getUploadByContentHash, recordUpload } from '$lib/db/index.js'
+import { MAX_UPLOAD_BYTES, uploadPublicUrl } from '$lib/uploads.js'
 import {
   resolveUploadPath,
   storeUploadBuffer,
   uploadContentHash,
-  uploadPublicUrl,
-  validateUpload,
-  MAX_UPLOAD_BYTES
-} from '$lib/uploads.js'
+  validateUpload
+} from '$lib/uploads.server.js'
 import { enforceAuthenticatedWriteRateLimit } from '$lib/api-rate-limit.js'
 import { existsSync, unlinkSync, writeFileSync } from 'fs'
 import type { RequestHandler } from './$types'
