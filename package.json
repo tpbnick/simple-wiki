@@ -30,7 +30,7 @@
     "svelte-check": "^4.4.8",
     "typescript": "^5.8.3",
     "vite": "^6.3.3",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.8"
   },
   "dependencies": {
     "@shikijs/rehype": "^1.29.2",
