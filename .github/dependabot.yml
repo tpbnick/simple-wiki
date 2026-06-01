@@ -1,7 +1,9 @@
+# Use the bun ecosystem so PRs update bun.lock (npm ecosystem only touched package.json).
 version: 2
+enable-beta-ecosystems: true
 
 updates:
-  - package-ecosystem: npm
+  - package-ecosystem: bun
     directory: /
     schedule:
       interval: weekly
@@ -13,8 +15,19 @@ updates:
           - 'svelte*'
       dev-tools:
         dependency-type: development
+        update-types:
+          - patch
+          - minor
         patterns:
           - '*'
+    ignore:
+      # Major bumps need manual code + lockfile review (syntax highlighting API, icons, Vite).
+      - dependency-name: '@shikijs/*'
+        update-types: ['version-update:semver-major']
+      - dependency-name: 'lucide-svelte'
+        update-types: ['version-update:semver-major']
+      - dependency-name: 'vite'
+        update-types: ['version-update:semver-major']
 
   - package-ecosystem: github-actions
     directory: /
