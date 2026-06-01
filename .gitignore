@@ -20,9 +20,7 @@ dist/
 *.db-wal
 /uploads/
 /data/
-!src/routes/uploads/
 *-backup-*.zip
-uploads/
 data/
 
 # Logs
