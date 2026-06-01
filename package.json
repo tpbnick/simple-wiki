@@ -33,7 +33,7 @@
     "vitest": "^4.1.8"
   },
   "dependencies": {
-    "@shikijs/rehype": "^1.29.2",
+    "@shikijs/rehype": "^4.1.0",
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^12.10.0",
     "fflate": "^0.8.3",
