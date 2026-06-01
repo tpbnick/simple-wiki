@@ -15,12 +15,12 @@ A personal markdown wiki with Wikipedia-like features — wiki links, full-text 
 
 - **Markdown pages** with wiki links (`[[Page Title]]`), syntax highlighting, and a table of contents on long articles
 - **Search** with live suggestions in the header
-- **Editing** with a split markdown/preview editor, infoboxes, image boxes, and callout templates
+- **Editing** with a split markdown/preview editor (live client-side preview — no server round-trip while typing), infoboxes, image boxes, and callout templates
 - **Revision history** with diffs and restore
 - **Uploads** for images and files
 - **Admin dashboard** — pages, users, uploads, templates, recent changes, backups, and extensions
 - **Family tree extension** — interactive trees embeddable in any page
-- **Reading settings** — font, text size, and column width (gear icon in the header)
+- **Reading settings** — font (site-wide), text size, and column width (gear icon in the header)
 
 ## Getting started
 
@@ -31,7 +31,7 @@ bun run dev
 
 Open **http://localhost:5173** (or the port shown in the terminal).
 
-On first run the app creates a SQLite database and an admin account. Log in with **admin / admin** — you'll be asked to change the password right away.
+On first run the app creates a SQLite database and an admin account (`admin`). Check the server logs for a one-time password, or set `ADMIN_PASSWORD` (at least 8 characters) in `.env` **before** the first start. You'll be required to change the password on first login. Existing databases are not affected — this only applies when the admin user is first created.
 
 Copy `.env.example` to `.env` to customize paths, port, or behavior. Everything works out of the box without it.
 
@@ -52,7 +52,7 @@ bun run start
 | `bun run build` | Production build                   |
 | `bun run start` | Run the production server          |
 | `bun run check` | Typecheck (Svelte + TypeScript)    |
-| `bun run test`  | Run tests                          |
+| `bun run test`  | Run tests (uses Node/vitest — prefer this over bare `bun test`) |
 
 ## Docker
 
@@ -90,7 +90,18 @@ On startup the entrypoint fixes ownership of `/data` and `/uploads`, then runs t
 
 Required env vars: `DATABASE_PATH=/data/wiki.db`, `UPLOADS_DIR=/uploads`.
 
+For plain HTTP on LAN, set `COOKIE_SECURE=false` (see `docker-compose.ghcr.yml`). Use HTTPS and `COOKIE_SECURE=true` if the wiki is reachable from untrusted networks.
+
 See `docker-compose.ghcr.yml` for a full compose example. Set `PUID=0` and `PGID=0` only if you intentionally want the process to run as root.
+
+### Backups
+
+Admin → Backups can export/import a zip containing `wiki.db`, optional markdown exports, and optional uploads.
+
+- **Database import** replaces the live wiki database (with rollback on failure).
+- **Restore uploads** merges files from the backup: matching filenames are overwritten; uploads on disk that are **not** in the backup are kept (not deleted).
+
+Import shows a 503 to other users while the database swap is in progress.
 
 ## Environment variables
 
@@ -113,9 +124,12 @@ Copy `.env.example` to `.env` and uncomment or set values as needed.
 
 ### Access control
 
-| Variable      | Default | Description                                                     |
-| ------------- | ------- | --------------------------------------------------------------- |
-| `PUBLIC_READ` | enabled | Set to `false` to require login for reading pages and read APIs |
+| Variable          | Default | Description                                                                 |
+| ----------------- | ------- | --------------------------------------------------------------------------- |
+| `PUBLIC_READ`     | enabled | Set to `false` to require login for reading pages and read APIs             |
+| `ADMIN_PASSWORD`  | —       | Initial `admin` password on **first boot only** (min 8 chars; random + logged if unset) |
+
+Page content is limited to **2 MB** per save (editor form and API).
 
 ### Sessions & cookies
 

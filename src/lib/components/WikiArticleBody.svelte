@@ -5,9 +5,11 @@ import { runExtensionArticleMounts } from '$lib/extensions/client-mount.js'
 
 interface Props {
   html: string
+  /** Preloaded slug list — skips /api/pages/slugs (editor preview). */
+  existingPageSlugs?: string[]
 }
 
-let { html }: Props = $props()
+let { html, existingPageSlugs }: Props = $props()
 let container = $state<HTMLDivElement | null>(null)
 let detachLightbox: (() => void) | undefined
 let detachHighlights: (() => void) | undefined
@@ -70,6 +72,7 @@ $effect(() => {
 
 <div
   bind:this={container}
+  data-wiki-page-slugs={existingPageSlugs ? JSON.stringify(existingPageSlugs) : undefined}
   class="wiki-content wiki-article-body
          prose prose-base max-w-none
          prose-headings:font-bold prose-headings:tracking-tight

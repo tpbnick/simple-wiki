@@ -33,9 +33,11 @@ import { getAllPages } from '$lib/db/index.js'
 import type { Page } from '$lib/db/types.js'
 import { invalidatePageSlugCache } from '$lib/db/slug-cache.js'
 import {
+  beginDatabaseBackup,
   beginDatabaseImport,
+  endDatabaseBackup,
   endDatabaseImport,
-  isDatabaseSwapInProgress
+  isDatabaseOperationInProgress
 } from '$lib/db/swap-lock.js'
 import { runOnDatabaseReset } from '$lib/extensions/server.js'
 
@@ -287,24 +289,13 @@ function replacePathSync(source: string, destination: string): void {
   }
 }
 
-function listLiveUploadFilenames(directory: string): string[] {
-  if (!existsSync(directory)) return []
-
-  return readdirSync(directory).flatMap((name) => {
-    if (name.startsWith('.')) return []
-    const filePath = join(directory, name)
-    return statSync(filePath).isFile() ? [name] : []
-  })
-}
-
 function restoreUploads(uploadEntries: Array<[string, Uint8Array]>): void {
   if (uploadEntries.length === 0) return
 
   const liveDir = uploadsDirectory()
   mkdirSync(liveDir, { recursive: true })
 
-  // Never rename the uploads directory itself — in Docker it is a volume mount point.
-  // Stage and roll back using subdirectories and file moves within the same volume.
+  // Merge restore: overwrite files present in the backup; leave other live uploads untouched.
   const stamp = Date.now()
   const stagingDir = join(liveDir, `.restore-staging-${stamp}`)
   const backupDir = join(liveDir, `.pre-import-${stamp}`)
@@ -315,9 +306,12 @@ function restoreUploads(uploadEntries: Array<[string, Uint8Array]>): void {
       writeFileSync(join(stagingDir, filename), data)
     }
 
-    for (const name of listLiveUploadFilenames(liveDir)) {
-      mkdirSync(backupDir, { recursive: true })
-      replacePathSync(join(liveDir, name), join(backupDir, name))
+    for (const [filename] of uploadEntries) {
+      const livePath = join(liveDir, filename)
+      if (existsSync(livePath) && statSync(livePath).isFile()) {
+        mkdirSync(backupDir, { recursive: true })
+        replacePathSync(livePath, join(backupDir, filename))
+      }
     }
 
     for (const [filename] of uploadEntries) {
@@ -327,13 +321,10 @@ function restoreUploads(uploadEntries: Array<[string, Uint8Array]>): void {
     for (const [filename] of uploadEntries) {
       const livePath = join(liveDir, filename)
       if (existsSync(livePath)) unlinkSync(livePath)
-    }
 
-    if (existsSync(backupDir)) {
-      for (const name of readdirSync(backupDir)) {
-        const from = join(backupDir, name)
-        if (!statSync(from).isFile()) continue
-        replacePathSync(from, join(liveDir, name))
+      const backedUpPath = join(backupDir, filename)
+      if (existsSync(backedUpPath)) {
+        replacePathSync(backedUpPath, livePath)
       }
     }
 
@@ -391,8 +382,10 @@ function unzipBackupArchive(zipBytes: Uint8Array): Record<string, Uint8Array> {
 
 /** Creates a zip backup containing wiki.db, manifest.txt, and optional uploads/markdown. */
 export async function createBackupArchive(options: BackupOptions = {}): Promise<Uint8Array> {
-  if (isDatabaseSwapInProgress()) {
-    throw new BackupError('Cannot create a backup while a restore is in progress')
+  try {
+    beginDatabaseBackup()
+  } catch {
+    throw new BackupError('Another database operation is already in progress')
   }
 
   const includeUploads = options.includeUploads === true
@@ -423,6 +416,7 @@ export async function createBackupArchive(options: BackupOptions = {}): Promise<
     return zipSync(zipEntries)
   } finally {
     rmSync(tempDir, { recursive: true, force: true })
+    endDatabaseBackup()
   }
 }
 
@@ -446,8 +440,8 @@ export function importBackupArchive(
     throw new BackupError(`Backup file exceeds ${MAX_BACKUP_BYTES} bytes`)
   }
 
-  if (isDatabaseSwapInProgress()) {
-    throw new BackupError('Another backup import is already in progress')
+  if (isDatabaseOperationInProgress()) {
+    throw new BackupError('Another database operation is already in progress')
   }
 
   beginDatabaseImport()

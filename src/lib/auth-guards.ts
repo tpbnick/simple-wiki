@@ -7,8 +7,7 @@ const BASE_WRITE_PATHS = [
   '/wiki',
   '/api/upload',
   '/api/admin',
-  '/api/pages',
-  '/api/render'
+  '/api/pages'
 ] as const
 
 /** Returns true when an unauthenticated write should be rejected. */

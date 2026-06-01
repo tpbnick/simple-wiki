@@ -56,6 +56,14 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 
   try {
     const upload = recordUpload(filename, file.name, buffer.length, mimeType, contentHash)
+
+    if (upload.filename !== filename) {
+      const orphanPath = resolveUploadPath(filename)
+      if (orphanPath && existsSync(orphanPath) && !reusedOnDisk) {
+        unlinkSync(orphanPath)
+      }
+    }
+
     return json({
       filename: upload.filename,
       url: uploadPublicUrl(upload.filename),

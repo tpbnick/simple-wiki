@@ -1,6 +1,8 @@
 import { getPage, savePage, PageConflictError, VALID_NAMESPACES, type Page } from '$lib/db/index.js'
 import { slugify } from '$lib/slug.js'
 
+export const MAX_PAGE_CONTENT_BYTES = 2 * 1024 * 1024
+
 export type PageSaveFields = {
   title: string
   content: string
@@ -11,7 +13,7 @@ export type PageSaveFields = {
 
 export type PersistWikiPageResult =
   | { ok: true; slug: string; page: Page }
-  | { ok: false; type: 'validation'; status: 400 | 422; message: string }
+  | { ok: false; type: 'validation'; status: 400 | 413 | 422; message: string }
   | {
       ok: false
       type: 'duplicate'
@@ -30,13 +32,17 @@ export type PersistWikiPageResult =
 /** Validates shared page save fields used by form and API handlers. */
 export function validatePageSaveFields(
   fields: PageSaveFields
-): { status: 400 | 422; message: string } | null {
+): { status: 400 | 413 | 422; message: string } | null {
   if (!fields.title.trim()) {
     return { status: 422, message: 'Title is required' }
   }
 
   if (typeof fields.content !== 'string') {
     return { status: 400, message: 'content is required' }
+  }
+
+  if (Buffer.byteLength(fields.content, 'utf8') > MAX_PAGE_CONTENT_BYTES) {
+    return { status: 413, message: 'Page content exceeds 2 MB limit' }
   }
 
   if (!VALID_NAMESPACES.has(fields.namespace)) {

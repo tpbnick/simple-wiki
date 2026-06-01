@@ -1,12 +1,14 @@
 import { redirect, fail } from '@sveltejs/kit'
 import { getUserByName, createSession, destroyOtherSessions } from '$lib/db/index.js'
-import { verifyPasswordAsync, setSessionCookie } from '$lib/auth.js'
+import { verifyPasswordAsync, setSessionCookie, hashPassword } from '$lib/auth.js'
 import { safeRedirectPath } from '$lib/safe-redirect.js'
 import { checkRateLimit, rateLimitRetryAfterSeconds } from '$lib/rate-limit.js'
 import type { PageServerLoad, Actions } from './$types'
 
 const LOGIN_LIMIT = 8
 const LOGIN_WINDOW_MS = 15 * 60 * 1000
+/** Always compared so missing usernames take similar time to verify. */
+const LOGIN_TIMING_GUARD_HASH = hashPassword('login-timing-guard')
 
 export const load: PageServerLoad = ({ locals, url }) => {
   const nextPath = safeRedirectPath(url.searchParams.get('next') ?? '/')
@@ -43,7 +45,11 @@ export const actions: Actions = {
     const nextPath = safeRedirectPath(String(formData.get('next') ?? '/'))
 
     const user = getUserByName(username)
-    if (!user || !(await verifyPasswordAsync(password, user.password_hash))) {
+    const passwordValid = await verifyPasswordAsync(
+      password,
+      user?.password_hash ?? LOGIN_TIMING_GUARD_HASH
+    )
+    if (!user || !passwordValid) {
       return fail(401, { error: 'Invalid username or password', username })
     }
 

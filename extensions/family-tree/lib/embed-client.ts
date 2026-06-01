@@ -1,15 +1,21 @@
-import { getFamilyTree } from '../db.js'
 import { escapeHtml } from '$lib/html.js'
-import { getRenderContext } from '$lib/markdown/render-context.js'
+import { encodeFamilyTreePayloadInBrowser } from './embed-payload-browser.js'
 import { renderFamilyTreeErrorHtml } from './embed-error.js'
-import { encodeFamilyTreePayload } from './embed-payload.server.js'
-import { validateFamilyTreeData } from './validate.js'
-
 import { resolveFamilyTreeParam } from './embed-params.js'
+import { validateFamilyTreeData } from './validate.js'
+import type { FamilyTreeData } from './types.js'
 
-export { resolveFamilyTreeParam }
+export interface FamilyTreePreviewRecord {
+  title: string
+  data: FamilyTreeData
+}
 
-export function renderFamilyTreeEmbed(params: Record<string, string>): string {
+/** Renders a family tree embed using tree data injected at editor load (no server fetch). */
+export function renderFamilyTreeEmbedClient(
+  params: Record<string, string>,
+  treesBySlug: Record<string, FamilyTreePreviewRecord>,
+  canEdit = false
+): string {
   const slug = resolveFamilyTreeParam(params)
   if (!slug) {
     return renderFamilyTreeErrorHtml(
@@ -18,7 +24,7 @@ export function renderFamilyTreeEmbed(params: Record<string, string>): string {
     )
   }
 
-  const tree = getFamilyTree(slug)
+  const tree = treesBySlug[slug]
   if (!tree) {
     return renderFamilyTreeErrorHtml(
       'Family tree not found',
@@ -31,8 +37,7 @@ export function renderFamilyTreeEmbed(params: Record<string, string>): string {
     return renderFamilyTreeErrorHtml('Family tree data is corrupt', validation.message)
   }
 
-  const treePayload = escapeHtml(encodeFamilyTreePayload(tree.data))
-  const canEdit = getRenderContext().canEdit ?? false
+  const treePayload = escapeHtml(encodeFamilyTreePayloadInBrowser(tree.data))
   const editorLink = canEdit
     ? `<a class="btn btn-sm btn-ghost" href="/family-tree/${escapeHtml(slug)}">Edit tree</a>`
     : ''

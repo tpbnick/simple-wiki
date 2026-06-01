@@ -13,6 +13,21 @@ interface EmbedHandle {
   abort?: () => void
 }
 
+let cachedWikiPageSlugs: string[] | null = null
+let wikiPageSlugsPromise: Promise<string[]> | null = null
+
+function readWikiPageSlugsFromRoot(root: HTMLElement): string[] | undefined {
+  const raw = root.dataset.wikiPageSlugs
+  if (!raw) return undefined
+  try {
+    const parsed: unknown = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return undefined
+    return parsed.filter((slug): slug is string => typeof slug === 'string')
+  } catch {
+    return undefined
+  }
+}
+
 async function fetchWikiPageSlugs(): Promise<string[]> {
   try {
     const response = await fetch('/api/pages/slugs')
@@ -24,6 +39,23 @@ async function fetchWikiPageSlugs(): Promise<string[]> {
   } catch {
     return []
   }
+}
+
+/** Resolves wiki slugs from a preloaded list, root data attribute, or one cached API fetch. */
+async function resolveWikiPageSlugs(root: HTMLElement): Promise<string[]> {
+  const fromRoot = readWikiPageSlugsFromRoot(root)
+  if (fromRoot) return fromRoot
+
+  if (cachedWikiPageSlugs) return cachedWikiPageSlugs
+
+  if (!wikiPageSlugsPromise) {
+    wikiPageSlugsPromise = fetchWikiPageSlugs().then((slugs) => {
+      cachedWikiPageSlugs = slugs
+      return slugs
+    })
+  }
+
+  return wikiPageSlugsPromise
 }
 
 function mountCanvas(
@@ -145,7 +177,7 @@ export function mountFamilyTreeEmbeds(root: HTMLElement): Cleanup {
   let cancelled = false
 
   void (async () => {
-    const existingPageSlugs = await fetchWikiPageSlugs()
+    const existingPageSlugs = await resolveWikiPageSlugs(root)
     if (cancelled) return
 
     for (const element of root.querySelectorAll<HTMLElement>(

@@ -18,6 +18,7 @@ let {
   imageBoxUploading,
   imageBoxUploadingBoxId,
   imageBoxUploadingItemIndex,
+  existingPageSlugs,
   onUpdateInfobox,
   onRemoveInfobox,
   onInfoboxUpload,
@@ -37,6 +38,7 @@ let {
   imageBoxUploading: boolean
   imageBoxUploadingBoxId: string | null
   imageBoxUploadingItemIndex: number | null
+  existingPageSlugs: string[]
   onUpdateInfobox: (data: InfoboxData) => void
   onRemoveInfobox: () => void
   onInfoboxUpload: (files: FileList | null, entryIndex: number) => void
@@ -86,7 +88,7 @@ let {
     {#if previewError}
       <p class="text-error text-sm">{previewError}</p>
     {:else if previewHtml}
-      <WikiArticleBody html={previewHtml} />
+      <WikiArticleBody html={previewHtml} {existingPageSlugs} />
     {:else}
       <p class="text-base-content/30 italic text-sm">Preview will appear here…</p>
     {/if}

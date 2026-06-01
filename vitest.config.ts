@@ -5,7 +5,8 @@ export default defineConfig({
   resolve: {
     alias: {
       $lib: path.resolve(__dirname, 'src/lib'),
-      $extensions: path.resolve(__dirname, 'extensions')
+      $extensions: path.resolve(__dirname, 'extensions'),
+      '$app/environment': path.resolve(__dirname, 'src/lib/test/app-environment.ts')
     }
   },
   test: {

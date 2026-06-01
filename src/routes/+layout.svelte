@@ -4,6 +4,7 @@ import.meta.glob('../../extensions/*/styles/*.css', { eager: true })
 import Header from '$lib/components/Header.svelte'
 import Sidebar from '$lib/components/Sidebar.svelte'
 import { theme } from '$lib/stores/theme.svelte.js'
+import { settingsStore } from '$lib/stores/settings.svelte.js'
 import { tocStore } from '$lib/stores/toc.svelte.js'
 import { sidebarStore } from '$lib/stores/sidebar.svelte.js'
 import { shouldShowReaderSidebar, isReaderViewPath } from '$lib/reader-view.js'
@@ -20,7 +21,18 @@ interface Props {
 
 let { data, children }: Props = $props()
 
-if (browser) theme.init()
+if (browser) {
+  theme.init()
+  settingsStore.init()
+}
+
+$effect(() => {
+  if (!browser) return
+  settingsStore.fontId
+  settingsStore.sizeId
+  settingsStore.readingWidth
+  settingsStore.applyToDocument()
+})
 
 const isReaderView = $derived(isReaderViewPath(page.url.pathname))
 const showSidebar = $derived(shouldShowReaderSidebar(page.url.pathname, tocStore.entries.length))

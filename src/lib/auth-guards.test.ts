@@ -27,7 +27,6 @@ describe('password change guards', () => {
   })
 
   it('blocks all APIs during password change', () => {
-    expect(isPasswordChangeAllowedApi('/api/render')).toBe(false)
     expect(isPasswordChangeAllowedApi('/api/upload')).toBe(false)
     expect(isPasswordChangeAllowedApi('/api/pages/foo')).toBe(false)
   })

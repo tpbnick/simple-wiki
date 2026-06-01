@@ -15,20 +15,17 @@
 html {
   scroll-behavior: smooth;
   --reading-width: 70%;
+  --font-sans: var(--reading-font);
   font-size: var(--reading-font-size);
 }
 
 body {
+  font-family: var(--reading-font);
   font-feature-settings:
     'kern' 1,
     'liga' 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-/* Reading font applies only to article/wiki content, not to UI chrome */
-.wiki-article-body {
-  font-family: var(--reading-font);
 }
 
 /* ─────────────────────────────────────────────────────────

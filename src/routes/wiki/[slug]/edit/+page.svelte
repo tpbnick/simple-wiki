@@ -17,7 +17,7 @@ import {
   serializeImageBox
 } from '$lib/templates/imagebox-editor.js'
 import type { ImageBoxData } from '$lib/templates/imagebox-editor.js'
-import { buildPreviewContent } from '$lib/wiki-edit/preview-content.js'
+import { renderEditorPreview } from '$lib/wiki-edit/client-preview.js'
 import { createMarkdownToolbarActions } from '$lib/wiki-edit/toolbar-actions.js'
 import { wrapSelection, insertAtSelection, handleTabKey } from '$lib/wiki-edit/text-editing.js'
 import { uploadFileToWiki, markdownForUpload } from '$lib/wiki-edit/upload.js'
@@ -70,7 +70,6 @@ let saving = $state(false)
 let allowNavigation = $state(false)
 let previewEnabled = $state(false)
 let expectedUpdatedAt = $state('')
-let previewAbort: AbortController | null = null
 let previewRequestId = 0
 
 let infoboxData = $state<InfoboxData | null>(null)
@@ -84,7 +83,6 @@ onMount(() => {
 
   return () => {
     clearTimeout(debounceTimer)
-    previewAbort?.abort()
   }
 })
 
@@ -107,7 +105,6 @@ $effect(() => {
   )
   imageBoxSyncPaused = false
 
-  previewAbort?.abort()
   previewHtml = ''
   previewError = ''
   schedulePreview()
@@ -183,7 +180,7 @@ let debounceTimer: ReturnType<typeof setTimeout>
 function schedulePreview() {
   if (!previewEnabled || !showPreview) return
   clearTimeout(debounceTimer)
-  debounceTimer = setTimeout(fetchPreview, 400)
+  debounceTimer = setTimeout(updatePreview, 300)
 }
 
 function setContent(next: string) {
@@ -191,39 +188,23 @@ function setContent(next: string) {
   schedulePreview()
 }
 
-async function fetchPreview() {
+async function updatePreview() {
   if (!showPreview) return
-  previewAbort?.abort()
-  previewAbort = new AbortController()
-  const { signal } = previewAbort
   const requestId = ++previewRequestId
 
   previewLoading = true
   previewError = ''
   try {
-    const previewContent = buildPreviewContent(content, {
+    const html = await renderEditorPreview(content, data.previewBundle, {
       stripInfobox: infoboxEditorActive,
       stripImageBoxes: hasImageBoxEditors
     })
-    const res = await fetch('/api/render', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content: previewContent }),
-      signal
-    })
-    if (signal.aborted || requestId !== previewRequestId) return
-    if (!res.ok) {
-      previewError =
-        res.status === 401 ? 'Session expired — please log in again.' : 'Preview failed'
-      return
-    }
-    const { html } = await res.json()
-    if (signal.aborted || requestId !== previewRequestId) return
+    if (requestId !== previewRequestId) return
     previewHtml = html
   } catch (error) {
-    if (error instanceof DOMException && error.name === 'AbortError') return
-    if (signal.aborted || requestId !== previewRequestId) return
-    previewError = 'Preview failed — check your connection.'
+    if (requestId !== previewRequestId) return
+    console.error(error)
+    previewError = 'Preview failed'
   } finally {
     if (requestId === previewRequestId) {
       previewLoading = false
@@ -455,6 +436,8 @@ const saveEnhance = ({ formData }: { formData: FormData }) => {
 </svelte:head>
 
 <input
+  id="wiki-edit-upload"
+  name="wiki-edit-upload"
   bind:this={fileInput}
   type="file"
   class="hidden"
@@ -514,6 +497,7 @@ const saveEnhance = ({ formData }: { formData: FormData }) => {
         {imageBoxUploading}
         {imageBoxUploadingBoxId}
         {imageBoxUploadingItemIndex}
+        existingPageSlugs={data.previewBundle.existingSlugs}
         onUpdateInfobox={updateInfobox}
         onRemoveInfobox={removeInfobox}
         onInfoboxUpload={handleInfoboxImageUpload}

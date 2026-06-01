@@ -194,7 +194,10 @@ function toggleFamilyTreeMenu() {
               void onCreateFamilyTree()
             }}
           >
+            <label class="sr-only" for="family-tree-new-title">New family tree name</label>
             <input
+              id="family-tree-new-title"
+              name="family-tree-new-title"
               type="text"
               bind:value={newFamilyTreeTitle}
               placeholder="Tree name"

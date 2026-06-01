@@ -207,7 +207,8 @@ async function submitImport() {
           class="checkbox checkbox-sm mt-0.5"
         />
         <span class="text-base-content/70">
-          Restore uploaded files from backup (when present in the zip)
+          Restore uploaded files from backup (overwrites matching files; keeps uploads not in the
+          zip)
         </span>
       </label>
       <label class="flex items-start gap-2 text-sm">
@@ -215,7 +216,7 @@ async function submitImport() {
         <span class="text-base-content/70">
           I understand this will replace the current wiki database
           {#if restoreUploadsOnImport}
-            and uploaded files
+            and merge uploaded files from the backup
           {/if}. This cannot be undone.
         </span>
       </label>

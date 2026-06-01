@@ -3,7 +3,12 @@ import { join } from 'path'
 import { tmpdir } from 'os'
 import BetterSqlite3 from 'better-sqlite3'
 import { zipSync, unzipSync } from 'fflate'
-import { beginDatabaseImport, endDatabaseImport } from '$lib/db/swap-lock.js'
+import {
+  beginDatabaseBackup,
+  beginDatabaseImport,
+  endDatabaseBackup,
+  endDatabaseImport
+} from '$lib/db/swap-lock.js'
 import { describe, expect, it } from 'vitest'
 import {
   BackupError,
@@ -122,9 +127,32 @@ describe('backup archive', () => {
     beginDatabaseImport()
     try {
       await expect(createBackupArchive()).rejects.toThrow(BackupError)
-      await expect(createBackupArchive()).rejects.toThrow(/restore is in progress/)
+      await expect(createBackupArchive()).rejects.toThrow(/operation is already in progress/)
     } finally {
       endDatabaseImport()
+    }
+  })
+
+  it('rejects backup import while export is in progress', async () => {
+    savePage('backup-page', 'Backup Page', 'content', 'article', 'create')
+    beginDatabaseBackup()
+    try {
+      const archive = zipSync({
+        [BACKUP_MANIFEST_FILE]: new TextEncoder().encode(
+          formatBackupManifest({
+            wikiName: 'Test Wiki',
+            wikiVersion: '0.1.0',
+            backupFormat: 1,
+            createdAt: '2026-05-28T12:00:00.000Z',
+            includesUploads: false,
+            includesMarkdown: false
+          })
+        ),
+        [BACKUP_DATABASE_FILE]: readFileSync(process.env.DATABASE_PATH!)
+      })
+      expect(() => importBackupArchive(archive)).toThrow(BackupError)
+    } finally {
+      endDatabaseBackup()
     }
   })
 
@@ -138,7 +166,7 @@ describe('backup archive', () => {
     const { manifest } = importBackupArchive(archive, { restoreUploads: true })
     expect(manifest.includesUploads).toBe(true)
     expect(readFileSync(join(uploadsDirectory(), 'photo.png'), 'utf8')).toBe('png-bytes')
-    expect(existsSync(join(uploadsDirectory(), 'old-only.txt'))).toBe(false)
+    expect(readFileSync(join(uploadsDirectory(), 'old-only.txt'), 'utf8')).toBe('remove-me')
   })
 
   it('warns when uploads are not restored', async () => {

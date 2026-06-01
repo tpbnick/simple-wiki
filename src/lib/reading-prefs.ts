@@ -37,7 +37,7 @@ export function resolveReadingPrefs(cookies: CookieReader): ReadingPrefs {
 /** Inline CSS for reading prefs, applied before the app bundle loads. */
 export function buildReadingPrefsCss(cookies: CookieReader): string {
   const prefs = resolveReadingPrefs(cookies)
-  return `:root{--reading-font:${prefs.fontStack};--reading-font-size:${prefs.fontSize};--reading-width:${prefs.readingWidth}%}`
+  return `:root{--reading-font:${prefs.fontStack};--font-sans:${prefs.fontStack};--reading-font-size:${prefs.fontSize};--reading-width:${prefs.readingWidth}%}`
 }
 
 /** Applies reading-preference placeholders in the HTML shell. */
