@@ -46,12 +46,12 @@ bun run start
 
 ### Scripts
 
-| Command         | Description                        |
-| --------------- | ---------------------------------- |
-| `bun run dev`   | Development server with hot reload |
-| `bun run build` | Production build                   |
-| `bun run start` | Run the production server          |
-| `bun run check` | Typecheck (Svelte + TypeScript)    |
+| Command         | Description                                                     |
+| --------------- | --------------------------------------------------------------- |
+| `bun run dev`   | Development server with hot reload                              |
+| `bun run build` | Production build                                                |
+| `bun run start` | Run the production server                                       |
+| `bun run check` | Typecheck (Svelte + TypeScript)                                 |
 | `bun run test`  | Run tests (uses Node/vitest — prefer this over bare `bun test`) |
 
 ## Docker
@@ -124,10 +124,10 @@ Copy `.env.example` to `.env` and uncomment or set values as needed.
 
 ### Access control
 
-| Variable          | Default | Description                                                                 |
-| ----------------- | ------- | --------------------------------------------------------------------------- |
-| `PUBLIC_READ`     | enabled | Set to `false` to require login for reading pages and read APIs             |
-| `ADMIN_PASSWORD`  | —       | Initial `admin` password on **first boot only** (min 8 chars; random + logged if unset) |
+| Variable         | Default | Description                                                                             |
+| ---------------- | ------- | --------------------------------------------------------------------------------------- |
+| `PUBLIC_READ`    | enabled | Set to `false` to require login for reading pages and read APIs                         |
+| `ADMIN_PASSWORD` | —       | Initial `admin` password on **first boot only** (min 8 chars; random + logged if unset) |
 
 Page content is limited to **2 MB** per save (editor form and API).
 
