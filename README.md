@@ -6,6 +6,11 @@
 
 A personal markdown wiki with Wikipedia-like features — wiki links, full-text search, uploads, revision history, templates, admin tools, and a pluggable extension system. Built with SvelteKit and SQLite.
 
+<p align="center">
+  <img src="static/Simple-Wiki-Home.png" alt="Simple-Wiki home page" width="48%">
+  <img src="static/Simple-Wiki-Admin.png" alt="Simple-Wiki admin panel" width="48%">
+</p>
+
 ## Features
 
 - **Markdown pages** with wiki links (`[[Page Title]]`), syntax highlighting, and a table of contents on long articles

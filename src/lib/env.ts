@@ -1,6 +1,7 @@
 import { accessSync, constants, mkdirSync } from 'fs'
-import { dirname, resolve } from 'path'
+import { dirname } from 'path'
 import { resolveDatabasePath } from '$lib/db/connection.js'
+import { uploadsDirectory } from '$lib/uploads.js'
 
 let validated = false
 
@@ -48,7 +49,9 @@ export function validateServerEnv(): void {
 
   try {
     assertWritableFilePath('DATABASE_PATH', resolveDatabasePath())
-    assertWritableDirectory('UPLOADS_DIR', resolve(process.env.UPLOADS_DIR ?? './uploads'))
+    const uploadsDir = uploadsDirectory()
+    assertWritableDirectory('UPLOADS_DIR', uploadsDir)
+    console.log(`[env] UPLOADS_DIR=${uploadsDir}`)
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     throw new Error(`[env] ${message}`)

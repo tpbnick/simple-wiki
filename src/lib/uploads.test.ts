@@ -8,6 +8,7 @@ import {
   resolveAvailableFilename,
   uploadContentHash,
   uploadPublicUrl,
+  defaultUploadsDirectoryPath,
   resetUploadsDirectoryForTests
 } from '$lib/uploads.js'
 
@@ -103,6 +104,19 @@ describe('uploadContentHash', () => {
 describe('uploadPublicUrl', () => {
   it('encodes spaces in the URL path', () => {
     expect(uploadPublicUrl('1860 Butler Census.png')).toBe('/uploads/1860%20Butler%20Census.png')
+  })
+})
+
+describe('defaultUploadsDirectoryPath', () => {
+  it('prefers UPLOADS_DIR when set', () => {
+    const previous = process.env.UPLOADS_DIR
+    process.env.UPLOADS_DIR = '/custom/uploads'
+    try {
+      expect(defaultUploadsDirectoryPath()).toBe('/custom/uploads')
+    } finally {
+      if (previous === undefined) delete process.env.UPLOADS_DIR
+      else process.env.UPLOADS_DIR = previous
+    }
   })
 })
 

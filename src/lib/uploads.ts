@@ -60,12 +60,19 @@ export interface UploadValidationResult {
 
 let cachedUploadsDirectory: string | null = null
 
+/** Resolves UPLOADS_DIR, defaulting to /uploads in production Docker when that path exists. */
+export function defaultUploadsDirectoryPath(): string {
+  if (process.env.UPLOADS_DIR) return process.env.UPLOADS_DIR
+  if (process.env.NODE_ENV === 'production' && existsSync('/uploads')) return '/uploads'
+  return './uploads'
+}
+
 /**
  * Returns the absolute path to the uploads directory, creating it if needed.
  */
 export function uploadsDirectory(): string {
   if (cachedUploadsDirectory) return cachedUploadsDirectory
-  const directory = resolve(process.env.UPLOADS_DIR ?? './uploads')
+  const directory = resolve(defaultUploadsDirectoryPath())
   if (!existsSync(directory)) mkdirSync(directory, { recursive: true })
   cachedUploadsDirectory = directory
   return directory
