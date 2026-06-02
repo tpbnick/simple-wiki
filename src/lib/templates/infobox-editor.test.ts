@@ -261,4 +261,40 @@ describe('renderInfoboxInlineValue', () => {
       'See <a href="https://example.com" rel="noopener noreferrer">https://example.com</a> for details'
     )
   })
+
+  it('renders wiki links to existing pages', () => {
+    const html = renderInfoboxInlineValue('[[John Smith]]', {
+      existingPages: new Set(['john-smith'])
+    })
+    expect(html).toBe('<a href="/wiki/john-smith">John Smith</a>')
+  })
+
+  it('renders wiki links with parenthetical titles', () => {
+    const html = renderInfoboxInlineValue('[[Kathleen (Kathy) Steighner]]', {
+      existingPages: new Set(['kathleen-kathy-steighner'])
+    })
+    expect(html).toBe(
+      '<a href="/wiki/kathleen-kathy-steighner">Kathleen (Kathy) Steighner</a>'
+    )
+  })
+
+  it('marks missing wiki pages as red links', () => {
+    const html = renderInfoboxInlineValue('[[Missing Person]]', {
+      existingPages: new Set(['home'])
+    })
+    expect(html).toBe(
+      '<a href="/wiki/missing-person?title=Missing%20Person" class="redlink">Missing Person</a>'
+    )
+  })
+
+  it('renders wiki links inside infobox templates from the reader pipeline', () => {
+    const markdown =
+      '{{Infobox|title=Test|@row0_label=Spouse|@row0=[[John Smith]]|@order=@row0}}'
+    const html = renderMarkdownSync(markdown, {
+      templateResolver,
+      wikiLinks: { existingPages: new Set(['john-smith']) }
+    })
+
+    expect(html).toContain('<a href="/wiki/john-smith">John Smith</a>')
+  })
 })

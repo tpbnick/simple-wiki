@@ -1,4 +1,6 @@
 import { escapeHtml } from '$lib/html.js'
+import { renderWikiInlineMarkdown, type WikiInlineOptions } from '$lib/markdown/inline.js'
+import { getRenderContext } from '$lib/markdown/render-context.js'
 import {
   decodeTemplateParamValue,
   partsToParamRecord,
@@ -220,33 +222,10 @@ export function removeInfoboxFromContent(content: string): string {
   return updated.trimStart()
 }
 
-const MARKDOWN_LINK_PATTERN = /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g
-const BARE_URL_PATTERN = /https?:\/\/[^\s<>")\]]+/g
-
-/** Renders URLs and markdown links inside infobox field values. */
-export function renderInfoboxInlineValue(value: string): string {
-  let result = ''
-  let lastIndex = 0
-  let match: RegExpExecArray | null
-
-  MARKDOWN_LINK_PATTERN.lastIndex = 0
-  while ((match = MARKDOWN_LINK_PATTERN.exec(value)) !== null) {
-    result += escapeHtml(value.slice(lastIndex, match.index))
-    result += `<a href="${escapeHtml(match[2])}" rel="noopener noreferrer">${escapeHtml(match[1])}</a>`
-    lastIndex = match.index + match[0].length
-  }
-
-  const tail = value.slice(lastIndex)
-  let tailIndex = 0
-  BARE_URL_PATTERN.lastIndex = 0
-  while ((match = BARE_URL_PATTERN.exec(tail)) !== null) {
-    result += escapeHtml(tail.slice(tailIndex, match.index))
-    result += `<a href="${escapeHtml(match[0])}" rel="noopener noreferrer">${escapeHtml(match[0])}</a>`
-    tailIndex = match.index + match[0].length
-  }
-
-  result += escapeHtml(tail.slice(tailIndex))
-  return result
+/** Renders wiki links, markdown links, and bare URLs inside infobox field values. */
+export function renderInfoboxInlineValue(value: string, options?: WikiInlineOptions): string {
+  const wikiLinks = options ?? getRenderContext().wikiLinks ?? {}
+  return renderWikiInlineMarkdown(value, wikiLinks)
 }
 
 /**
