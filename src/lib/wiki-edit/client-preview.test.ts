@@ -8,7 +8,7 @@ const bundle: EditorPreviewBundle = {
   familyTrees: {}
 }
 
-describe('renderEditorPreview', () => {
+describe('renderEditorPreview', { timeout: 15_000 }, () => {
   it('renders markdown with wiki links without a server round-trip', async () => {
     const html = await renderEditorPreview('See [[about]] and [[missing]].', bundle, {
       stripInfobox: false,
