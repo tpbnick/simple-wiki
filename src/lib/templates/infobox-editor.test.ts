@@ -273,9 +273,7 @@ describe('renderInfoboxInlineValue', () => {
     const html = renderInfoboxInlineValue('[[Kathleen (Kathy) Steighner]]', {
       existingPages: new Set(['kathleen-kathy-steighner'])
     })
-    expect(html).toBe(
-      '<a href="/wiki/kathleen-kathy-steighner">Kathleen (Kathy) Steighner</a>'
-    )
+    expect(html).toBe('<a href="/wiki/kathleen-kathy-steighner">Kathleen (Kathy) Steighner</a>')
   })
 
   it('marks missing wiki pages as red links', () => {
@@ -288,8 +286,7 @@ describe('renderInfoboxInlineValue', () => {
   })
 
   it('renders wiki links inside infobox templates from the reader pipeline', () => {
-    const markdown =
-      '{{Infobox|title=Test|@row0_label=Spouse|@row0=[[John Smith]]|@order=@row0}}'
+    const markdown = '{{Infobox|title=Test|@row0_label=Spouse|@row0=[[John Smith]]|@order=@row0}}'
     const html = renderMarkdownSync(markdown, {
       templateResolver,
       wikiLinks: { existingPages: new Set(['john-smith']) }
