@@ -11,6 +11,9 @@ A personal markdown wiki with Wikipedia-like features — wiki links, full-text 
   <img src="static/Simple-Wiki-Admin.png" alt="Simple-Wiki admin panel" width="48%">
 </p>
 
+> [!IMPORTANT]  
+> This application was developed with the assistance of AI.
+
 ## Features
 
 - **Markdown pages** with wiki links (`[[Page Title]]`), syntax highlighting, and a table of contents on long articles
