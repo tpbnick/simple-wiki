@@ -65,6 +65,8 @@ export interface BackupOptions {
 }
 
 export interface ImportBackupOptions {
+  /** When true, replaces the live wiki.db with the backup (required for import). */
+  overwriteDatabase?: boolean
   restoreUploads?: boolean
 }
 
@@ -382,6 +384,8 @@ function unzipBackupArchive(zipBytes: Uint8Array): Record<string, Uint8Array> {
 
 /** Creates a zip backup containing wiki.db, manifest.txt, and optional uploads/markdown. */
 export async function createBackupArchive(options: BackupOptions = {}): Promise<Uint8Array> {
+  openDatabase()
+
   try {
     beginDatabaseBackup()
   } catch {
@@ -436,6 +440,12 @@ export function importBackupArchive(
   zipBytes: Uint8Array,
   options: ImportBackupOptions = {}
 ): ImportBackupResult {
+  if (options.overwriteDatabase !== true) {
+    throw new BackupError(
+      'Database overwrite was not confirmed. Enable fully overwrite existing database to import.'
+    )
+  }
+
   if (zipBytes.byteLength > MAX_BACKUP_BYTES) {
     throw new BackupError(`Backup file exceeds ${MAX_BACKUP_BYTES} bytes`)
   }

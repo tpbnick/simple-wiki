@@ -21,7 +21,7 @@ import {
   serializePageAsMarkdown
 } from '$lib/backup.js'
 import { getPage, savePage } from '$lib/db/index.js'
-import { getDatabase } from '$lib/db/connection.js'
+import { getDatabase, resetDatabaseConnection } from '$lib/db/connection.js'
 import { SCHEMA } from '$lib/db/schema.js'
 import { loadExtensions } from '$lib/extensions/server.js'
 import { installTempWikiEnv } from '$lib/test/db-env.js'
@@ -71,7 +71,7 @@ describe('backup archive', () => {
     savePage('backup-page', 'Backup Page', 'changed content', 'article', 'edit')
     expect(getPage('backup-page')?.content).toBe('changed content')
 
-    const { manifest } = importBackupArchive(archive)
+    const { manifest } = importBackupArchive(archive, { overwriteDatabase: true })
     expect(manifest.wikiName).toBe('Test Wiki')
     expect(getPage('backup-page')?.content).toBe('original content')
   })
@@ -97,6 +97,12 @@ describe('backup archive', () => {
     const manifest = parseBackupManifest(manifestText)
     expect(manifest.includesMarkdown).toBe(true)
     expect(manifestText).toContain('template namespace pages are only in wiki.db')
+  })
+
+  it('exports on cold database without a prior page write', async () => {
+    resetDatabaseConnection()
+    const archive = await createBackupArchive()
+    expect(archive.byteLength).toBeGreaterThan(0)
   })
 
   it('serializes page frontmatter safely', () => {
@@ -150,7 +156,7 @@ describe('backup archive', () => {
         ),
         [BACKUP_DATABASE_FILE]: readFileSync(process.env.DATABASE_PATH!)
       })
-      expect(() => importBackupArchive(archive)).toThrow(BackupError)
+      expect(() => importBackupArchive(archive, { overwriteDatabase: true })).toThrow(BackupError)
     } finally {
       endDatabaseBackup()
     }
@@ -163,7 +169,10 @@ describe('backup archive', () => {
     writeFileSync(join(uploadsDirectory(), 'photo.png'), 'changed-bytes')
     writeFileSync(join(uploadsDirectory(), 'old-only.txt'), 'remove-me')
 
-    const { manifest } = importBackupArchive(archive, { restoreUploads: true })
+    const { manifest } = importBackupArchive(archive, {
+      overwriteDatabase: true,
+      restoreUploads: true
+    })
     expect(manifest.includesUploads).toBe(true)
     expect(readFileSync(join(uploadsDirectory(), 'photo.png'), 'utf8')).toBe('png-bytes')
     expect(readFileSync(join(uploadsDirectory(), 'old-only.txt'), 'utf8')).toBe('remove-me')
@@ -173,7 +182,7 @@ describe('backup archive', () => {
     writeFileSync(join(uploadsDirectory(), 'photo.png'), 'png-bytes')
     const archive = await createBackupArchive({ includeUploads: true })
 
-    const { warnings } = importBackupArchive(archive)
+    const { warnings } = importBackupArchive(archive, { overwriteDatabase: true })
     expect(warnings.some((warning) => warning.includes('were not restored'))).toBe(true)
   })
 
@@ -183,12 +192,20 @@ describe('backup archive', () => {
     const archive = await createBackupArchive({ includeUploads: true })
     writeFileSync(join(uploadsDirectory(), 'photo.png'), 'changed-bytes')
 
-    importBackupArchive(archive)
+    importBackupArchive(archive, { overwriteDatabase: true })
     expect(readFileSync(join(uploadsDirectory(), 'photo.png'), 'utf8')).toBe('changed-bytes')
   })
 
+  it('requires explicit database overwrite confirmation', () => {
+    expect(() => importBackupArchive(new Uint8Array([1, 2, 3]))).toThrow(
+      /overwrite was not confirmed/
+    )
+  })
+
   it('rejects invalid zip files', () => {
-    expect(() => importBackupArchive(new Uint8Array([1, 2, 3]))).toThrow(BackupError)
+    expect(() =>
+      importBackupArchive(new Uint8Array([1, 2, 3]), { overwriteDatabase: true })
+    ).toThrow(BackupError)
   })
 
   it('ignores hidden upload paths when restoring uploads', async () => {
@@ -210,7 +227,7 @@ describe('backup archive', () => {
       'uploads/visible.txt': new TextEncoder().encode('from-backup')
     })
 
-    importBackupArchive(archive, { restoreUploads: true })
+    importBackupArchive(archive, { overwriteDatabase: true, restoreUploads: true })
     expect(existsSync(join(uploadsDirectory(), '.hidden.txt'))).toBe(false)
     expect(readFileSync(join(uploadsDirectory(), 'visible.txt'), 'utf8')).toBe('from-backup')
   })
@@ -240,7 +257,7 @@ describe('backup archive', () => {
         [BACKUP_DATABASE_FILE]: readFileSync(dbPath)
       })
 
-      importBackupArchive(archive)
+      importBackupArchive(archive, { overwriteDatabase: true })
 
       const liveDb = getDatabase()
       const table = liveDb

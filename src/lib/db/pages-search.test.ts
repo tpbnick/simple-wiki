@@ -19,6 +19,15 @@ describe('searchContentPageSummaries', () => {
     expect(filtered.pages[0]?.slug).toBe('alpha-page')
   })
 
+  it('treats LIKE metacharacters in admin search literally', () => {
+    savePage('hundred-percent', '100% Complete', 'content', 'article', 'create')
+    savePage('other-page', 'Other', 'content', 'article', 'create')
+
+    const literal = searchContentPageSummaries({ query: '100%' })
+    expect(literal.pages.some((p) => p.slug === 'hundred-percent')).toBe(true)
+    expect(literal.pages.some((p) => p.slug === 'other-page')).toBe(false)
+  })
+
   it('paginates results', () => {
     for (let index = 0; index < 5; index++) {
       savePage(`page-${index}`, `Page ${index}`, 'content', 'article', 'create')

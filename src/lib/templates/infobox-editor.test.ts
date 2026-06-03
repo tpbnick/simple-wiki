@@ -237,10 +237,10 @@ describe('renderInfoboxInlineValue', () => {
 
   it('renders markdown links inside infobox templates from the reader pipeline', () => {
     const markdown =
-      '{{Infobox|title=Test|@row0_label=Wikipedia Link|@row0=[Link](https://en.wikipedia.org/wiki/Fischbach_bei_Dahn)|@order=@row0}}'
+      '{{Infobox|title=Test|@row0_label=Wikipedia Link|@row0=[Link](https://en.wikipedia.org/wiki/Example)|@order=@row0}}'
     const html = renderMarkdownSync(markdown, { templateResolver, wikiLinks: {} })
 
-    expect(html).toContain('<a href="https://en.wikipedia.org/wiki/Fischbach_bei_Dahn">Link</a>')
+    expect(html).toContain('<a href="https://en.wikipedia.org/wiki/Example">Link</a>')
   })
 
   it('renders bare URLs without swallowing trailing markdown', () => {
@@ -270,10 +270,10 @@ describe('renderInfoboxInlineValue', () => {
   })
 
   it('renders wiki links with parenthetical titles', () => {
-    const html = renderInfoboxInlineValue('[[Kathleen (Kathy) Steighner]]', {
-      existingPages: new Set(['kathleen-kathy-steighner'])
+    const html = renderInfoboxInlineValue('[[Jane (Jan) Doe]]', {
+      existingPages: new Set(['jane-jan-doe'])
     })
-    expect(html).toBe('<a href="/wiki/kathleen-kathy-steighner">Kathleen (Kathy) Steighner</a>')
+    expect(html).toBe('<a href="/wiki/jane-jan-doe">Jane (Jan) Doe</a>')
   })
 
   it('marks missing wiki pages as red links', () => {

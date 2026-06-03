@@ -21,20 +21,20 @@ describe('renderWikiPage', () => {
     'preserves family tree embeds through extension and re-sanitize passes',
     { timeout: 10_000 },
     async () => {
-      createFamilyTree('Steighner', 'steighner')
+      createFamilyTree('Example Family', 'example-family')
 
       const { html } = await renderWikiPage({
         id: 1,
         slug: 'demo',
         title: 'Demo',
-        content: '{{FamilyTree|family=steighner}}',
+        content: '{{FamilyTree|family=example-family}}',
         namespace: 'article',
         created_at: '',
         updated_at: ''
       })
 
       expect(html).toContain('wiki-family-tree-embed')
-      expect(html).toContain('data-family="steighner"')
+      expect(html).toContain('data-family="example-family"')
       expect(html).not.toContain('data-tree="')
       expect(html).not.toContain('<script')
     }

@@ -3,6 +3,13 @@ import { afterNavigate } from '$app/navigation'
 import { onMount } from 'svelte'
 import { tocStore } from '$lib/stores/toc.svelte.js'
 import { sidebarStore } from '$lib/stores/sidebar.svelte.js'
+import type { SidebarItem } from '$lib/extensions/types.js'
+
+interface Props {
+  extensionNavItems?: SidebarItem[]
+}
+
+let { extensionNavItems = [] }: Props = $props()
 
 let activeId = $state<string | null>(null)
 let observer: IntersectionObserver | null = null
@@ -122,6 +129,7 @@ afterNavigate(() => {
 })
 
 const hasToc = $derived(tocStore.entries.length > 0)
+const hasExtensionNav = $derived(extensionNavItems.length > 0)
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
@@ -171,6 +179,32 @@ const hasToc = $derived(tocStore.entries.length > 0)
 {/snippet}
 
 {#snippet sidebarContent(mobile: boolean)}
+  {#if hasExtensionNav}
+    <div class={hasToc ? 'mb-6 pb-6 border-b border-base-200' : ''}>
+      <p
+        class="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-base-content/40 mb-4 px-1"
+      >
+        Links
+      </p>
+      <nav aria-label="Extension links">
+        <ul class="space-y-1">
+          {#each extensionNavItems as item (item.href)}
+            <li>
+              <a
+                href={item.href}
+                target={item.external ? '_blank' : undefined}
+                rel={item.external ? 'noopener noreferrer' : undefined}
+                class="block py-1.5 px-1 text-sm text-base-content/70 hover:text-primary transition-colors"
+                onclick={mobile ? () => closeMobileToc() : undefined}
+              >
+                {item.label}
+              </a>
+            </li>
+          {/each}
+        </ul>
+      </nav>
+    </div>
+  {/if}
   {#if hasToc}
     <div>
       <p

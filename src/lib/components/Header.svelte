@@ -35,8 +35,12 @@ const showSuggestions = $derived(
   searchFocused && query.trim().length >= MIN_SEARCH_SUGGESTION_LENGTH
 )
 
+const extensionNavCount = $derived(
+  Array.isArray(page.data.sidebarItems) ? page.data.sidebarItems.length : 0
+)
+
 const showSidebarToggle = $derived(
-  shouldShowReaderSidebar(page.url.pathname, tocStore.entries.length)
+  shouldShowReaderSidebar(page.url.pathname, tocStore.entries.length, extensionNavCount)
 )
 
 onMount(() => {

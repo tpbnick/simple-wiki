@@ -1,4 +1,4 @@
-import { writeFileSync } from 'fs'
+import { symlinkSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import { describe, expect, it } from 'vitest'
 import { GET } from './[filename]/+server.js'
@@ -43,5 +43,21 @@ describe('GET /uploads/[filename]', () => {
         request: new Request('http://localhost/uploads/../wiki.db')
       } as Parameters<typeof GET>[0])
     ).toThrow(expect.objectContaining({ status: 400 }))
+  })
+
+  it('returns 404 for symlinks under the uploads directory', () => {
+    writeFileSync(join(uploadsDirectory(), 'real-target.png'), PNG_BYTES)
+    symlinkSync(
+      join(uploadsDirectory(), 'real-target.png'),
+      join(uploadsDirectory(), 'link-target.png')
+    )
+
+    expect(() =>
+      GET({
+        params: { filename: 'link-target.png' },
+        locals: {},
+        request: new Request('http://localhost/uploads/link-target.png')
+      } as Parameters<typeof GET>[0])
+    ).toThrow(expect.objectContaining({ status: 404 }))
   })
 })

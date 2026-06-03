@@ -1,7 +1,7 @@
 <script lang="ts">
 import { tick } from 'svelte'
 import { mountWikiLightbox, closeActiveWikiLightbox } from '$lib/actions/wikiLightbox.js'
-import { runExtensionArticleMounts } from '$lib/extensions/client-mount.js'
+import { createExtensionArticleMountController } from '$lib/extensions/client-mount.js'
 
 interface Props {
   html: string
@@ -13,7 +13,7 @@ let { html, existingPageSlugs }: Props = $props()
 let container = $state<HTMLDivElement | null>(null)
 let detachLightbox: (() => void) | undefined
 let detachHighlights: (() => void) | undefined
-let detachFamilyTrees: (() => void) | undefined
+const extensionMounts = createExtensionArticleMountController()
 
 function attachFootnoteHighlights(root: HTMLElement): () => void {
   const links = root.querySelectorAll<HTMLAnchorElement>('a[href^="#fn-"], a[href^="#fnref-"]')
@@ -43,6 +43,8 @@ $effect(() => {
   const root = container
   if (!root) return
 
+  extensionMounts.detachForHtmlSwap(root)
+
   let cancelled = false
 
   void tick().then(() => {
@@ -50,22 +52,25 @@ $effect(() => {
 
     detachLightbox?.()
     detachHighlights?.()
-    detachFamilyTrees?.()
 
     detachLightbox = mountWikiLightbox(container)
     detachHighlights = attachFootnoteHighlights(container)
-    detachFamilyTrees = runExtensionArticleMounts(container)
+    extensionMounts.sync(container, () => cancelled)
   })
 
   return () => {
     cancelled = true
     detachLightbox?.()
     detachHighlights?.()
-    detachFamilyTrees?.()
     closeActiveWikiLightbox()
     detachLightbox = undefined
     detachHighlights = undefined
-    detachFamilyTrees = undefined
+  }
+})
+
+$effect(() => {
+  return () => {
+    extensionMounts.destroy()
   }
 })
 </script>

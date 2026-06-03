@@ -18,7 +18,7 @@ let {
 let includeUploadsInBackup = $state(false)
 let includeMarkdownInBackup = $state(false)
 let restoreUploadsOnImport = $state(false)
-let importConfirm = $state(false)
+let overwriteDatabaseOnImport = $state(false)
 let importLoading = $state(false)
 let importError = $state('')
 let importSuccess = $state<{
@@ -48,8 +48,8 @@ async function submitImport() {
     importError = 'Choose a backup zip file first'
     return
   }
-  if (!importConfirm) {
-    importError = 'Confirm that you want to replace the current database'
+  if (!overwriteDatabaseOnImport) {
+    importError = 'Check “Fully overwrite existing database” to confirm this import'
     return
   }
 
@@ -57,6 +57,7 @@ async function submitImport() {
   try {
     const body = new FormData()
     body.set('backup', file)
+    body.set('overwriteDatabase', 'on')
     if (restoreUploadsOnImport) body.set('restoreUploads', 'on')
     const res = await fetch('/api/admin/backup', { method: 'POST', body })
     const contentType = res.headers.get('content-type') ?? ''
@@ -77,7 +78,7 @@ async function submitImport() {
     }
     importSuccess = payload.manifest
     importWarnings = Array.isArray(payload.warnings) ? payload.warnings : []
-    importConfirm = false
+    overwriteDatabaseOnImport = false
     if (importInput) importInput.value = ''
     await invalidateAll()
   } finally {
@@ -155,8 +156,8 @@ async function submitImport() {
       <div>
         <h2 class="font-semibold text-base-content">Import backup</h2>
         <p class="text-sm text-base-content/60 mt-1">
-          Replaces the current database with the one from a backup zip. Uploaded files can be
-          restored separately.
+          Restores wiki content from a backup zip. The database is only replaced when you explicitly
+          confirm full overwrite below. Uploaded files can be merged separately.
         </p>
       </div>
     </div>
@@ -212,18 +213,35 @@ async function submitImport() {
         </span>
       </label>
       <label class="flex items-start gap-2 text-sm">
-        <input type="checkbox" bind:checked={importConfirm} class="checkbox checkbox-sm mt-0.5" />
+        <input
+          type="checkbox"
+          bind:checked={overwriteDatabaseOnImport}
+          class="checkbox checkbox-sm mt-0.5 checkbox-warning"
+        />
         <span class="text-base-content/70">
-          I understand this will replace the current wiki database
-          {#if restoreUploadsOnImport}
-            and merge uploaded files from the backup
-          {/if}. This cannot be undone.
+          <span class="font-medium text-base-content">Fully overwrite existing database</span>
+          <span class="block text-xs text-base-content/55 mt-1">
+            Replaces the entire live <code class="font-mono bg-base-200 px-1 rounded">wiki.db</code>
+            with the backup. All current pages, users, revisions, and settings in the existing database
+            are permanently deleted and cannot be recovered except from another backup.
+          </span>
         </span>
       </label>
+      {#if overwriteDatabaseOnImport}
+        <div class="alert alert-warning text-sm py-2">
+          <p>
+            Import will <strong>fully delete</strong> the current wiki database and replace it with
+            the backup.
+            {#if restoreUploadsOnImport}
+              Matching uploaded files will also be overwritten.
+            {/if}
+          </p>
+        </div>
+      {/if}
       <button
         type="button"
         onclick={submitImport}
-        disabled={importLoading}
+        disabled={importLoading || !overwriteDatabaseOnImport}
         class="inline-flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium
                bg-warning text-warning-content hover:bg-warning/90 transition-colors disabled:opacity-50"
       >

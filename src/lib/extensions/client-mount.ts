@@ -1,18 +1,18 @@
-/** Eagerly loaded extension client mounts. */
-const globMounts = import.meta.glob('$extensions/*/mount-client.ts', {
-  eager: true,
-  import: 'default'
-}) as Record<string, (root: HTMLElement) => () => void>
+import { createFamilyTreeEmbedCache } from '$extensions/family-tree/actions/mount-embeds.js'
 
-const extensionMounts = Object.values(globMounts).filter(
-  (mount): mount is (root: HTMLElement) => () => void => typeof mount === 'function'
-)
+/** Per-article controller that reuses extension embeds across preview HTML updates. */
+export function createExtensionArticleMountController() {
+  const familyTreeCache = createFamilyTreeEmbedCache()
 
-/** Runs client-side mount hooks from all extensions (e.g. interactive embeds). */
-export function runExtensionArticleMounts(root: HTMLElement): () => void {
-  const cleanups = extensionMounts.map((mount) => mount(root))
-
-  return () => {
-    for (const cleanup of cleanups) cleanup()
+  return {
+    sync(root: HTMLElement, isCancelled: () => boolean): void {
+      familyTreeCache.sync(root, isCancelled)
+    },
+    detachForHtmlSwap(root: HTMLElement): void {
+      familyTreeCache.detachForHtmlSwap(root)
+    },
+    destroy(): void {
+      familyTreeCache.destroy()
+    }
   }
 }

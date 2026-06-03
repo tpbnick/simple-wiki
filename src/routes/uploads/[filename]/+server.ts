@@ -3,7 +3,7 @@ import { createReadStream, existsSync, statSync } from 'fs'
 import { extname } from 'path'
 import { Readable } from 'node:stream'
 import { mimeTypeForExtension } from '$lib/uploads.js'
-import { resolveUploadPath } from '$lib/uploads.server.js'
+import { isRegularUploadFile, resolveUploadPath } from '$lib/uploads.server.js'
 import { requireReadAccess } from '$lib/read-access.js'
 import type { RequestHandler } from './$types'
 
@@ -11,7 +11,7 @@ export const GET: RequestHandler = ({ params, locals, request }) => {
   requireReadAccess(locals)
   const filePath = resolveUploadPath(params.filename)
   if (!filePath) error(400, 'Invalid path')
-  if (!existsSync(filePath)) error(404, 'File not found')
+  if (!existsSync(filePath) || !isRegularUploadFile(filePath)) error(404, 'File not found')
 
   const fileStat = statSync(filePath)
   const extension = extname(params.filename).toLowerCase()

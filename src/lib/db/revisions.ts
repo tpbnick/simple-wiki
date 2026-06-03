@@ -37,7 +37,20 @@ export function pruneAllRevisions(limit: number): number {
   return openDatabase().statements.pruneRevisionsOverLimit.run(limit).changes
 }
 
-/** Restores a page to a previous revision. */
+/** Page content and title after a revision edit (the end state shown in history diffs). */
+export function getRevisionPostEditSnapshot(
+  revisionId: number
+): { pageId: number; content: string; title: string } | null {
+  const row = openDatabase().statements.getRevisionPostEdit.get(revisionId)
+  if (!row) return null
+  return {
+    pageId: row.page_id,
+    content: row.post_edit_content,
+    title: row.post_edit_title
+  }
+}
+
+/** Restores the page to how it looked after the selected edit. */
 export function restoreRevision(
   slug: string,
   revisionId: number,
@@ -47,13 +60,13 @@ export function restoreRevision(
   const page = getPage(slug)
   if (!page) return null
 
-  const revision = getRevisionById(revisionId)
-  if (!revision || revision.page_id !== page.id) return null
+  const snapshot = getRevisionPostEditSnapshot(revisionId)
+  if (!snapshot || snapshot.pageId !== page.id) return null
 
   return savePage(
     slug,
-    revision.title ?? page.title,
-    revision.content,
+    snapshot.title,
+    snapshot.content,
     page.namespace,
     summary,
     expectedUpdatedAt

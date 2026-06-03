@@ -28,6 +28,7 @@ describe('POST /api/admin/backup', () => {
       new File([Buffer.from(archive)], 'backup.zip', { type: 'application/zip' })
     )
     formData.append('restoreUploads', 'on')
+    formData.append('overwriteDatabase', 'on')
 
     const response = await POST({
       locals: adminLocals,
@@ -43,6 +44,26 @@ describe('POST /api/admin/backup', () => {
     expect(body.ok).toBe(true)
     expect(getPage('route-page')?.content).toBe('original')
     expect(readFileSync(join(uploadsDirectory(), 'asset.txt'), 'utf8')).toBe('original-bytes')
+  })
+
+  it('rejects import without database overwrite confirmation', async () => {
+    const archive = await createBackupArchive()
+    const formData = new FormData()
+    formData.append(
+      'backup',
+      new File([Buffer.from(archive)], 'backup.zip', { type: 'application/zip' })
+    )
+
+    await expect(
+      POST({
+        locals: adminLocals,
+        getClientAddress: () => '127.0.0.1',
+        request: new Request('http://localhost/api/admin/backup', {
+          method: 'POST',
+          body: formData
+        })
+      } as Parameters<typeof POST>[0])
+    ).rejects.toMatchObject({ status: 400 })
   })
 
   it('rejects non-admin callers', async () => {

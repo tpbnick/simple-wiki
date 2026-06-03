@@ -31,13 +31,28 @@ function getRevisionTitleChange(index: number): { from: string; to: string } | n
 
 let expanded = $state<number | null>(null)
 
-let restoreTarget = $state<{ revisionId: number; revisionNumber: number } | null>(null)
+let restoreTarget = $state<{
+  revisionId: number
+  revisionNumber: number
+  summary: string
+} | null>(null)
 let restoreDialogEl = $state<HTMLDivElement | null>(null)
 let restoreCancelBtn = $state<HTMLButtonElement | null>(null)
 let restoreDialogTrigger: HTMLElement | null = null
+let expectedUpdatedAt = $state('')
 
-function openRestoreModal(revisionId: number, revisionNumber: number) {
-  restoreTarget = { revisionId, revisionNumber }
+$effect(() => {
+  expectedUpdatedAt = data.page.updated_at
+})
+
+$effect(() => {
+  if (!form?.error) return
+  const payload = form as Record<string, unknown>
+  if (payload.expectedUpdatedAt) expectedUpdatedAt = String(payload.expectedUpdatedAt)
+})
+
+function openRestoreModal(revisionId: number, revisionNumber: number, summary: string) {
+  restoreTarget = { revisionId, revisionNumber, summary }
   restoreDialogTrigger = document.activeElement as HTMLElement
   tick().then(() => restoreCancelBtn?.focus())
 }
@@ -130,6 +145,9 @@ function closeRestoreModal() {
             {@const diff = getRevisionDiff(i)}
             {@const titleChange = getRevisionTitleChange(i)}
             <div class="border-t border-base-200 px-4 py-3 space-y-3">
+              <p class="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-base-content/40">
+                Changes in this edit
+              </p>
               {#if titleChange}
                 <p class="text-xs text-base-content/70">
                   Title renamed:
@@ -154,10 +172,15 @@ function closeRestoreModal() {
                   type="button"
                   class="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium
                          bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-                  onclick={() => openRestoreModal(rev.id, data.revisions.length - i)}
+                  onclick={() =>
+                    openRestoreModal(
+                      rev.id,
+                      data.revisions.length - i,
+                      rev.summary || 'No summary'
+                    )}
                 >
                   <RotateCcw size={12} />
-                  Restore this revision
+                  Restore this version
                 </button>
               {/if}
             </div>
@@ -171,15 +194,28 @@ function closeRestoreModal() {
 <!-- ── Restore confirmation modal ──────────────────────────────────── -->
 <ConfirmDialog
   open={restoreTarget !== null}
-  title="Restore revision"
+  title="Restore this version"
   titleId="restore-dialog-title"
   bind:dialogEl={restoreDialogEl}
   bind:cancelBtn={restoreCancelBtn}
   onClose={closeRestoreModal}
 >
   {#if restoreTarget}
-    Restore to revision <strong class="text-base-content">#{restoreTarget.revisionNumber}</strong>?
-    This will replace the current page content and title when the revision includes them.
+    <p class="text-sm text-base-content/80 leading-relaxed">
+      Make revision <strong class="text-base-content">#{restoreTarget.revisionNumber}</strong>
+      the current page?
+    </p>
+    <p class="text-sm text-base-content/60 leading-relaxed mt-3">
+      This restores the page to how it looked <strong class="font-medium text-base-content/75"
+        >after</strong
+      >
+      this edit — the result of the changes shown above, not the version before them.
+    </p>
+    {#if restoreTarget.summary}
+      <p class="text-xs text-base-content/45 mt-3">
+        Edit summary: {restoreTarget.summary}
+      </p>
+    {/if}
   {/if}
   {#snippet actions()}
     <form
@@ -193,11 +229,11 @@ function closeRestoreModal() {
       }}
     >
       <input type="hidden" name="revisionId" value={restoreTarget?.revisionId ?? ''} />
-      <input type="hidden" name="expectedUpdatedAt" value={data.page.updated_at} />
+      <input type="hidden" name="expectedUpdatedAt" value={expectedUpdatedAt} />
       <input
         type="hidden"
         name="summary"
-        value="Restored revision #{restoreTarget?.revisionNumber ?? ''}"
+        value="Restored version #{restoreTarget?.revisionNumber ?? ''}"
       />
       <button
         type="submit"

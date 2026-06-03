@@ -27,4 +27,10 @@ describe('shouldShowReaderSidebar', () => {
     expect(shouldShowReaderSidebar('/', 0)).toBe(false)
     expect(shouldShowReaderSidebar('/search', 3)).toBe(false)
   })
+
+  it('shows the sidebar when extension nav items exist without toc entries', () => {
+    expect(shouldShowReaderSidebar('/', 0, 1)).toBe(true)
+    expect(shouldShowReaderSidebar('/wiki/home', 0, 2)).toBe(true)
+    expect(shouldShowReaderSidebar('/search', 0, 1)).toBe(false)
+  })
 })

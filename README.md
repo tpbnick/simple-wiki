@@ -54,6 +54,16 @@ bun run start
 | `bun run check` | Typecheck (Svelte + TypeScript)                                 |
 | `bun run test`  | Run tests (uses Node/vitest — prefer this over bare `bun test`) |
 
+## Self-hosting on your LAN
+
+Defaults are tuned for **home / NAS use** (Unraid, Docker on a private network):
+
+- **Public read** is on — anyone on your network can read pages without logging in. Set `PUBLIC_READ=false` if you want login required for reading.
+- **Plain HTTP** is supported — `COOKIE_SECURE=false` in the bundled compose files is intentional for `http://host:3000` on a trusted LAN.
+- **Every wiki account can edit** — there are no read-only editor roles; only create accounts for people you trust with the whole site.
+
+If the wiki is reachable from the **public internet**, use HTTPS, `COOKIE_SECURE=true`, `WIKI_ORIGIN`, and consider `PUBLIC_READ=false`. See [Access control](#access-control) and [Reverse proxy](#reverse-proxy).
+
 ## Docker
 
 ```bash
@@ -90,15 +100,15 @@ On startup the entrypoint fixes ownership of `/data` and `/uploads`, then runs t
 
 Required env vars: `DATABASE_PATH=/data/wiki.db`, `UPLOADS_DIR=/uploads`.
 
-For plain HTTP on LAN, set `COOKIE_SECURE=false` (see `docker-compose.ghcr.yml`). Use HTTPS and `COOKIE_SECURE=true` if the wiki is reachable from untrusted networks.
+`docker-compose.yml` and `docker-compose.ghcr.yml` already set `COOKIE_SECURE=false` for LAN HTTP. Behind HTTPS (NPM, SWAG, Caddy), set `COOKIE_SECURE=true` and `WIKI_ORIGIN` to your public URL.
 
-See `docker-compose.ghcr.yml` for a full compose example. Set `PUID=0` and `PGID=0` only if you intentionally want the process to run as root.
+See `docker-compose.ghcr.yml` for a full compose example. **Do not** set `PUID=0` / `PGID=0` unless you intentionally want the process to run as root.
 
 ### Backups
 
 Admin → Backups can export/import a zip containing `wiki.db`, optional markdown exports, and optional uploads.
 
-- **Database import** replaces the live wiki database (with rollback on failure).
+- **Database import** replaces the live wiki database only when you check **Fully overwrite existing database** in Admin → Backups (with rollback on failure).
 - **Restore uploads** merges files from the backup: matching filenames are overwritten; uploads on disk that are **not** in the backup are kept (not deleted).
 
 Import shows a 503 to other users while the database swap is in progress.
@@ -124,12 +134,14 @@ Copy `.env.example` to `.env` and uncomment or set values as needed.
 
 ### Access control
 
-| Variable         | Default | Description                                                                             |
-| ---------------- | ------- | --------------------------------------------------------------------------------------- |
-| `PUBLIC_READ`    | enabled | Set to `false` to require login for reading pages and read APIs                         |
-| `ADMIN_PASSWORD` | —       | Initial `admin` password on **first boot only** (min 8 chars; random + logged if unset) |
+| Variable         | Default | Description                                                                               |
+| ---------------- | ------- | ----------------------------------------------------------------------------------------- |
+| `PUBLIC_READ`    | enabled | Fine for LAN wikis. Set to `false` for a private site or when exposed beyond home network |
+| `ADMIN_PASSWORD` | —       | Initial `admin` password on **first boot only** (min 8 chars; random + logged if unset)   |
 
-Page content is limited to **2 MB** per save (editor form and API).
+All logged-in users can edit pages, upload files, and use extensions — not only admins. Admins additionally manage users, backups, and settings.
+
+Page content is limited to **2 MB** per save (editor form and API), which does NOT include images/uploads - the 2MB is raw markdown text.
 
 ### Sessions & cookies
 
@@ -163,7 +175,7 @@ Extensions add features to Simple-Wiki without modifying core app code. Each ext
 
 1. On build, SvelteKit bundles every `extensions/*/index.ts` file into the server.
 2. On startup, the app loads each extension, applies any database schema, and registers hooks.
-3. Optional client code (`mount-client.ts`) and styles (`styles/*.css`) are bundled for the browser.
+3. Optional styles (`styles/*.css`) are bundled for the browser. Interactive article embeds register with the core article mount controller (see family-tree).
 
 After changing an extension, run `bun run build` and restart the server.
 
@@ -175,7 +187,6 @@ The bundled **Example** extension (`extensions/example/`) is included in develop
 extensions/my-extension/
   index.ts           # Required — extension entry point
   schema.sql         # Optional — tables created on first DB open
-  mount-client.ts    # Optional — client-side interactivity for page embeds
   styles/            # Optional — CSS loaded globally
   routes/            # Optional — SvelteKit routes (see family-tree for a full example)
 ```

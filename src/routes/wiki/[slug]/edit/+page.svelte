@@ -17,7 +17,7 @@ import {
   serializeImageBox
 } from '$lib/templates/imagebox-editor.js'
 import type { ImageBoxData } from '$lib/templates/imagebox-editor.js'
-import { renderEditorPreview } from '$lib/wiki-edit/client-preview.js'
+import { renderEditorPreview, type EditorPreviewBundle } from '$lib/wiki-edit/client-preview.js'
 import { createMarkdownToolbarActions } from '$lib/wiki-edit/toolbar-actions.js'
 import { wrapSelection, insertAtSelection, handleTabKey } from '$lib/wiki-edit/text-editing.js'
 import { uploadFileToWiki, markdownForUpload } from '$lib/wiki-edit/upload.js'
@@ -71,6 +71,12 @@ let allowNavigation = $state(false)
 let previewEnabled = $state(false)
 let expectedUpdatedAt = $state('')
 let previewRequestId = 0
+let previewBundle = $state<EditorPreviewBundle>({
+  existingSlugs: [],
+  templatePages: {},
+  familyTrees: {}
+})
+let familyTrees = $state<Array<{ slug: string; title: string }>>([])
 
 let infoboxData = $state<InfoboxData | null>(null)
 let infoboxSyncPaused = $state(false)
@@ -93,6 +99,8 @@ $effect(() => {
   namespace = baseline.namespace
   summary = ''
   expectedUpdatedAt = data.page?.updated_at ?? ''
+  previewBundle = data.previewBundle
+  familyTrees = data.familyTrees
   allowNavigation = false
 
   const match = findInfoboxInContent(baseline.content)
@@ -195,7 +203,7 @@ async function updatePreview() {
   previewLoading = true
   previewError = ''
   try {
-    const html = await renderEditorPreview(content, data.previewBundle, {
+    const html = await renderEditorPreview(content, previewBundle, {
       stripInfobox: infoboxEditorActive,
       stripImageBoxes: hasImageBoxEditors
     })
@@ -362,7 +370,16 @@ async function createAndInsertFamilyTree() {
   try {
     const payload = await createFamilyTree(trimmed)
     newFamilyTreeTitle = ''
+    previewBundle = {
+      ...previewBundle,
+      familyTrees: {
+        ...previewBundle.familyTrees,
+        [payload.slug]: { title: payload.title, data: payload.data }
+      }
+    }
+    familyTrees = [{ slug: payload.slug, title: payload.title }, ...familyTrees]
     insertFamilyTreeEmbed(payload.slug)
+    schedulePreview()
   } catch (err) {
     familyTreeError = err instanceof Error ? err.message : 'Could not create family tree'
   } finally {
@@ -457,7 +474,7 @@ const saveEnhance = ({ formData }: { formData: FormData }) => {
     bind:showInfoboxAddMenu
     bind:showFamilyTreeMenu
     {hasFamilyTreeTool}
-    familyTrees={data.familyTrees}
+    {familyTrees}
     bind:newFamilyTreeTitle
     {creatingFamilyTree}
     {familyTreeError}
@@ -497,7 +514,7 @@ const saveEnhance = ({ formData }: { formData: FormData }) => {
         {imageBoxUploading}
         {imageBoxUploadingBoxId}
         {imageBoxUploadingItemIndex}
-        existingPageSlugs={data.previewBundle.existingSlugs}
+        existingPageSlugs={previewBundle.existingSlugs}
         onUpdateInfobox={updateInfobox}
         onRemoveInfobox={removeInfobox}
         onInfoboxUpload={handleInfoboxImageUpload}

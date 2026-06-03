@@ -35,7 +35,10 @@ $effect(() => {
 })
 
 const isReaderView = $derived(isReaderViewPath(page.url.pathname))
-const showSidebar = $derived(shouldShowReaderSidebar(page.url.pathname, tocStore.entries.length))
+const extensionNavCount = $derived(data.sidebarItems.length)
+const showSidebar = $derived(
+  shouldShowReaderSidebar(page.url.pathname, tocStore.entries.length, extensionNavCount)
+)
 
 $effect(() => {
   sidebarStore.setEnabled(isReaderView)
@@ -51,7 +54,7 @@ $effect(() => {
 
   <div class="flex flex-1 min-h-0 max-w-screen-2xl mx-auto w-full">
     {#if showSidebar}
-      <Sidebar />
+      <Sidebar extensionNavItems={data.sidebarItems} />
     {/if}
 
     <main id="main-content" class="flex-1 min-w-0 bg-base-100">

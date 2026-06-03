@@ -1,11 +1,34 @@
 import { describe, expect, it } from 'vitest'
 import { savePage, searchPageSuggestions, searchPages } from '$lib/db/index.js'
-import { MIN_SEARCH_SUGGESTION_LENGTH } from '$lib/db/search.js'
+import { buildFtsQuery, MIN_SEARCH_SUGGESTION_LENGTH } from '$lib/db/search.js'
 import { installTempWikiEnv } from '$lib/test/db-env.js'
 
 installTempWikiEnv('wiki-search-test-')
 
+describe('buildFtsQuery', () => {
+  it('prefixes each token and joins with AND', () => {
+    expect(buildFtsQuery('apple pie')).toBe('apple* pie*')
+  })
+
+  it('strips FTS operators and special characters', () => {
+    expect(buildFtsQuery('apple OR NOT pie')).toBe('apple* pie*')
+    expect(buildFtsQuery('"quoted"')).toBe('quoted*')
+  })
+
+  it('returns empty when nothing searchable remains', () => {
+    expect(buildFtsQuery('OR AND NOT')).toBe('')
+    expect(buildFtsQuery('***')).toBe('')
+  })
+})
+
 describe('searchPages', () => {
+  it('returns nothing before the minimum query length', () => {
+    savePage('apple-pie', 'Apple Pie', 'A delicious dessert with apples', 'article', 'create')
+
+    const short = 'a'.repeat(MIN_SEARCH_SUGGESTION_LENGTH - 1)
+    expect(searchPages(short, 10)).toEqual([])
+  })
+
   it('returns article pages but excludes templates', () => {
     savePage('apple-pie', 'Apple Pie', 'A delicious dessert with apples', 'article', 'create')
     savePage(

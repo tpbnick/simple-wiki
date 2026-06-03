@@ -1,6 +1,10 @@
 /** Returns true when the reader sidebar or its toggle should be shown. */
-export function shouldShowReaderSidebar(pathname: string, tocEntryCount: number): boolean {
-  return isReaderViewPath(pathname) && tocEntryCount > 0
+export function shouldShowReaderSidebar(
+  pathname: string,
+  tocEntryCount: number,
+  extensionNavCount = 0
+): boolean {
+  return isReaderViewPath(pathname) && (tocEntryCount > 0 || extensionNavCount > 0)
 }
 
 /**

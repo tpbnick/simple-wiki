@@ -27,6 +27,13 @@ export const actions: Actions = {
 
     if (!revisionId) return fail(400, { error: 'Revision ID is required' })
 
+    const page = getPage(params.slug)
+    if (page && !expectedUpdatedAt) {
+      return fail(400, {
+        error: 'Page timestamp is required to restore — refresh the page and try again.'
+      })
+    }
+
     try {
       const page = restoreRevision(
         params.slug,

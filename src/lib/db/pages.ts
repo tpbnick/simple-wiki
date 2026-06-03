@@ -37,9 +37,9 @@ export function getAllPages(): Page[] {
   return openDatabase().statements.getAllPages.all()
 }
 
-/** Returns page metadata for every page, without body content. */
-export function getAllPageSummaries(): PageSummary[] {
-  return openDatabase().statements.getAllPageSummaries.all()
+/** Escapes `%`, `_`, and `\` for SQLite LIKE patterns with ESCAPE '\\'. */
+export function escapeLikePattern(value: string): string {
+  return value.replace(/[\\%_]/g, (char) => `\\${char}`)
 }
 
 /** Returns page metadata for article/help pages with optional search and pagination. */
@@ -53,7 +53,7 @@ export function searchContentPageSummaries(
   const query = options.query?.trim() ?? ''
   const limit = options.limit ?? 100
   const offset = options.offset ?? 0
-  const pattern = query ? `%${query}%` : ''
+  const pattern = query ? `%${escapeLikePattern(query)}%` : ''
   const { statements } = openDatabase()
 
   const total = statements.countContentPageSummaries.get(query, pattern, pattern)?.count ?? 0

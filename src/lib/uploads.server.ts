@@ -1,5 +1,5 @@
 import { createHash } from 'crypto'
-import { existsSync, mkdirSync, openSync, closeSync, writeSync, readFileSync } from 'fs'
+import { existsSync, lstatSync, mkdirSync, openSync, closeSync, writeSync, readFileSync } from 'fs'
 import { resolve, extname, join, basename } from 'path'
 
 import {
@@ -71,6 +71,18 @@ export function resolveUploadPath(filename: string): string | null {
   const prefix = directory.endsWith('/') ? directory : `${directory}/`
   if (filePath !== directory && !filePath.startsWith(prefix)) return null
   return filePath
+}
+
+/**
+ * Returns true when the path is a regular file (not a symlink or directory).
+ * Uses lstat so symlinks are not followed.
+ */
+export function isRegularUploadFile(filePath: string): boolean {
+  try {
+    return lstatSync(filePath).isFile()
+  } catch {
+    return false
+  }
 }
 
 /**
