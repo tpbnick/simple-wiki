@@ -4,6 +4,8 @@
 
 # Simple-Wiki
 
+[![CI](https://github.com/tpbnick/simple-wiki/actions/workflows/ci.yml/badge.svg)](https://github.com/tpbnick/simple-wiki/actions/workflows/ci.yml)
+
 A personal markdown wiki with Wikipedia-like features — wiki links, full-text search, uploads, revision history, templates, admin tools, and a pluggable extension system. Built with SvelteKit and SQLite.
 
 <p align="center">
