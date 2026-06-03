@@ -1,15 +1,10 @@
 <script lang="ts">
 import { Pencil, History, Clock } from 'lucide-svelte'
 import WikiArticleBody from '$lib/components/WikiArticleBody.svelte'
-import { tocStore } from '$lib/stores/toc.svelte.js'
 import type { PageData } from './$types'
 import { formatTimeAgo, formatDateTime, toDatetimeAttr } from '$lib/format.js'
 
 let { data }: { data: PageData } = $props()
-
-$effect(() => {
-  tocStore.set(data.toc ?? [])
-})
 </script>
 
 <svelte:head>

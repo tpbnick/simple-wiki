@@ -7,7 +7,12 @@ import { theme } from '$lib/stores/theme.svelte.js'
 import { settingsStore } from '$lib/stores/settings.svelte.js'
 import { tocStore } from '$lib/stores/toc.svelte.js'
 import { sidebarStore } from '$lib/stores/sidebar.svelte.js'
-import { shouldShowReaderSidebar, isReaderViewPath } from '$lib/reader-view.js'
+import {
+  shouldShowReaderSidebar,
+  isReaderViewPath,
+  readerTocEntryCount,
+  tocEntriesFromPageData
+} from '$lib/reader-view.js'
 import { page } from '$app/state'
 import { browser } from '$app/environment'
 import AboutDialog from '$lib/components/AboutDialog.svelte'
@@ -36,15 +41,21 @@ $effect(() => {
 
 const isReaderView = $derived(isReaderViewPath(page.url.pathname))
 const extensionNavCount = $derived(data.sidebarItems.length)
+const tocEntryCount = $derived(
+  readerTocEntryCount(page.url.pathname, page.data, tocStore.entries.length)
+)
 const showSidebar = $derived(
-  shouldShowReaderSidebar(page.url.pathname, tocStore.entries.length, extensionNavCount)
+  shouldShowReaderSidebar(page.url.pathname, tocEntryCount, extensionNavCount)
 )
 
-$effect(() => {
+$effect.pre(() => {
   sidebarStore.setEnabled(isReaderView)
   if (!isReaderView) {
     tocStore.clear()
+    return
   }
+  const toc = tocEntriesFromPageData(page.data)
+  if (toc) tocStore.set(toc)
 })
 </script>
 
