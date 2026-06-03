@@ -4,12 +4,17 @@
 
 # Simple-Wiki
 
+[![CI](https://github.com/tpbnick/simple-wiki/actions/workflows/ci.yml/badge.svg)](https://github.com/tpbnick/simple-wiki/actions/workflows/ci.yml)
+
 A personal markdown wiki with Wikipedia-like features — wiki links, full-text search, uploads, revision history, templates, admin tools, and a pluggable extension system. Built with SvelteKit and SQLite.
 
 <p align="center">
   <img src="static/Simple-Wiki-Home.png" alt="Simple-Wiki home page" width="48%">
   <img src="static/Simple-Wiki-Admin.png" alt="Simple-Wiki admin panel" width="48%">
 </p>
+
+> [!IMPORTANT]  
+> This application was developed with the assistance of AI.
 
 ## Features
 
