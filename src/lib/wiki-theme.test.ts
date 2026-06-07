@@ -44,6 +44,7 @@ describe('applyReadingPrefsHtmlShell', () => {
     })
 
     expect(out).toContain('--reading-font:')
+    expect(out).toContain('--font-sans:')
     expect(out).toContain('Roboto')
     expect(out).toContain('--reading-font-size:18px')
     expect(out).toContain('--reading-width:90%')

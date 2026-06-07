@@ -5,7 +5,7 @@ describe('buildPreviewContent', () => {
   it('strips infobox and imagebox blocks when requested', () => {
     const raw = [
       'Intro',
-      '{{Infobox|title=Test|fields=name=Alice}}',
+      '{{Infobox|title=Test|fields=name=Jane}}',
       '{{ImageBox|id=box1|title=Photos|images=photo.png|caption=Photo}}',
       'Outro'
     ].join('\n')
@@ -18,7 +18,7 @@ describe('buildPreviewContent', () => {
   })
 
   it('leaves content unchanged when stripping is disabled', () => {
-    const raw = '{{Infobox|title=Test|fields=name=Alice}}'
+    const raw = '{{Infobox|title=Test|fields=name=Jane}}'
     expect(buildPreviewContent(raw, { stripInfobox: false, stripImageBoxes: false })).toBe(raw)
   })
 })

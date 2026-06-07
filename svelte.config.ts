@@ -16,6 +16,8 @@ const config: Config = {
       mode: 'auto',
       directives: {
         'default-src': ['self'],
+        // Shiki uses Oniguruma WASM for syntax highlighting in the client-side editor preview.
+        'script-src': ['self', 'wasm-unsafe-eval'],
         'style-src': ['self', 'unsafe-inline', 'https://fonts.bunny.net'],
         'img-src': ['self', 'data:', 'blob:'],
         'font-src': ['self', 'https://fonts.bunny.net'],

@@ -29,7 +29,10 @@ let {
   >
     Markdown
   </div>
+  <label class="sr-only" for="wiki-edit-content">Page content</label>
   <textarea
+    id="wiki-edit-content"
+    name="content"
     bind:this={textarea}
     bind:value={content}
     oninput={onInput}

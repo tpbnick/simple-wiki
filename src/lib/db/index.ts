@@ -21,7 +21,6 @@ export { resetDatabaseConnection, applyExtensionSchemas, getDatabase } from './c
 export {
   getPage,
   getAllPages,
-  getAllPageSummaries,
   getPageSummaries,
   searchContentPageSummaries,
   countContentPages,
@@ -36,6 +35,7 @@ export {
 export {
   getRevisions,
   getRevisionDiff,
+  getRevisionPostEditSnapshot,
   getRecentRevisions,
   restoreRevision,
   pruneAllRevisions

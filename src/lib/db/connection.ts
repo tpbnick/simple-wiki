@@ -1,8 +1,9 @@
 import BetterSqlite3 from 'better-sqlite3'
+import { randomBytes } from 'node:crypto'
 import { mkdirSync, readFileSync } from 'fs'
 import { dirname, resolve } from 'path'
 import { hashPassword } from '$lib/auth.js'
-import { resolveUploadPath, uploadContentHash } from '$lib/uploads.js'
+import { resolveUploadPath, uploadContentHash } from '$lib/uploads.server.js'
 import type { WikiExtension } from '$lib/extensions/types.js'
 import { SCHEMA } from './schema.js'
 import { buildStatements, type Database, type Statements } from './statements.js'
@@ -37,6 +38,20 @@ export function resetDatabaseConnection(): void {
   invalidatePageSlugCache()
 }
 
+/** Flushes WAL pages into the main db file before a backup restore swap. */
+export function checkpointDatabaseConnection(): void {
+  database?.pragma('wal_checkpoint(TRUNCATE)')
+}
+
+function isUniqueConstraintError(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    (error as { code?: string }).code === 'SQLITE_CONSTRAINT_UNIQUE'
+  )
+}
+
 function scheduleUploadHashBackfill(db: Database): void {
   const pending = db
     .prepare("SELECT filename FROM uploads WHERE content_hash IS NULL OR content_hash = ''")
@@ -64,7 +79,12 @@ function scheduleUploadHashBackfill(db: Database): void {
       }
 
       const hash = uploadContentHash(buffer)
-      updateHash.run(hash, filename)
+      try {
+        updateHash.run(hash, filename)
+      } catch (error) {
+        if (isUniqueConstraintError(error)) continue
+        throw error
+      }
     }
 
     if (index < pending.length) {
@@ -89,7 +109,25 @@ function ensureHelpPage(preparedStatements: Statements) {
 function ensureAdminUser(preparedStatements: Statements) {
   if (preparedStatements.getUserByName.get('admin')) return
 
-  preparedStatements.createUser.run('admin', hashPassword('admin'), 1, 1)
+  const envPassword = process.env.ADMIN_PASSWORD?.trim()
+  let password: string
+
+  if (envPassword && envPassword.length >= 8) {
+    password = envPassword
+  } else {
+    if (envPassword) {
+      console.warn('[auth] ADMIN_PASSWORD must be at least 8 characters; using a random password.')
+    }
+    password = randomBytes(18).toString('base64url')
+    console.warn(
+      '[auth] Created initial admin user.\n' +
+        '[auth]   Username: admin\n' +
+        `[auth]   One-time password: ${password}\n` +
+        '[auth] Save this password — it will not be shown again. You must change it on first login.'
+    )
+  }
+
+  preparedStatements.createUser.run('admin', hashPassword(password), 1, 1)
 }
 
 function ensureHomePage(preparedStatements: Statements) {

@@ -4,10 +4,10 @@ import { readJsonBody } from '$lib/http.js'
 import { requireReadAccess } from '$lib/read-access.js'
 import { enforceAuthenticatedWriteRateLimit } from '$lib/api-rate-limit.js'
 import { enforceReadRateLimit } from '$lib/read-rate-limit.js'
-import { persistWikiPage } from '$lib/server/page-save.js'
+import { persistWikiPage, MAX_PAGE_CONTENT_BYTES } from '$lib/server/page-save.js'
 import type { RequestHandler } from './$types'
 
-const MAX_PAGE_BODY_BYTES = 2 * 1024 * 1024
+const MAX_PAGE_BODY_BYTES = MAX_PAGE_CONTENT_BYTES
 
 export const GET: RequestHandler = ({ params, locals, getClientAddress }) => {
   requireReadAccess(locals)

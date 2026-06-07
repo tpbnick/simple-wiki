@@ -14,13 +14,14 @@ dist/
 !.env.example
 *.pem
 
-# Local data
+# Local data (repo-root only — never use bare `uploads/`; it ignores src/routes/uploads/)
 *.db
 *.db-shm
 *.db-wal
-uploads/
-data/
+/uploads/
+/data/
 *-backup-*.zip
+data/
 
 # Logs
 *.log

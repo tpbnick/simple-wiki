@@ -5,6 +5,7 @@ import { getEditorToolbarItems, getEditorLoadData } from '$lib/extensions/index.
 import { requireAuthenticated, requireAuthenticatedPage } from '$lib/auth-access.js'
 import { enforceFormWriteRateLimit } from '$lib/server/form-rate-limit.js'
 import { persistWikiPage } from '$lib/server/page-save.js'
+import { loadEditorPreviewBundle } from '$lib/wiki-edit/preview-load.server.js'
 import type { PageServerLoad, Actions } from './$types'
 
 export const load: PageServerLoad = ({ params, locals, url }) => {
@@ -30,7 +31,8 @@ export const load: PageServerLoad = ({ params, locals, url }) => {
     defaultNamespace,
     defaultTitle,
     editorTools,
-    familyTrees
+    familyTrees,
+    previewBundle: loadEditorPreviewBundle()
   }
 }
 

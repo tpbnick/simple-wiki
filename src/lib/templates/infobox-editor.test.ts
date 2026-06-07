@@ -237,10 +237,10 @@ describe('renderInfoboxInlineValue', () => {
 
   it('renders markdown links inside infobox templates from the reader pipeline', () => {
     const markdown =
-      '{{Infobox|title=Test|@row0_label=Wikipedia Link|@row0=[Link](https://en.wikipedia.org/wiki/Fischbach_bei_Dahn)|@order=@row0}}'
+      '{{Infobox|title=Test|@row0_label=Wikipedia Link|@row0=[Link](https://en.wikipedia.org/wiki/Example)|@order=@row0}}'
     const html = renderMarkdownSync(markdown, { templateResolver, wikiLinks: {} })
 
-    expect(html).toContain('<a href="https://en.wikipedia.org/wiki/Fischbach_bei_Dahn">Link</a>')
+    expect(html).toContain('<a href="https://en.wikipedia.org/wiki/Example">Link</a>')
   })
 
   it('renders bare URLs without swallowing trailing markdown', () => {
@@ -260,5 +260,38 @@ describe('renderInfoboxInlineValue', () => {
     expect(html).toContain(
       'See <a href="https://example.com" rel="noopener noreferrer">https://example.com</a> for details'
     )
+  })
+
+  it('renders wiki links to existing pages', () => {
+    const html = renderInfoboxInlineValue('[[John Smith]]', {
+      existingPages: new Set(['john-smith'])
+    })
+    expect(html).toBe('<a href="/wiki/john-smith">John Smith</a>')
+  })
+
+  it('renders wiki links with parenthetical titles', () => {
+    const html = renderInfoboxInlineValue('[[Jane (Jan) Doe]]', {
+      existingPages: new Set(['jane-jan-doe'])
+    })
+    expect(html).toBe('<a href="/wiki/jane-jan-doe">Jane (Jan) Doe</a>')
+  })
+
+  it('marks missing wiki pages as red links', () => {
+    const html = renderInfoboxInlineValue('[[Missing Person]]', {
+      existingPages: new Set(['home'])
+    })
+    expect(html).toBe(
+      '<a href="/wiki/missing-person?title=Missing%20Person" class="redlink">Missing Person</a>'
+    )
+  })
+
+  it('renders wiki links inside infobox templates from the reader pipeline', () => {
+    const markdown = '{{Infobox|title=Test|@row0_label=Spouse|@row0=[[John Smith]]|@order=@row0}}'
+    const html = renderMarkdownSync(markdown, {
+      templateResolver,
+      wikiLinks: { existingPages: new Set(['john-smith']) }
+    })
+
+    expect(html).toContain('<a href="/wiki/john-smith">John Smith</a>')
   })
 })

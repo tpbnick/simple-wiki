@@ -27,7 +27,7 @@ describe('sanitizeSearchSnippet', () => {
   it('strips wiki template markup from snippets', () => {
     expect(
       sanitizeSearchSnippet(
-        '{{Infobox|title=Fischbach|@img0=/uploads/fischbach_0910f2a3.png|@img1_cap=Coat'
+        '{{Infobox|title=Exampleville|@img0=/uploads/exampleville_0910f2a3.png|@img1_cap=Coat'
       )
     ).toBe('')
   })
@@ -35,9 +35,9 @@ describe('sanitizeSearchSnippet', () => {
   it('strips templates while preserving highlighted prose', () => {
     expect(
       sanitizeSearchSnippet(
-        'Overview of <mark>Fisch</mark>bach {{Infobox|title=Fischbach|@img0=/uploads/long-file-name.png}}'
+        'Overview of <mark>Exam</mark>pleville {{Infobox|title=Exampleville|@img0=/uploads/long-file-name.png}}'
       )
-    ).toBe('Overview of <mark>Fisch</mark>bach')
+    ).toBe('Overview of <mark>Exam</mark>pleville')
   })
 })
 
@@ -66,7 +66,7 @@ describe('slugify', () => {
 
 describe('titleFromSlug', () => {
   it('derives a readable title from a slug', () => {
-    expect(titleFromSlug('fischbach-bei-dahn')).toBe('Fischbach Bei Dahn')
+    expect(titleFromSlug('sample-village-north')).toBe('Sample Village North')
   })
 })
 

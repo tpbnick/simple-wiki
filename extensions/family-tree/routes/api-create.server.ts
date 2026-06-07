@@ -17,7 +17,7 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 
   try {
     const created = createFamilyTree(title, slug)
-    return json({ slug: created.slug })
+    return json({ slug: created.slug, title: created.title, data: created.data })
   } catch (e) {
     if (e instanceof FamilyTreeConflictError) {
       error(409, e.message)

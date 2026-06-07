@@ -4,12 +4,13 @@ import { settingsStore } from '$lib/stores/settings.svelte.js'
 import { FONTS, SIZES } from '$lib/reading-options.js'
 import { READING_WIDTH_OPTIONS, readingWidthIndex } from '$lib/reading-width.js'
 import { aboutDialogStore } from '$lib/stores/about-dialog.svelte.js'
-import { onMount } from 'svelte'
 
 let open = $state(false)
 let panel = $state<HTMLDivElement | null>(null)
 
-onMount(() => settingsStore.init())
+const fontId = $derived(settingsStore.fontId)
+const sizeId = $derived(settingsStore.sizeId)
+const readingWidth = $derived(settingsStore.readingWidth)
 
 function handleOutsideClick(e: MouseEvent) {
   if (open && panel && !panel.contains(e.target as Node)) {
@@ -57,17 +58,17 @@ function handleKeydown(e: KeyboardEvent) {
           {#each FONTS as font}
             <button
               type="button"
-              aria-pressed={settingsStore.fontId === font.id}
+              aria-pressed={fontId === font.id}
               onclick={() => settingsStore.setFont(font.id)}
               class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm
                      transition-colors text-left
-                     {settingsStore.fontId === font.id
+                     {fontId === font.id
                 ? 'bg-primary/10 text-primary font-medium'
                 : 'hover:bg-base-200 text-base-content/70'}"
               style="font-family: {font.stack}"
             >
               {font.label}
-              {#if settingsStore.fontId === font.id}
+              {#if fontId === font.id}
                 <span class="w-1.5 h-1.5 rounded-full bg-primary shrink-0"></span>
               {/if}
             </button>
@@ -83,10 +84,10 @@ function handleKeydown(e: KeyboardEvent) {
           {#each SIZES as size}
             <button
               type="button"
-              aria-pressed={settingsStore.sizeId === size.id}
+              aria-pressed={sizeId === size.id}
               onclick={() => settingsStore.setSize(size.id)}
               class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-colors
-                     {settingsStore.sizeId === size.id
+                     {sizeId === size.id
                 ? 'bg-primary/10 text-primary'
                 : 'hover:bg-base-200 text-base-content/60'}"
             >
@@ -106,10 +107,10 @@ function handleKeydown(e: KeyboardEvent) {
           min={0}
           max={READING_WIDTH_OPTIONS.length - 1}
           step={1}
-          value={readingWidthIndex(settingsStore.readingWidth)}
+          value={readingWidthIndex(readingWidth)}
           aria-valuemin={0}
           aria-valuemax={READING_WIDTH_OPTIONS.length - 1}
-          aria-valuenow={readingWidthIndex(settingsStore.readingWidth)}
+          aria-valuenow={readingWidthIndex(readingWidth)}
           aria-valuetext="Reading width"
           oninput={(e) => settingsStore.setReadingWidthIndex(Number(e.currentTarget.value))}
           class="range range-primary range-xs w-full"

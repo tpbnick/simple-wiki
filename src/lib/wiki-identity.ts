@@ -1,19 +1,8 @@
-import { readFileSync } from 'fs'
-import { dirname, join } from 'path'
-import { fileURLToPath } from 'url'
+import { getBuildInfo } from '$lib/build-info.js'
 
-const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '../..')
-
-let cachedVersion: string | null = null
-
-/** Application version from package.json. */
+/** Application version from build-time metadata (package.json at build). */
 export function getAppVersion(): string {
-  if (cachedVersion) return cachedVersion
-  const pkg = JSON.parse(readFileSync(join(repoRoot, 'package.json'), 'utf8')) as {
-    version?: string
-  }
-  cachedVersion = pkg.version ?? '0.0.0'
-  return cachedVersion
+  return getBuildInfo().version
 }
 
 /** Display name for this wiki instance (override with WIKI_NAME). */
@@ -24,5 +13,5 @@ export function getWikiName(): string {
 
 /** Clears cached app version. Intended for tests. */
 export function resetWikiIdentityForTests(): void {
-  cachedVersion = null
+  // Version comes from build-time __BUILD_INFO__; nothing to reset at runtime.
 }

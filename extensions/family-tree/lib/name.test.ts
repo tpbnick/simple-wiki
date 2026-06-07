@@ -21,12 +21,12 @@ describe('parseBirthYear', () => {
 
 describe('comparePeopleByBirthThenName', () => {
   it('sorts by birth year then first name', () => {
-    const donna = { name: 'Donna June Steighner', birthYear: '1940' }
-    const bob = { name: 'Robert (Bob) Joseph Steighner', birthYear: '1949' }
-    const anna = { name: 'Anna Marie Steighner', birthYear: '1949' }
+    const jane1940 = { name: 'Jane Doe', birthYear: '1940' }
+    const john1949 = { name: 'John (Jack) Doe', birthYear: '1949' }
+    const janeMarie1949 = { name: 'Jane Marie Doe', birthYear: '1949' }
 
-    expect(comparePeopleByBirthThenName(donna, bob)).toBeLessThan(0)
-    expect(comparePeopleByBirthThenName(bob, donna)).toBeGreaterThan(0)
-    expect(comparePeopleByBirthThenName(anna, bob)).toBeLessThan(0)
+    expect(comparePeopleByBirthThenName(jane1940, john1949)).toBeLessThan(0)
+    expect(comparePeopleByBirthThenName(john1949, jane1940)).toBeGreaterThan(0)
+    expect(comparePeopleByBirthThenName(janeMarie1949, john1949)).toBeLessThan(0)
   })
 })

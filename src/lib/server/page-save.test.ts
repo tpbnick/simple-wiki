@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { persistWikiPage, validatePageSaveFields } from '$lib/server/page-save.js'
+import {
+  persistWikiPage,
+  validatePageSaveFields,
+  MAX_PAGE_CONTENT_BYTES
+} from '$lib/server/page-save.js'
 import { getPage, savePage } from '$lib/db/index.js'
 import { installTempWikiEnv } from '$lib/test/db-env.js'
 
@@ -16,6 +20,19 @@ describe('validatePageSaveFields', () => {
         expectedUpdatedAt: null
       })
     ).toEqual({ status: 422, message: 'Title is required' })
+  })
+
+  it('rejects content over 2 MB', () => {
+    const oversized = 'x'.repeat(MAX_PAGE_CONTENT_BYTES + 1)
+    expect(
+      validatePageSaveFields({
+        title: 'Big',
+        content: oversized,
+        namespace: 'article',
+        summary: '',
+        expectedUpdatedAt: null
+      })
+    ).toEqual({ status: 413, message: 'Page content exceeds 2 MB limit' })
   })
 })
 

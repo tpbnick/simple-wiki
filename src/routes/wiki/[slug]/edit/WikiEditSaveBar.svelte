@@ -29,6 +29,7 @@ let {
     <p class="w-full text-xs text-error -mb-1" role="alert">{formError}</p>
   {/if}
   <input
+    id="edit-summary"
     type="text"
     name="summary"
     bind:value={summary}

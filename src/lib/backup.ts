@@ -12,18 +12,18 @@ import {
   unlinkSync,
   writeFileSync
 } from 'fs'
-import { tmpdir } from 'os'
-import { join } from 'path'
+import { join, dirname } from 'path'
 import { zipSync, unzipSync } from 'fflate'
 import { getAppVersion, getWikiName } from '$lib/wiki-identity.js'
 import {
   openDatabase,
   resetDatabaseConnection,
+  checkpointDatabaseConnection,
   resolveDatabasePath,
   applyExtensionSchemas
 } from '$lib/db/connection.js'
 import { getExtensions } from '$lib/extensions/server.js'
-import { uploadsDirectory } from '$lib/uploads.js'
+import { uploadsDirectory } from '$lib/uploads.server.js'
 import {
   validateZipArchiveLimits,
   validateUnzippedEntrySizes,
@@ -33,9 +33,11 @@ import { getAllPages } from '$lib/db/index.js'
 import type { Page } from '$lib/db/types.js'
 import { invalidatePageSlugCache } from '$lib/db/slug-cache.js'
 import {
+  beginDatabaseBackup,
   beginDatabaseImport,
+  endDatabaseBackup,
   endDatabaseImport,
-  isDatabaseSwapInProgress
+  isDatabaseOperationInProgress
 } from '$lib/db/swap-lock.js'
 import { runOnDatabaseReset } from '$lib/extensions/server.js'
 
@@ -63,6 +65,8 @@ export interface BackupOptions {
 }
 
 export interface ImportBackupOptions {
+  /** When true, replaces the live wiki.db with the backup (required for import). */
+  overwriteDatabase?: boolean
   restoreUploads?: boolean
 }
 
@@ -76,6 +80,26 @@ export class BackupError extends Error {
     super(message, options)
     this.name = 'BackupError'
   }
+}
+
+function rethrowImportError(error: unknown, context: string): never {
+  if (error instanceof BackupError) throw error
+
+  const code =
+    error instanceof Error && 'code' in error ? String((error as NodeJS.ErrnoException).code) : ''
+
+  if (code === 'EACCES' || code === 'EPERM') {
+    throw new BackupError(
+      `${context}: permission denied. Ensure /data and /uploads are writable by the container user (check PUID/PGID on Unraid).`,
+      { cause: error }
+    )
+  }
+
+  if (code === 'ENOSPC') {
+    throw new BackupError(`${context}: disk full.`, { cause: error })
+  }
+
+  throw error
 }
 
 /** Serializes a backup manifest to the standard text format. */
@@ -205,6 +229,7 @@ function collectUploadEntries(): Record<string, Uint8Array> {
   if (!existsSync(directory)) return entries
 
   for (const name of readdirSync(directory)) {
+    if (name.startsWith('.')) continue
     const filePath = join(directory, name)
     if (!statSync(filePath).isFile()) continue
     entries[`${BACKUP_UPLOADS_PREFIX}${name}`] = readFileSync(filePath)
@@ -216,7 +241,13 @@ function collectUploadEntries(): Record<string, Uint8Array> {
 function safeUploadFilename(zipPath: string): string | null {
   if (!zipPath.startsWith(BACKUP_UPLOADS_PREFIX)) return null
   const filename = zipPath.slice(BACKUP_UPLOADS_PREFIX.length)
-  if (!filename || filename.includes('/') || filename.includes('\\') || filename.includes('..')) {
+  if (
+    !filename ||
+    filename.startsWith('.') ||
+    filename.includes('/') ||
+    filename.includes('\\') ||
+    filename.includes('..')
+  ) {
     return null
   }
   return filename
@@ -248,32 +279,61 @@ function removeSidecarFiles(dbPath: string): void {
   }
 }
 
+/** Move or copy a file into place; rename fails with EXDEV across mount points (e.g. /tmp -> /data). */
+function replacePathSync(source: string, destination: string): void {
+  try {
+    renameSync(source, destination)
+  } catch (error) {
+    const code = error instanceof Error && 'code' in error ? String(error.code) : ''
+    if (code !== 'EXDEV') throw error
+    copyFileSync(source, destination)
+    unlinkSync(source)
+  }
+}
+
 function restoreUploads(uploadEntries: Array<[string, Uint8Array]>): void {
   if (uploadEntries.length === 0) return
 
   const liveDir = uploadsDirectory()
-  const preImportDir = `${liveDir}.pre-import-${Date.now()}`
-
-  if (existsSync(liveDir)) {
-    renameSync(liveDir, preImportDir)
-  }
-
   mkdirSync(liveDir, { recursive: true })
+
+  // Merge restore: overwrite files present in the backup; leave other live uploads untouched.
+  const stamp = Date.now()
+  const stagingDir = join(liveDir, `.restore-staging-${stamp}`)
+  const backupDir = join(liveDir, `.pre-import-${stamp}`)
+  mkdirSync(stagingDir, { recursive: true })
 
   try {
     for (const [filename, data] of uploadEntries) {
-      writeFileSync(join(liveDir, filename), data)
+      writeFileSync(join(stagingDir, filename), data)
+    }
+
+    for (const [filename] of uploadEntries) {
+      const livePath = join(liveDir, filename)
+      if (existsSync(livePath) && statSync(livePath).isFile()) {
+        mkdirSync(backupDir, { recursive: true })
+        replacePathSync(livePath, join(backupDir, filename))
+      }
+    }
+
+    for (const [filename] of uploadEntries) {
+      replacePathSync(join(stagingDir, filename), join(liveDir, filename))
     }
   } catch (error) {
-    rmSync(liveDir, { recursive: true, force: true })
-    if (existsSync(preImportDir)) {
-      renameSync(preImportDir, liveDir)
-    }
-    throw error
-  }
+    for (const [filename] of uploadEntries) {
+      const livePath = join(liveDir, filename)
+      if (existsSync(livePath)) unlinkSync(livePath)
 
-  if (existsSync(preImportDir)) {
-    rmSync(preImportDir, { recursive: true, force: true })
+      const backedUpPath = join(backupDir, filename)
+      if (existsSync(backedUpPath)) {
+        replacePathSync(backedUpPath, livePath)
+      }
+    }
+
+    rethrowImportError(error, 'Could not restore uploaded files')
+  } finally {
+    rmSync(stagingDir, { recursive: true, force: true })
+    if (existsSync(backupDir)) rmSync(backupDir, { recursive: true, force: true })
   }
 }
 
@@ -324,13 +384,19 @@ function unzipBackupArchive(zipBytes: Uint8Array): Record<string, Uint8Array> {
 
 /** Creates a zip backup containing wiki.db, manifest.txt, and optional uploads/markdown. */
 export async function createBackupArchive(options: BackupOptions = {}): Promise<Uint8Array> {
-  if (isDatabaseSwapInProgress()) {
-    throw new BackupError('Cannot create a backup while a restore is in progress')
+  openDatabase()
+
+  try {
+    beginDatabaseBackup()
+  } catch {
+    throw new BackupError('Another database operation is already in progress')
   }
 
   const includeUploads = options.includeUploads === true
   const includeMarkdown = options.includeMarkdown === true
-  const tempDir = mkdtempSync(join(tmpdir(), 'wiki-backup-'))
+  const dbDir = dirname(resolveDatabasePath())
+  mkdirSync(dbDir, { recursive: true })
+  const tempDir = mkdtempSync(join(dbDir, '.wiki-backup-'))
   const snapshotPath = join(tempDir, BACKUP_DATABASE_FILE)
 
   try {
@@ -354,6 +420,7 @@ export async function createBackupArchive(options: BackupOptions = {}): Promise<
     return zipSync(zipEntries)
   } finally {
     rmSync(tempDir, { recursive: true, force: true })
+    endDatabaseBackup()
   }
 }
 
@@ -373,8 +440,18 @@ export function importBackupArchive(
   zipBytes: Uint8Array,
   options: ImportBackupOptions = {}
 ): ImportBackupResult {
+  if (options.overwriteDatabase !== true) {
+    throw new BackupError(
+      'Database overwrite was not confirmed. Enable fully overwrite existing database to import.'
+    )
+  }
+
   if (zipBytes.byteLength > MAX_BACKUP_BYTES) {
     throw new BackupError(`Backup file exceeds ${MAX_BACKUP_BYTES} bytes`)
+  }
+
+  if (isDatabaseOperationInProgress()) {
+    throw new BackupError('Another database operation is already in progress')
   }
 
   beginDatabaseImport()
@@ -391,7 +468,10 @@ export function importBackupArchive(
     const uploadEntries = options.restoreUploads === true ? listUploadEntries(entries) : []
     const warnings = buildImportWarnings(manifest, options, uploadEntries)
 
-    const tempDir = mkdtempSync(join(tmpdir(), 'wiki-import-'))
+    const livePath = resolveDatabasePath()
+    const dbDir = dirname(livePath)
+    mkdirSync(dbDir, { recursive: true })
+    const tempDir = mkdtempSync(join(dbDir, '.wiki-import-'))
     const extractedDbPath = join(tempDir, BACKUP_DATABASE_FILE)
     const stagingPath = join(tempDir, `${BACKUP_DATABASE_FILE}.staging`)
 
@@ -401,20 +481,20 @@ export function importBackupArchive(
       copyFileSync(extractedDbPath, stagingPath)
       removeSidecarFiles(stagingPath)
 
-      const livePath = resolveDatabasePath()
+      checkpointDatabaseConnection()
       resetDatabaseConnection()
       runOnDatabaseReset()
 
       const preImportPath = `${livePath}.pre-import-${Date.now()}`
 
       if (existsSync(livePath)) {
-        renameSync(livePath, preImportPath)
+        replacePathSync(livePath, preImportPath)
       }
       removeSidecarFiles(livePath)
 
       let importSucceeded = false
       try {
-        renameSync(stagingPath, livePath)
+        replacePathSync(stagingPath, livePath)
         removeSidecarFiles(livePath)
         openDatabase({ duringImport: true })
         applyExtensionSchemas(getExtensions())
@@ -437,7 +517,7 @@ export function importBackupArchive(
 
         if (existsSync(preImportPath)) {
           try {
-            renameSync(preImportPath, livePath)
+            replacePathSync(preImportPath, livePath)
             removeSidecarFiles(livePath)
           } catch (rollbackError) {
             throw new BackupError(
@@ -448,10 +528,15 @@ export function importBackupArchive(
           }
         }
 
-        openDatabase({ duringImport: true })
+        try {
+          openDatabase({ duringImport: true })
+          applyExtensionSchemas(getExtensions())
+        } catch {
+          // Rollback opened the previous database file; avoid masking the original import error.
+        }
         invalidatePageSlugCache()
         runOnDatabaseReset()
-        throw error
+        rethrowImportError(error, 'Database import failed')
       } finally {
         if (importSucceeded && existsSync(preImportPath)) {
           unlinkSync(preImportPath)
@@ -459,6 +544,8 @@ export function importBackupArchive(
       }
 
       return { manifest, warnings }
+    } catch (error) {
+      rethrowImportError(error, 'Backup import failed')
     } finally {
       rmSync(tempDir, { recursive: true, force: true })
     }

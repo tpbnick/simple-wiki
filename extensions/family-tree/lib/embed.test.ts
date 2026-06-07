@@ -36,20 +36,20 @@ describe('resolveFamilyTreeParam', () => {
   })
 
   it('falls back to slug for legacy embeds', () => {
-    expect(resolveFamilyTreeParam({ slug: 'steighner' })).toBe('steighner')
+    expect(resolveFamilyTreeParam({ slug: 'legacy-tree' })).toBe('legacy-tree')
   })
 })
 
 describe('renderFamilyTreeEmbed', () => {
   it('renders an inline tree with nodes and edges', () => {
-    createFamilyTree('Steighner', 'steighner')
+    createFamilyTree('Example Family', 'example-family')
 
-    const html = renderFamilyTreeEmbed({ family: 'steighner' })
+    const html = renderFamilyTreeEmbed({ family: 'example-family' })
 
     expect(html).toContain('wiki-family-tree-embed')
-    expect(html).toContain('Steighner')
+    expect(html).toContain('Example Family')
     expect(html).toContain('wiki-family-tree-embed__mount')
-    expect(html).toContain('data-family="steighner"')
+    expect(html).toContain('data-family="example-family"')
     expect(html).toContain('data-tree="')
     expect(html).not.toContain('<iframe')
     expect(html).not.toContain('Edit tree')
@@ -57,27 +57,27 @@ describe('renderFamilyTreeEmbed', () => {
   })
 
   it('shows an edit link for signed-in admins', () => {
-    createFamilyTree('Steighner', 'steighner')
+    createFamilyTree('Example Family', 'example-family')
 
     const html = withRenderContext({ canEdit: true }, () =>
-      renderFamilyTreeEmbed({ family: 'steighner' })
+      renderFamilyTreeEmbed({ family: 'example-family' })
     )
 
     expect(html).toContain('Edit tree')
-    expect(html).toContain('/family-tree/steighner')
+    expect(html).toContain('/family-tree/example-family')
   })
 
   it('does not embed wiki page slugs in HTML (loaded client-side)', () => {
-    createFamilyTree('Steighner', 'steighner')
+    createFamilyTree('Example Family', 'example-family')
     savePage(
-      'steighner-family',
-      'Steighner Family',
-      '{{FamilyTree|family=steighner}}',
+      'example-family-page',
+      'Example Family Page',
+      '{{FamilyTree|family=example-family}}',
       'article',
       'create'
     )
 
-    const html = renderFamilyTreeEmbed({ family: 'steighner' })
+    const html = renderFamilyTreeEmbed({ family: 'example-family' })
 
     expect(html).not.toContain('data-wiki-pages')
   })
@@ -97,15 +97,15 @@ describe('renderFamilyTreeEmbed', () => {
   })
 
   it('survives wiki sanitization in the reader pipeline', () => {
-    createFamilyTree('Steighner', 'steighner')
+    createFamilyTree('Example Family', 'example-family')
 
-    const html = renderMarkdownSync('{{FamilyTree|family=steighner}}', {
+    const html = renderMarkdownSync('{{FamilyTree|family=example-family}}', {
       templateResolver,
       wikiLinks: { existingPages: new Set<string>() }
     })
 
     expect(html).toContain('wiki-family-tree-embed')
-    expect(html).toContain('data-family="steighner"')
+    expect(html).toContain('data-family="example-family"')
     expect(html).not.toContain('data-tree="')
     expect(html).not.toContain('<iframe')
   })

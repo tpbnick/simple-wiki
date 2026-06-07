@@ -2,14 +2,15 @@ import { mkdtempSync, rmSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import { tmpdir } from 'os'
 import { afterEach, describe, expect, it } from 'vitest'
+import { uploadPublicUrl } from '$lib/uploads.js'
 import {
   validateUpload,
   normalizeUploadFilename,
   resolveAvailableFilename,
   uploadContentHash,
-  uploadPublicUrl,
+  defaultUploadsDirectoryPath,
   resetUploadsDirectoryForTests
-} from '$lib/uploads.js'
+} from '$lib/uploads.server.js'
 
 const PNG_BYTES = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00])
 
@@ -103,6 +104,19 @@ describe('uploadContentHash', () => {
 describe('uploadPublicUrl', () => {
   it('encodes spaces in the URL path', () => {
     expect(uploadPublicUrl('1860 Butler Census.png')).toBe('/uploads/1860%20Butler%20Census.png')
+  })
+})
+
+describe('defaultUploadsDirectoryPath', () => {
+  it('prefers UPLOADS_DIR when set', () => {
+    const previous = process.env.UPLOADS_DIR
+    process.env.UPLOADS_DIR = '/custom/uploads'
+    try {
+      expect(defaultUploadsDirectoryPath()).toBe('/custom/uploads')
+    } finally {
+      if (previous === undefined) delete process.env.UPLOADS_DIR
+      else process.env.UPLOADS_DIR = previous
+    }
   })
 })
 

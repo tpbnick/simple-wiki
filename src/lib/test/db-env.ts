@@ -3,10 +3,12 @@ import { join } from 'path'
 import { tmpdir } from 'os'
 import { afterEach, beforeEach } from 'vitest'
 import { resetDatabaseConnection } from '$lib/db/connection.js'
-import { resetUploadsDirectoryForTests } from '$lib/uploads.js'
+import { resetUploadsDirectoryForTests } from '$lib/uploads.server.js'
 import { resetWikiIdentityForTests } from '$lib/wiki-identity.js'
 import { resetRateLimits } from '$lib/rate-limit.js'
 import { resetDatabaseSwapLockForTests } from '$lib/db/swap-lock.js'
+
+export const TEST_ADMIN_PASSWORD = 'admin-test-password'
 
 export interface TempWikiEnv {
   tempDir: string
@@ -17,6 +19,8 @@ export interface TempWikiEnv {
 export interface TempWikiEnvOptions {
   wikiName?: string
   withUploads?: boolean
+  /** Initial admin password for seeded user (min 8 chars; default for tests). */
+  adminPassword?: string
 }
 
 /**
@@ -28,12 +32,16 @@ export function installTempWikiEnv(prefix: string, options: TempWikiEnvOptions =
   let originalUploadsDir: string | undefined
   let originalWikiName: string | undefined
 
+  let originalAdminPassword: string | undefined
+
   beforeEach(() => {
     resetDatabaseConnection()
     resetWikiIdentityForTests()
     originalDatabasePath = process.env.DATABASE_PATH
     originalUploadsDir = process.env.UPLOADS_DIR
     originalWikiName = process.env.WIKI_NAME
+    originalAdminPassword = process.env.ADMIN_PASSWORD
+    process.env.ADMIN_PASSWORD = options.adminPassword ?? TEST_ADMIN_PASSWORD
     tempDir = mkdtempSync(join(tmpdir(), prefix))
     process.env.DATABASE_PATH = join(tempDir, 'test.db')
     process.env.UPLOADS_DIR = join(tempDir, 'uploads')
@@ -55,6 +63,11 @@ export function installTempWikiEnv(prefix: string, options: TempWikiEnvOptions =
     process.env.DATABASE_PATH = originalDatabasePath
     process.env.UPLOADS_DIR = originalUploadsDir
     process.env.WIKI_NAME = originalWikiName
+    if (originalAdminPassword === undefined) {
+      delete process.env.ADMIN_PASSWORD
+    } else {
+      process.env.ADMIN_PASSWORD = originalAdminPassword
+    }
     resetUploadsDirectoryForTests(originalUploadsDir)
     resetWikiIdentityForTests()
   })

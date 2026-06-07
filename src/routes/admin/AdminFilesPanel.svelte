@@ -3,6 +3,7 @@ import { tick } from 'svelte'
 import { Check, Eye, PenLine, Search, Trash2, X } from 'lucide-svelte'
 import { goto, invalidateAll } from '$app/navigation'
 import { formatBytes, formatTimeAgo, toDatetimeAttr, formatDateTime } from '$lib/format.js'
+import { uploadPublicUrl } from '$lib/uploads.js'
 import type { AdminDeleteTarget } from './admin-types.js'
 
 let {
@@ -149,7 +150,7 @@ async function submitRename() {
               {#if renameError}<p class="text-error text-xs mt-1">{renameError}</p>{/if}
             {:else}
               <a
-                href="/uploads/{file.filename}"
+                href={uploadPublicUrl(file.filename)}
                 target="_blank"
                 class="font-medium text-base-content hover:text-primary transition-colors"
               >
@@ -179,7 +180,7 @@ async function submitRename() {
               class="flex gap-1 justify-end opacity-100 lg:opacity-70 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100"
             >
               <a
-                href="/uploads/{file.filename}"
+                href={uploadPublicUrl(file.filename)}
                 target="_blank"
                 class="w-7 h-7 flex items-center justify-center rounded-md hover:bg-base-200 text-base-content/50 hover:text-base-content transition-all"
                 title="View"><Eye size={13} /></a

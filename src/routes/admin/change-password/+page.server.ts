@@ -55,6 +55,6 @@ export const actions: Actions = {
 
     setUserPassword(locals.user.id, await hashPasswordAsync(newPassword))
     destroyOtherSessions(locals.user.id, cookies.get(SESSION_COOKIE_NAME))
-    redirect(303, '/admin')
+    redirect(303, locals.user.isAdmin ? '/admin' : '/')
   }
 }

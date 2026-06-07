@@ -26,7 +26,6 @@ let {
   onupload
 }: Props = $props()
 
-let imageInputs: Record<number, HTMLInputElement> = {}
 let draggedIndex = $state<number | null>(null)
 let dropIndex = $state<number | null>(null)
 
@@ -62,10 +61,6 @@ function moveEntry(fromIndex: number, toIndex: number) {
   const [moved] = entries.splice(fromIndex, 1)
   entries.splice(toIndex, 0, moved)
   onupdate({ ...data, entries })
-}
-
-function openImageUpload(index: number) {
-  imageInputs[index]?.click()
 }
 
 function entryKey(entry: InfoboxEntry, index: number): string {
@@ -113,6 +108,8 @@ function parseSizeInput(value: string): number | undefined {
       <tr>
         <th colspan="3" class="infobox-title">
           <input
+            id="infobox-title"
+            name="infobox-title"
             type="text"
             value={data.title}
             placeholder="Infobox title"
@@ -147,6 +144,8 @@ function parseSizeInput(value: string): number | undefined {
             <th scope="row">
               <div class="infobox-editor-label-cell">
                 <input
+                  id="infobox-label-{entryKey(entry, index)}"
+                  name="infobox-label-{entryKey(entry, index)}"
                   type="text"
                   value={entry.label}
                   placeholder="Label"
@@ -169,6 +168,8 @@ function parseSizeInput(value: string): number | undefined {
             </th>
             <td>
               <input
+                id="infobox-value-{entryKey(entry, index)}"
+                name="infobox-value-{entryKey(entry, index)}"
                 type="text"
                 value={entry.value}
                 placeholder="Value"
@@ -201,10 +202,12 @@ function parseSizeInput(value: string): number | undefined {
             </td>
             <td colspan="2" class="infobox-image">
               <input
-                bind:this={imageInputs[index]}
+                id="infobox-upload-{entryKey(entry, index)}"
+                name="infobox-upload-{entryKey(entry, index)}"
                 type="file"
                 class="hidden"
                 accept="image/*"
+                disabled={uploading && uploadingEntryIndex === index}
                 onchange={(event) => onupload(event.currentTarget.files, index)}
               />
 
@@ -222,6 +225,8 @@ function parseSizeInput(value: string): number | undefined {
               {/if}
 
               <input
+                id="infobox-image-url-{entryKey(entry, index)}"
+                name="infobox-image-url-{entryKey(entry, index)}"
                 type="text"
                 value={entry.image}
                 placeholder="Image URL"
@@ -232,6 +237,8 @@ function parseSizeInput(value: string): number | undefined {
               />
 
               <input
+                id="infobox-caption-{entryKey(entry, index)}"
+                name="infobox-caption-{entryKey(entry, index)}"
                 type="text"
                 value={entry.caption}
                 placeholder="Image caption (optional)"
@@ -241,9 +248,11 @@ function parseSizeInput(value: string): number | undefined {
                   updateEntry(index, { ...entry, caption: event.currentTarget.value })}
               />
 
-              <label class="infobox-editor-size-field">
+              <label class="infobox-editor-size-field" for="infobox-size-{entryKey(entry, index)}">
                 <span class="infobox-editor-size-label">Size</span>
                 <input
+                  id="infobox-size-{entryKey(entry, index)}"
+                  name="infobox-size-{entryKey(entry, index)}"
                   type="number"
                   min="1"
                   max="100"
@@ -264,11 +273,10 @@ function parseSizeInput(value: string): number | undefined {
               </label>
 
               <div class="infobox-image-actions">
-                <button
-                  type="button"
+                <label
+                  for="infobox-upload-{entryKey(entry, index)}"
                   class="infobox-add-image"
-                  disabled={uploading && uploadingEntryIndex === index}
-                  onclick={() => openImageUpload(index)}
+                  aria-disabled={uploading && uploadingEntryIndex === index}
                 >
                   {#if uploading && uploadingEntryIndex === index}
                     <span class="loading loading-spinner loading-xs"></span>
@@ -276,7 +284,7 @@ function parseSizeInput(value: string): number | undefined {
                     <Upload size={14} />
                   {/if}
                   {entry.image ? 'Change image' : 'Upload image'}
-                </button>
+                </label>
 
                 {#if data.entries.length > 1}
                   <button

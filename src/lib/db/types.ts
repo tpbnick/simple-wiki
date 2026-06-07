@@ -21,9 +21,10 @@ export interface PageSummary {
 export interface Revision {
   id: number
   page_id: number
+  /** Snapshot of page content before this edit. */
   content: string
   summary: string
-  /** Page title before this revision was superseded (null on legacy rows). */
+  /** Snapshot of page title before this edit (null on legacy rows). */
   title: string | null
   created_at: string
 }

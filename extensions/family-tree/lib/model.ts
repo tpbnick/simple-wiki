@@ -1,9 +1,8 @@
 import type { FamilyTreeData, FamilyTreePerson } from './types.js'
+import { createPersonId } from './id.js'
 import { comparePeopleByBirthThenName } from './name.js'
 
-export function createPersonId(): string {
-  return crypto.randomUUID()
-}
+export { createPersonId }
 
 export function createPerson(name = 'New person'): FamilyTreePerson {
   return {

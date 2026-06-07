@@ -7,7 +7,7 @@
     "dev": "vite dev",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "node build/index.js",
+    "start": "node server/start.mjs",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -25,12 +25,12 @@
     "daisyui": "^5.0.0",
     "lucide-svelte": "^0.511.0",
     "prettier": "^3.8.3",
-    "prettier-plugin-svelte": "^4.0.1",
+    "prettier-plugin-svelte": "^4.1.0",
     "svelte": "^5.33.0",
     "svelte-check": "^4.4.8",
-    "typescript": "^5.8.3",
-    "vite": "^6.3.3",
-    "vitest": "^3.2.4"
+    "typescript": "^6.0.3",
+    "vite": "^6.4.3",
+    "vitest": "^4.1.8"
   },
   "dependencies": {
     "@shikijs/rehype": "^1.29.2",

@@ -5,12 +5,10 @@ import { renderFamilyTreeErrorHtml } from './embed-error.js'
 import { encodeFamilyTreePayload } from './embed-payload.server.js'
 import { validateFamilyTreeData } from './validate.js'
 
-/** Reads the tree id from template params (`family`, with legacy `slug` fallback). */
-export function resolveFamilyTreeParam(params: Record<string, string>): string {
-  return (params.family ?? params.slug ?? '').trim()
-}
+import { resolveFamilyTreeParam } from './embed-params.js'
 
-/** Renders a reader embed placeholder upgraded client-side into an interactive canvas. */
+export { resolveFamilyTreeParam }
+
 export function renderFamilyTreeEmbed(params: Record<string, string>): string {
   const slug = resolveFamilyTreeParam(params)
   if (!slug) {

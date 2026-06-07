@@ -1,5 +1,11 @@
 /** Creates a family tree via the wiki API. */
-export async function createFamilyTree(title: string): Promise<{ slug: string; title: string }> {
+import type { FamilyTreeData } from '$extensions/family-tree/lib/types.js'
+
+export async function createFamilyTree(title: string): Promise<{
+  slug: string
+  title: string
+  data: FamilyTreeData
+}> {
   const trimmed = title.trim()
   if (!trimmed) {
     throw new Error('Tree name is required')

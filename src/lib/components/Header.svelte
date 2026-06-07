@@ -7,7 +7,7 @@ import ThemeToggle from './ThemeToggle.svelte'
 import SettingsPanel from './SettingsPanel.svelte'
 import { sidebarStore } from '$lib/stores/sidebar.svelte.js'
 import { tocStore } from '$lib/stores/toc.svelte.js'
-import { shouldShowReaderSidebar } from '$lib/reader-view.js'
+import { shouldShowReaderSidebar, readerTocEntryCount } from '$lib/reader-view.js'
 import { MIN_SEARCH_SUGGESTION_LENGTH } from '$lib/search-constants.js'
 import { Search, LayoutDashboard, LogOut, LogIn, FilePlus } from 'lucide-svelte'
 
@@ -35,8 +35,15 @@ const showSuggestions = $derived(
   searchFocused && query.trim().length >= MIN_SEARCH_SUGGESTION_LENGTH
 )
 
+const extensionNavCount = $derived(
+  Array.isArray(page.data.sidebarItems) ? page.data.sidebarItems.length : 0
+)
+
+const tocEntryCount = $derived(
+  readerTocEntryCount(page.url.pathname, page.data, tocStore.entries.length)
+)
 const showSidebarToggle = $derived(
-  shouldShowReaderSidebar(page.url.pathname, tocStore.entries.length)
+  shouldShowReaderSidebar(page.url.pathname, tocEntryCount, extensionNavCount)
 )
 
 onMount(() => {

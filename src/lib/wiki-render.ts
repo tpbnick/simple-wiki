@@ -1,9 +1,8 @@
 import type { Page } from '$lib/db/index.js'
 import { getAllPageSlugs } from '$lib/db/pages.js'
 import { renderMarkdown, extractToc, type TocEntry } from '$lib/markdown/index.js'
+import { prepareWikiMarkdownForRender } from '$lib/markdown/prepare-for-render.js'
 import { templateResolver } from '$lib/templates/index.js'
-import { normalizeInfoboxForRender } from '$lib/templates/infobox-editor.js'
-import { normalizeImageBoxForRender } from '$lib/templates/imagebox-editor.js'
 import { runOnPageRender } from '$lib/extensions/server.js'
 import { sanitizeWikiHtml } from '$lib/markdown/sanitize-html.js'
 
@@ -18,10 +17,7 @@ const PREVIEW_PAGE: Page = {
   updated_at: ''
 }
 
-/** Applies infobox/imagebox normalization used before reader rendering. */
-export function prepareWikiMarkdownForRender(content: string): string {
-  return normalizeImageBoxForRender(normalizeInfoboxForRender(content))
-}
+export { prepareWikiMarkdownForRender } from '$lib/markdown/prepare-for-render.js'
 
 /**
  * Renders markdown with wiki links, templates, and syntax highlighting.

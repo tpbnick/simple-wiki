@@ -10,7 +10,12 @@ services:
       DATABASE_PATH: /data/wiki.db
       UPLOADS_DIR: /uploads
       PORT: 3000
+      # LAN / home network: plain HTTP on port 3000 (default for self-hosting)
       COOKIE_SECURE: 'false'
+      # Internet-facing: use HTTPS in front and set COOKIE_SECURE=true, WIKI_ORIGIN=https://...
+      # PRIVATE_WIKI: PUBLIC_READ=false
+      # Reverse proxy rate limits: ADDRESS_HEADER=x-forwarded-for, XFF_DEPTH=1
+      # BODY_SIZE_LIMIT defaults to 512M in the Docker image
     restart: unless-stopped
     healthcheck:
       test:

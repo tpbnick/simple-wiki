@@ -49,10 +49,18 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 
   const formData = await request.formData()
   const file = formData.get('backup')
+  const overwriteDatabase = formData.get('overwriteDatabase') === 'on'
   const restoreUploads = formData.get('restoreUploads') === 'on'
 
   if (!(file instanceof File)) {
     error(400, 'Backup file is required')
+  }
+
+  if (!overwriteDatabase) {
+    error(
+      400,
+      'Confirm fully overwrite existing database before importing — this replaces the entire live wiki database.'
+    )
   }
 
   if (file.size > MAX_BACKUP_BYTES) {
@@ -62,7 +70,10 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
   const zipBytes = new Uint8Array(await file.arrayBuffer())
 
   try {
-    const { manifest, warnings } = importBackupArchive(zipBytes, { restoreUploads })
+    const { manifest, warnings } = importBackupArchive(zipBytes, {
+      overwriteDatabase: true,
+      restoreUploads
+    })
     return json({
       ok: true,
       manifest: {

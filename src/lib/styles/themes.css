@@ -5,8 +5,9 @@
 html:not([data-theme='wiki-dark']) {
   color-scheme: light;
 
-  /* Reading settings — overridden at runtime by SettingsPanel via JS */
+  /* Reading settings — overridden at runtime via settingsStore / inline shell CSS */
   --reading-font: 'Atkinson Hyperlegible', system-ui, sans-serif;
+  --font-sans: var(--reading-font);
   --reading-font-size: 16px;
 
   /* DaisyUI surface palette */

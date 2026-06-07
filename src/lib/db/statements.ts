@@ -17,21 +17,18 @@ export function buildStatements(db: Database) {
   return {
     getPage: db.prepare<[string], Page>('SELECT * FROM pages WHERE slug = ? LIMIT 1'),
     getAllPages: db.prepare<[], Page>('SELECT * FROM pages ORDER BY updated_at DESC'),
-    getAllPageSummaries: db.prepare<[], PageSummary>(
-      'SELECT id, slug, title, namespace, created_at, updated_at FROM pages ORDER BY updated_at DESC'
-    ),
     getPageSummariesByNamespace: db.prepare<[string], PageSummary>(
       'SELECT id, slug, title, namespace, created_at, updated_at FROM pages WHERE namespace = ? ORDER BY title ASC'
     ),
     countContentPageSummaries: db.prepare<[string, string, string], { count: number }>(`
       SELECT COUNT(*) AS count FROM pages
       WHERE namespace != 'template'
-        AND (? = '' OR lower(title) LIKE lower(?) OR lower(slug) LIKE lower(?))
+        AND (? = '' OR lower(title) LIKE lower(?) ESCAPE '\\' OR lower(slug) LIKE lower(?) ESCAPE '\\')
     `),
     searchContentPageSummaries: db.prepare<[string, string, string, number, number], PageSummary>(`
       SELECT id, slug, title, namespace, created_at, updated_at FROM pages
       WHERE namespace != 'template'
-        AND (? = '' OR lower(title) LIKE lower(?) OR lower(slug) LIKE lower(?))
+        AND (? = '' OR lower(title) LIKE lower(?) ESCAPE '\\' OR lower(slug) LIKE lower(?) ESCAPE '\\')
       ORDER BY updated_at DESC
       LIMIT ? OFFSET ?
     `),
@@ -71,6 +68,41 @@ export function buildStatements(db: Database) {
           ORDER BY r2.created_at ASC, r2.id ASC
           LIMIT 1
         ) AS next_revision_content
+      FROM revisions r
+      INNER JOIN pages p ON p.id = r.page_id
+      WHERE r.id = ?
+      LIMIT 1
+    `),
+    getRevisionPostEdit: db.prepare<
+      [number],
+      {
+        page_id: number
+        post_edit_content: string
+        post_edit_title: string
+      }
+    >(`
+      SELECT
+        p.id AS page_id,
+        COALESCE(
+          (
+            SELECT r2.content FROM revisions r2
+            WHERE r2.page_id = r.page_id
+              AND (r2.created_at > r.created_at OR (r2.created_at = r.created_at AND r2.id > r.id))
+            ORDER BY r2.created_at ASC, r2.id ASC
+            LIMIT 1
+          ),
+          p.content
+        ) AS post_edit_content,
+        COALESCE(
+          (
+            SELECT r2.title FROM revisions r2
+            WHERE r2.page_id = r.page_id
+              AND (r2.created_at > r.created_at OR (r2.created_at = r.created_at AND r2.id > r.id))
+            ORDER BY r2.created_at ASC, r2.id ASC
+            LIMIT 1
+          ),
+          p.title
+        ) AS post_edit_title
       FROM revisions r
       INNER JOIN pages p ON p.id = r.page_id
       WHERE r.id = ?

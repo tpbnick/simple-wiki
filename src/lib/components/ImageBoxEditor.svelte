@@ -25,7 +25,6 @@ let {
   onupload
 }: Props = $props()
 
-let imageInputs: Record<number, HTMLInputElement> = {}
 let draggedIndex = $state<number | null>(null)
 let dropIndex = $state<number | null>(null)
 
@@ -54,10 +53,6 @@ function moveItem(fromIndex: number, toIndex: number) {
   const [moved] = images.splice(fromIndex, 1)
   images.splice(toIndex, 0, moved)
   onupdate({ ...data, images })
-}
-
-function openImageUpload(index: number) {
-  imageInputs[index]?.click()
 }
 
 function itemKey(item: ImageBoxItem, index: number): string {
@@ -140,9 +135,11 @@ function handleCaptionKeydown(
 <section class="wiki-imagebox-editor not-prose" aria-label="Image box editor">
   <div class="imagebox-editor-header">
     <span class="imagebox-editor-title">Image box</span>
-    <label class="imagebox-editor-columns">
+    <label class="imagebox-editor-columns" for="imagebox-columns">
       <span>Per row</span>
       <input
+        id="imagebox-columns"
+        name="imagebox-columns"
         type="number"
         min="1"
         max="4"
@@ -178,10 +175,12 @@ function handleCaptionKeydown(
 
         <div class="imagebox-editor-thumb">
           <input
-            bind:this={imageInputs[index]}
+            id="imagebox-upload-{itemKey(item, index)}"
+            name="imagebox-upload-{itemKey(item, index)}"
             type="file"
             class="hidden"
             accept="image/*"
+            disabled={uploading && uploadingItemIndex === index}
             onchange={(event) => onupload(event.currentTarget.files, index)}
           />
 
@@ -200,6 +199,8 @@ function handleCaptionKeydown(
           </div>
 
           <input
+            id="imagebox-url-{itemKey(item, index)}"
+            name="imagebox-url-{itemKey(item, index)}"
             type="text"
             value={item.image}
             placeholder="Image URL"
@@ -209,6 +210,8 @@ function handleCaptionKeydown(
           />
 
           <textarea
+            id="imagebox-caption-{itemKey(item, index)}"
+            name="imagebox-caption-{itemKey(item, index)}"
             value={item.caption}
             placeholder="Caption (Enter for new line, Shift+Enter for gap)"
             aria-label="Caption for item {index + 1}"
@@ -220,11 +223,10 @@ function handleCaptionKeydown(
           ></textarea>
 
           <div class="imagebox-editor-actions">
-            <button
-              type="button"
+            <label
+              for="imagebox-upload-{itemKey(item, index)}"
               class="imagebox-upload-btn"
-              disabled={uploading && uploadingItemIndex === index}
-              onclick={() => openImageUpload(index)}
+              aria-disabled={uploading && uploadingItemIndex === index}
             >
               {#if uploading && uploadingItemIndex === index}
                 <span class="loading loading-spinner loading-xs"></span>
@@ -232,7 +234,7 @@ function handleCaptionKeydown(
                 <Upload size={14} />
               {/if}
               {item.image ? 'Change image' : 'Upload image'}
-            </button>
+            </label>
 
             {#if data.images.length > 1}
               <button

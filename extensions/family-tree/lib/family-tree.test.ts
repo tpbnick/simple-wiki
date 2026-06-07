@@ -12,6 +12,8 @@ import {
 import { layoutFamilyTree } from './layout.js'
 import { NODE_HEIGHT } from './types.js'
 
+const LONG_EXAMPLE_NAME = 'Jane Lucille Example Longname Person'
+
 describe('family tree model', () => {
   it('adds spouses and children', () => {
     let data = createEmptyTree('Root')
@@ -230,7 +232,7 @@ describe('layoutFamilyTree', () => {
         ...data.people,
         [data.rootId]: {
           ...data.people[data.rootId],
-          name: 'Anna Lucille Snodgrass Steighner',
+          name: LONG_EXAMPLE_NAME,
           birthYear: '1907',
           deathYear: '1996'
         }
@@ -246,38 +248,38 @@ describe('layoutFamilyTree', () => {
   })
 
   it('does not overlap siblings when parentIds order differs between children', () => {
-    let data = createEmptyTree('Katherine')
-    data = addSpouse(data, data.rootId, 'Aaron')
-    const katherineId = data.rootId
-    const aaronId = getPerson(data, katherineId)!.spouseId!
+    let data = createEmptyTree('Jane Doe')
+    data = addSpouse(data, data.rootId, 'John Doe')
+    const janeId = data.rootId
+    const johnId = getPerson(data, janeId)!.spouseId!
 
-    data = addChild(data, katherineId, 'Mikayla')
-    data = addChild(data, katherineId, 'Oliver')
-    data = addChild(data, katherineId, 'Atticus')
+    data = addChild(data, janeId, 'Alex')
+    data = addChild(data, janeId, 'Blake')
+    data = addChild(data, janeId, 'Casey')
 
-    const mikayla = Object.values(data.people).find((person) => person.name === 'Mikayla')!
-    const oliver = Object.values(data.people).find((person) => person.name === 'Oliver')!
-    const atticus = Object.values(data.people).find((person) => person.name === 'Atticus')!
+    const alex = Object.values(data.people).find((person) => person.name === 'Alex')!
+    const blake = Object.values(data.people).find((person) => person.name === 'Blake')!
+    const casey = Object.values(data.people).find((person) => person.name === 'Casey')!
 
     data = {
       ...data,
       people: {
         ...data.people,
-        [mikayla.id]: { ...mikayla, birthYear: '2000', parentIds: [katherineId, aaronId] },
-        [oliver.id]: { ...oliver, birthYear: '2012', parentIds: [aaronId, katherineId] },
-        [atticus.id]: { ...atticus, birthYear: '2018', parentIds: [katherineId, aaronId] }
+        [alex.id]: { ...alex, birthYear: '2000', parentIds: [janeId, johnId] },
+        [blake.id]: { ...blake, birthYear: '2012', parentIds: [johnId, janeId] },
+        [casey.id]: { ...casey, birthYear: '2018', parentIds: [janeId, johnId] }
       }
     }
 
     const layout = layoutFamilyTree(data)
     const childNodes = layout.nodes.filter((node) =>
-      ['Mikayla', 'Oliver', 'Atticus'].includes(node.person.name)
+      ['Alex', 'Blake', 'Casey'].includes(node.person.name)
     )
 
     expect(childNodes).toHaveLength(3)
 
     const sorted = [...childNodes].sort((a, b) => a.x - b.x)
-    expect(sorted.map((node) => node.person.name)).toEqual(['Mikayla', 'Oliver', 'Atticus'])
+    expect(sorted.map((node) => node.person.name)).toEqual(['Alex', 'Blake', 'Casey'])
 
     for (let index = 1; index < sorted.length; index++) {
       expect(sorted[index].x).toBeGreaterThanOrEqual(sorted[index - 1].x + 148 + 36)
@@ -301,15 +303,15 @@ describe('layoutFamilyTree', () => {
 
   it('separates cousin clusters that would otherwise collide', () => {
     let data = createEmptyTree('Grandparent')
-    data = addChild(data, data.rootId, 'Rebecca')
-    data = addChild(data, data.rootId, 'Katherine')
-    const rebeccaId = Object.values(data.people).find((person) => person.name === 'Rebecca')!.id
-    const katherineId = Object.values(data.people).find((person) => person.name === 'Katherine')!.id
+    data = addChild(data, data.rootId, 'Jane Doe')
+    data = addChild(data, data.rootId, 'John Doe')
+    const janeId = Object.values(data.people).find((person) => person.name === 'Jane Doe')!.id
+    const johnId = Object.values(data.people).find((person) => person.name === 'John Doe')!.id
 
-    data = addSpouse(data, rebeccaId, 'Brian')
-    data = addSpouse(data, katherineId, 'Aaron')
+    data = addSpouse(data, janeId, 'Alex Doe')
+    data = addSpouse(data, johnId, 'Blake Doe')
 
-    for (const parentId of [rebeccaId, katherineId]) {
+    for (const parentId of [janeId, johnId]) {
       data = addChild(data, parentId, 'Child A')
       data = addChild(data, parentId, 'Child B')
       data = addChild(data, parentId, 'Child C')
