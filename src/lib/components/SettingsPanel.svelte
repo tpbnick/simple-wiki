@@ -97,7 +97,7 @@ function handleKeydown(e: KeyboardEvent) {
         </div>
       </div>
 
-      <div>
+      <div class="hidden md:block">
         <p class="text-[0.65rem] font-bold uppercase tracking-widest text-base-content/40 mb-2">
           Width
         </p>

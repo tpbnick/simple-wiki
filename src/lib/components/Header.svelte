@@ -156,7 +156,7 @@ function handleSearchBlur() {
 </script>
 
 <header class="wiki-header sticky top-0 z-50 h-14">
-  <div class="flex items-center gap-2 px-4 h-full max-w-screen-2xl mx-auto">
+  <div class="flex items-center gap-2 px-4 h-full w-full">
     {#if showSidebarToggle}
       <button
         type="button"

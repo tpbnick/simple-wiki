@@ -32,9 +32,9 @@ export const FONTS: FontOption[] = [
     stack: "'Merriweather', Georgia, serif"
   },
   {
-    id: 'playfair',
-    label: 'Playfair Display',
-    stack: "'Playfair Display', Georgia, serif"
+    id: 'space-mono',
+    label: 'Space Mono',
+    stack: "'Space Mono', ui-monospace, monospace"
   },
   {
     id: 'lato',
