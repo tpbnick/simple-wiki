@@ -220,7 +220,7 @@ const hasExtensionNav = $derived(extensionNavItems.length > 0)
 <!-- Desktop sidebar -->
 <aside
   class="wiki-sidebar shrink-0 hidden lg:block"
-  style="width: {sidebarStore.isOpen ? '15rem' : '0'}; overflow: clip;"
+  class:wiki-sidebar--collapsed={!sidebarStore.isOpen}
 >
   <div
     class="sticky top-14 overflow-y-auto py-6 px-4"
@@ -231,22 +231,29 @@ const hasExtensionNav = $derived(extensionNavItems.length > 0)
 </aside>
 
 <!-- Mobile sidebar drawer -->
-{#if sidebarStore.isOpen}
-  <div class="lg:hidden fixed inset-0 z-40">
-    <button
-      type="button"
-      class="absolute inset-0 bg-base-content/20 backdrop-blur-sm"
-      aria-label="Close sidebar"
-      onclick={closeMobileToc}
-    ></button>
-    <div
-      class="absolute left-0 top-14 bottom-0 w-72 max-w-[85vw] bg-base-100 border-r border-base-300 shadow-xl overflow-y-auto py-6 px-4"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Navigation"
-      tabindex="-1"
-    >
-      {@render sidebarContent(true)}
-    </div>
+<div
+  class="lg:hidden fixed inset-0 z-40"
+  class:invisible={!sidebarStore.isOpen}
+  class:pointer-events-none={!sidebarStore.isOpen}
+  aria-hidden={!sidebarStore.isOpen}
+>
+  <button
+    type="button"
+    class="wiki-sidebar-backdrop absolute inset-0 bg-base-content/20 backdrop-blur-sm"
+    class:wiki-sidebar-backdrop--closed={!sidebarStore.isOpen}
+    aria-label="Close sidebar"
+    tabindex={sidebarStore.isOpen ? 0 : -1}
+    onclick={closeMobileToc}
+  ></button>
+  <div
+    class="wiki-sidebar-drawer absolute left-0 top-14 bottom-0 w-72 max-w-[85vw] bg-base-100 border-r border-base-300 shadow-xl overflow-y-auto py-6 px-4"
+    class:wiki-sidebar-drawer--closed={!sidebarStore.isOpen}
+    role="dialog"
+    aria-modal="true"
+    aria-label="Navigation"
+    aria-hidden={!sidebarStore.isOpen}
+    tabindex={sidebarStore.isOpen ? 0 : -1}
+  >
+    {@render sidebarContent(true)}
   </div>
-{/if}
+</div>

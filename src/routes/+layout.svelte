@@ -63,7 +63,7 @@ $effect.pre(() => {
   <a href="#main-content" class="skip-link">Skip to content</a>
   <Header user={data.user} />
 
-  <div class="flex flex-1 min-h-0 max-w-screen-2xl mx-auto w-full">
+  <div class="flex flex-1 min-h-0 w-full">
     {#if showSidebar}
       <Sidebar extensionNavItems={data.sidebarItems} />
     {/if}

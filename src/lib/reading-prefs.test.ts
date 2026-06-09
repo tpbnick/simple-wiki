@@ -6,7 +6,7 @@ describe('resolveReadingPrefs', () => {
     const prefs = resolveReadingPrefs({ get: () => undefined })
     expect(prefs.fontId).toBe('atkinson')
     expect(prefs.sizeId).toBe('medium')
-    expect(prefs.readingWidth).toBe(70)
+    expect(prefs.readingWidth).toBe(100)
   })
 
   it('reads saved cookie values', () => {

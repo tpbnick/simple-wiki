@@ -56,6 +56,6 @@ describe('buildReadingPrefsCss', () => {
     const css = buildReadingPrefsCss({ get: () => undefined })
     expect(css).toContain('Atkinson Hyperlegible')
     expect(css).toContain('--reading-font-size:16px')
-    expect(css).toContain('--reading-width:70%')
+    expect(css).toContain('--reading-width:100%')
   })
 })
