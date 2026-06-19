@@ -22,9 +22,9 @@ describe('extension settings', () => {
     setExtensionEnabled('family-tree', false)
 
     expect(isExtensionEnabled('family-tree')).toBe(false)
-    expect(openDatabase().statements.getAppMeta.get(extensionEnabledMetaKey('family-tree'))?.value).toBe(
-      '0'
-    )
+    expect(
+      openDatabase().statements.getAppMeta.get(extensionEnabledMetaKey('family-tree'))?.value
+    ).toBe('0')
   })
 
   it('clears disabled state when re-enabled', () => {
@@ -32,6 +32,8 @@ describe('extension settings', () => {
     setExtensionEnabled('family-tree', true)
 
     expect(isExtensionEnabled('family-tree')).toBe(true)
-    expect(openDatabase().statements.getAppMeta.get(extensionEnabledMetaKey('family-tree'))).toBeUndefined()
+    expect(
+      openDatabase().statements.getAppMeta.get(extensionEnabledMetaKey('family-tree'))
+    ).toBeUndefined()
   })
 })
