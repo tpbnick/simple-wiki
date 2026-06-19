@@ -10,7 +10,10 @@ const extension: WikiExtension = {
 
   hooks: {
     onSidebarItems(items) {
-      return [...items, { label: 'Example Link', href: '/wiki/example', external: false }]
+      return [
+        ...items,
+        { label: 'Example extension loaded successfully', href: '/wiki/example', external: false }
+      ]
     },
 
     onTemplateParse(name, params) {

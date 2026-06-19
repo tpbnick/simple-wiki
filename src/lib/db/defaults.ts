@@ -19,6 +19,29 @@ export const HOME_CONTENT = `Welcome to your personal wiki! This page is editabl
 | \`{{Note\\|Your text here}}\` | Info callout |
 | \`{{Warning\\|Your text here}}\` | Warning callout |
 | \`{{Stub}}\` | Marks an article as a stub |
+| \`[^: Source text]\` | Inline [1] reference with source attached |
+| \`[^]\` with \`[^]: Source text\` at bottom | Numbered by order — no manual ids |
+
+## References
+
+Add numbered citations that link to a **References** section at the bottom of the page. Display numbers are assigned automatically from the order references appear in the text.
+
+**Easiest:** put the source right in the marker (use the **Reference** toolbar button). Insert anywhere without renumbering:
+
+\`\`\`
+Einstein published special relativity in 1905.[^: [On the Electrodynamics of Moving Bodies](https://example.com)]
+\`\`\`
+
+**Alternative:** use a marker in the text and matching lines at the bottom, in the same order:
+
+\`\`\`
+First claim.[^] Second claim.[^]
+
+[^]: First source
+[^]: Second source
+\`\`\`
+
+Sources can be plain text, a markdown link like \`[label](url)\`, or a \`[[wiki link]]\`.
 
 ## Tips
 
@@ -42,6 +65,8 @@ Sign in, then use **Edit** on any page or **New page** in the header.
 - \`[[Title|label]]\` — link with custom text
 - \`{{Infobox|title=Name|Key=Value}}\` — sidebar infobox
 - \`{{Note|…}}\` / \`{{Warning|…}}\` — callout boxes
+- \`[^: …]\` — inline reference with source attached (numbers assigned automatically)
+- \`[^]\` in the text with \`[^]: …\` lines at the bottom — paired in order. Use the **Reference** toolbar button.
 
 ## Admin
 
