@@ -3,26 +3,22 @@
    ───────────────────────────────────────────────────────── */
 
 /* Inline citation superscript — renders as [1] */
-.wiki-content sup a[href^='#fn-'] {
+.wiki-content sup a[data-footnote-ref] {
   color: var(--wiki-link);
   text-decoration: none;
   font-size: 0.8em;
   font-weight: 500;
   padding: 0 0.5px;
+  scroll-margin-top: 5rem;
 }
-.wiki-content sup a[href^='#fn-']:hover {
+.wiki-content sup a[data-footnote-ref]:hover {
   text-decoration: underline;
 }
-.wiki-content sup a[href^='#fn-']::before {
+.wiki-content sup a[data-footnote-ref]::before {
   content: '[';
 }
-.wiki-content sup a[href^='#fn-']::after {
+.wiki-content sup a[data-footnote-ref]::after {
   content: ']';
-}
-
-/* Inline citation target scroll offset (back-navigation) */
-.wiki-content a[id^='fnref-'] {
-  scroll-margin-top: 5rem;
 }
 
 /* References section */

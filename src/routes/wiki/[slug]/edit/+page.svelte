@@ -20,6 +20,7 @@ import type { ImageBoxData } from '$lib/templates/imagebox-editor.js'
 import { renderEditorPreview, type EditorPreviewBundle } from '$lib/wiki-edit/client-preview.js'
 import { createMarkdownToolbarActions } from '$lib/wiki-edit/toolbar-actions.js'
 import { wrapSelection, insertAtSelection, handleTabKey } from '$lib/wiki-edit/text-editing.js'
+import { insertReference } from '$lib/wiki-edit/references.js'
 import { uploadFileToWiki, markdownForUpload } from '$lib/wiki-edit/upload.js'
 import type { PageData, ActionData } from './$types'
 import WikiEditHeader from './WikiEditHeader.svelte'
@@ -413,6 +414,11 @@ function insertAt(text: string) {
   insertAtSelection(textarea, content, setContent, text)
 }
 
+function addReference() {
+  if (!textarea) return
+  insertReference(textarea, content, setContent)
+}
+
 function handleTab(e: KeyboardEvent) {
   if (!textarea) return
   handleTabKey(e, textarea, content, setContent)
@@ -423,7 +429,11 @@ function togglePreview() {
   localStorage.setItem('wiki-preview-pane', showPreview ? '1' : '0')
 }
 
-const toolbarActions = createMarkdownToolbarActions({ wrap, insertAt })
+const toolbarActions = createMarkdownToolbarActions({
+  wrap,
+  insertAt,
+  insertReference: addReference
+})
 
 const cancelHref = $derived(data.isNew && data.slug === 'new' ? '/' : `/wiki/${data.slug}`)
 

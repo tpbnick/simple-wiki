@@ -1,4 +1,4 @@
-import { Bold, Italic, Link2, Hash, Code2, Info, AlertTriangle } from 'lucide-svelte'
+import { Bold, Italic, Link2, Hash, Code2, Info, AlertTriangle, BookMarked } from 'lucide-svelte'
 
 export type ToolbarAction = {
   icon:
@@ -9,6 +9,7 @@ export type ToolbarAction = {
     | typeof Code2
     | typeof Info
     | typeof AlertTriangle
+    | typeof BookMarked
   label: string
   action: () => void
 }
@@ -16,6 +17,7 @@ export type ToolbarAction = {
 export function createMarkdownToolbarActions(handlers: {
   wrap: (before: string, after?: string, placeholder?: string) => void
   insertAt: (text: string) => void
+  insertReference: () => void
 }): ToolbarAction[] {
   return [
     { icon: Bold, label: 'Bold', action: () => handlers.wrap('**') },
@@ -23,6 +25,11 @@ export function createMarkdownToolbarActions(handlers: {
     { icon: Link2, label: 'Wiki link', action: () => handlers.wrap('[[', ']]', 'Page Name') },
     { icon: Hash, label: 'Heading', action: () => handlers.insertAt('\n## ') },
     { icon: Code2, label: 'Code', action: () => handlers.wrap('`') },
+    {
+      icon: BookMarked,
+      label: 'Reference',
+      action: () => handlers.insertReference()
+    },
     { icon: Info, label: 'Note', action: () => handlers.insertAt('\n{{Note|Your note here}}\n') },
     {
       icon: AlertTriangle,
