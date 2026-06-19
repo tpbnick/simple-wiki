@@ -9,12 +9,13 @@ import {
   createWikiUser,
   searchContentPageSummaries
 } from '$lib/db/index.js'
-import { getExtensions } from '$lib/extensions/index.js'
+import { getExtensions, isExtensionEnabled } from '$lib/extensions/index.js'
 import { hashPasswordAsync, generatePassword } from '$lib/auth.js'
 import { getAppVersion, getWikiName } from '$lib/wiki-identity.js'
 import { requireAdminPage } from '$lib/admin-access.js'
 import { enforceFormWriteRateLimit } from '$lib/server/form-rate-limit.js'
 import { handleRevisionRetentionAction } from '$lib/server/revision-retention-action.js'
+import { handleExtensionToggleAction } from '$lib/server/extension-toggle-action.js'
 import type { PageServerLoad, Actions } from './$types'
 
 const ADMIN_PAGES_PAGE_SIZE = 100
@@ -42,10 +43,12 @@ export const load: PageServerLoad = async ({ locals, url }) => {
   const templates = getPageSummaries('template')
   const users = listUsers()
   const extensions = getExtensions().map((e) => ({
+    id: e.id ?? '',
     name: e.name,
     version: e.version,
     description: e.description ?? '',
-    manageHref: e.manageHref ?? null
+    manageHref: e.manageHref ?? null,
+    enabled: e.id ? isExtensionEnabled(e.id) : true
   }))
 
   return {
@@ -114,5 +117,11 @@ export const actions: Actions = {
     return handleRevisionRetentionAction(await request.formData(), locals, getClientAddress, {
       tab: 'recent'
     })
+  },
+
+  toggleExtension: async ({ request, locals, getClientAddress }) => {
+    requireAdminPage(locals, { next: '/admin?tab=extensions' })
+
+    return handleExtensionToggleAction(await request.formData(), locals, getClientAddress)
   }
 }

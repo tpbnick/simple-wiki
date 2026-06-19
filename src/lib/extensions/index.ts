@@ -3,6 +3,8 @@ export {
   loadExtensions,
   resetExtensionsForTests,
   getExtensions,
+  isExtensionEnabled,
+  findDisabledExtensionForPath,
   getEditorToolbarItems,
   runOnPageRender,
   runOnTemplateParse,

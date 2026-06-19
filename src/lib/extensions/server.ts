@@ -1,4 +1,5 @@
 import { applyExtensionSchemas } from '$lib/db/connection.js'
+import { isExtensionEnabled as readExtensionEnabled } from '$lib/db/extension-settings.js'
 import type { WikiExtension, WikiExtensionHooks, SidebarItem, EditorToolbarItem } from './types.js'
 import type { Page } from '$lib/db/index.js'
 
@@ -12,6 +13,11 @@ const bundledExtensionModules = import.meta.glob<ExtensionModule>(
   '../../../extensions/*/index.ts',
   { eager: true }
 )
+
+function extensionIdFromSource(source: string): string {
+  const match = source.match(/\/extensions\/([^/]+)\/index\.ts$/)
+  return match?.[1] ?? source
+}
 
 function isBundledExtensionEnabled(source: string): boolean {
   if (!source.includes('/example/')) return true
@@ -37,7 +43,7 @@ function validateExtensionModule(extension: WikiExtension, source: string): bool
 function normalizeExtensionModule(module: ExtensionModule, source: string): WikiExtension | null {
   const extension = (module.default ?? module) as WikiExtension
   if (!validateExtensionModule(extension, source)) return null
-  return extension
+  return { ...extension, id: extensionIdFromSource(source) }
 }
 
 function loadBundledExtensions(): WikiExtension[] {
@@ -56,6 +62,23 @@ function loadBundledExtensions(): WikiExtension[] {
   }
 
   return extensions
+}
+
+function getActiveExtensions(): WikiExtension[] {
+  return loadedExtensions.filter((extension) => extension.id && readExtensionEnabled(extension.id))
+}
+
+function extensionGuardPaths(extension: WikiExtension): string[] {
+  const paths = new Set<string>()
+  if (extension.manageHref) paths.add(extension.manageHref)
+  for (const path of extension.writeGuardPaths ?? []) {
+    paths.add(path)
+  }
+  return [...paths]
+}
+
+function matchesGuardPath(pathname: string, guardPath: string): boolean {
+  return pathname === guardPath || pathname.startsWith(`${guardPath}/`)
 }
 
 /** Loads bundled extensions once per process. Idempotent; safe to call from tests after reset. */
@@ -77,23 +100,41 @@ export function getExtensions(): WikiExtension[] {
   return loadedExtensions
 }
 
-/** Returns editor toolbar items contributed by loaded extensions. */
-export function getEditorToolbarItems(): EditorToolbarItem[] {
-  return loadedExtensions.flatMap((extension) => extension.hooks.onEditorToolbarItems?.() ?? [])
+/** Returns whether an extension is enabled in app settings. */
+export function isExtensionEnabled(id: string): boolean {
+  return readExtensionEnabled(id)
 }
 
-/** Runs page-render hooks from loaded extensions. */
+/** Returns the first disabled extension blocking a request path, if any. */
+export function findDisabledExtensionForPath(pathname: string): WikiExtension | null {
+  for (const extension of loadedExtensions) {
+    if (!extension.id || readExtensionEnabled(extension.id)) continue
+    if (extensionGuardPaths(extension).some((path) => matchesGuardPath(pathname, path))) {
+      return extension
+    }
+  }
+  return null
+}
+
+/** Returns editor toolbar items contributed by enabled extensions. */
+export function getEditorToolbarItems(): EditorToolbarItem[] {
+  return getActiveExtensions().flatMap(
+    (extension) => extension.hooks.onEditorToolbarItems?.() ?? []
+  )
+}
+
+/** Runs page-render hooks from enabled extensions. */
 export function runOnPageRender(html: string, page: Page): string {
-  return loadedExtensions.reduce(
+  return getActiveExtensions().reduce(
     (output, extension) =>
       extension.hooks.onPageRender ? extension.hooks.onPageRender(output, page) : output,
     html
   )
 }
 
-/** Runs template-parse hooks from loaded extensions. */
+/** Runs template-parse hooks from enabled extensions. */
 export function runOnTemplateParse(name: string, params: Record<string, string>): string | null {
-  for (const extension of loadedExtensions) {
+  for (const extension of getActiveExtensions()) {
     if (!extension.hooks.onTemplateParse) continue
     const result = extension.hooks.onTemplateParse(name, params)
     if (result != null) return result
@@ -101,26 +142,26 @@ export function runOnTemplateParse(name: string, params: Record<string, string>)
   return null
 }
 
-/** Runs sidebar hooks from loaded extensions. */
+/** Runs sidebar hooks from enabled extensions. */
 export function runOnSidebarItems(items: SidebarItem[]): SidebarItem[] {
-  return loadedExtensions.reduce(
+  return getActiveExtensions().reduce(
     (output, extension) =>
       extension.hooks.onSidebarItems ? extension.hooks.onSidebarItems(output) : output,
     items
   )
 }
 
-/** Path prefixes that require login for non-GET writes (from loaded extensions). */
+/** Path prefixes that require login for non-GET writes (from enabled extensions). */
 export function getExtensionWriteGuardPaths(): string[] {
-  return loadedExtensions.flatMap((extension) => extension.writeGuardPaths ?? [])
+  return getActiveExtensions().flatMap((extension) => extension.writeGuardPaths ?? [])
 }
 
-/** Merges editor load data from extensions for active toolbar items. */
+/** Merges editor load data from enabled extensions for active toolbar items. */
 export function getEditorLoadData(activeTools: EditorToolbarItem[]): Record<string, unknown> {
   const toolIds = new Set(activeTools.map((tool) => tool.id))
   const data: Record<string, unknown> = {}
 
-  for (const extension of loadedExtensions) {
+  for (const extension of getActiveExtensions()) {
     if (!extension.hooks.onEditorLoad) continue
     Object.assign(data, extension.hooks.onEditorLoad(toolIds))
   }

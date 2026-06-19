@@ -14,6 +14,8 @@ export interface EditorToolbarItem {
 }
 
 export interface WikiExtension {
+  /** Stable id from the extensions/<id>/ folder; assigned automatically when loaded. */
+  id?: string
   name: string
   version: string
   description?: string

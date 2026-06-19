@@ -100,7 +100,7 @@ function closeDeleteModal() {
     {:else if tab === 'templates'}
       <AdminTemplatesPanel templates={data.templates} onDelete={openDeleteTarget} />
     {:else if tab === 'extensions'}
-      <AdminExtensionsPanel extensions={data.extensions} />
+      <AdminExtensionsPanel extensions={data.extensions} {form} />
     {:else if tab === 'users'}
       <AdminUsersPanel users={data.users} {form} />
     {:else if tab === 'backups'}

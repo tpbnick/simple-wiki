@@ -45,6 +45,12 @@ export type { RevisionDiffLine } from './revisions.js'
 export { getRevisionRetentionLimit, setRevisionRetentionLimit } from './settings.js'
 
 export {
+  extensionEnabledMetaKey,
+  isExtensionEnabled,
+  setExtensionEnabled
+} from './extension-settings.js'
+
+export {
   MIN_SEARCH_SUGGESTION_LENGTH,
   SearchError,
   searchPages,

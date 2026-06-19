@@ -1,5 +1,5 @@
 import { resolveSession, touchSession } from '$lib/db/index.js'
-import { loadExtensions } from '$lib/extensions/server.js'
+import { findDisabledExtensionForPath, loadExtensions } from '$lib/extensions/server.js'
 import { validateServerEnv } from '$lib/env.js'
 import { SESSION_COOKIE_NAME } from '$lib/auth.js'
 import {
@@ -70,6 +70,20 @@ export const handle: Handle = async ({ event, resolve }) => {
 
   const method = event.request.method
   const pathname = event.url.pathname
+
+  const disabledExtension = findDisabledExtensionForPath(pathname)
+  if (disabledExtension) {
+    if (pathname.startsWith('/api')) {
+      return applySecurityHeaders(
+        new Response(JSON.stringify({ error: 'Extension disabled' }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' }
+        })
+      )
+    }
+
+    return applySecurityHeaders(new Response('Not found', { status: 404 }))
+  }
 
   if (
     event.locals.user?.mustChangePw &&
