@@ -247,6 +247,6 @@ function toggleFamilyTreeMenu() {
   {/if}
 
   <span class="text-xs text-base-content/40 ml-auto hidden md:inline">
-    Markdown + [[wiki links]] + templates
+    Markdown + [[wiki links]] + references
   </span>
 </div>

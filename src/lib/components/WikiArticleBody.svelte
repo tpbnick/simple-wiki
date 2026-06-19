@@ -16,7 +16,9 @@ let detachHighlights: (() => void) | undefined
 const extensionMounts = createExtensionArticleMountController()
 
 function attachFootnoteHighlights(root: HTMLElement): () => void {
-  const links = root.querySelectorAll<HTMLAnchorElement>('a[href^="#fn-"], a[href^="#fnref-"]')
+  const links = root.querySelectorAll<HTMLAnchorElement>(
+    'a[data-footnote-ref], a[data-footnote-backref]'
+  )
   const handlers: Array<{ el: HTMLAnchorElement; fn: () => void }> = []
 
   for (const link of links) {

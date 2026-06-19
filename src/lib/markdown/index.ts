@@ -49,7 +49,7 @@ function buildProcessor(includeSyntaxHighlighting: boolean) {
     .use(remarkTemplates)
     .use(remarkGfm)
     .use(remarkWikiLinks)
-    .use(remarkRehype, { allowDangerousHtml: true })
+    .use(remarkRehype, { allowDangerousHtml: true, footnoteLabel: 'References' })
     .use(rehypeRaw)
     .use(rehypeSlug)
 
