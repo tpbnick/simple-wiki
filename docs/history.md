@@ -3,7 +3,7 @@
 <div class="screenshot" markdown>
 
 ![Page revision history](assets/screenshots/history.png)
-*Per-page history with edit summaries and expandable diffs.*
+_Per-page history with edit summaries and expandable diffs._
 
 </div>
 
@@ -26,7 +26,7 @@ Restore is only available when you're signed in. Click **Restore this version**,
 <div class="screenshot" markdown>
 
 ![Site-wide recent changes](assets/screenshots/recent.png)
-*The `/recent` feed groups edits by day with expandable diffs.*
+_The `/recent` feed groups edits by day with expandable diffs._
 
 </div>
 

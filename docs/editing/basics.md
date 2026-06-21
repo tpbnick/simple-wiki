@@ -3,18 +3,18 @@
 <div class="screenshot" markdown>
 
 ![Split markdown editor](../assets/screenshots/editor.png)
-*The editor with markdown source, live preview, toolbar, and infobox panel.*
+_The editor with markdown source, live preview, toolbar, and infobox panel._
 
 </div>
 
 ## Ways to create a page
 
-| How | Where |
-|-----|-------|
-| **New page** button | Header (signed in) |
-| Red wiki link | Click a `[[Page Title]]` link to a page that doesn't exist yet |
-| Search | **Create "[query]"** when search finds nothing (signed in) |
-| Admin | **Admin → Pages → New page** |
+| How                 | Where                                                          |
+| ------------------- | -------------------------------------------------------------- |
+| **New page** button | Header (signed in)                                             |
+| Red wiki link       | Click a `[[Page Title]]` link to a page that doesn't exist yet |
+| Search              | **Create "[query]"** when search finds nothing (signed in)     |
+| Admin               | **Admin → Pages → New page**                                   |
 
 ## The editor
 
@@ -27,12 +27,12 @@ Toggle preview with the button in the toolbar. On desktop, preview starts open. 
 
 ### Fields
 
-| Field | Purpose |
-|-------|---------|
-| **Title** | The name shown at the top of the page |
-| **Namespace** | `article` (normal), `template`, or `help` |
+| Field            | Purpose                                                        |
+| ---------------- | -------------------------------------------------------------- |
+| **Title**        | The name shown at the top of the page                          |
+| **Namespace**    | `article` (normal), `template`, or `help`                      |
 | **Edit summary** | Short note about what you changed (optional, shows in history) |
-| **Content** | The markdown body |
+| **Content**      | The markdown body                                              |
 
 New pages get an address like `/wiki/my-page` based on the title you enter.
 
@@ -62,11 +62,11 @@ Open the article and click **Edit** (signed in). The editor loads the current ti
 
 ## Namespaces
 
-| Namespace | Use |
-|-----------|-----|
-| `article` | Normal wiki pages — searchable, listed on `/pages` |
-| `template` | Reusable `{{TemplateName}}` blocks |
-| `help` | Help content (the built-in `/wiki/help` page uses this) |
+| Namespace  | Use                                                     |
+| ---------- | ------------------------------------------------------- |
+| `article`  | Normal wiki pages — searchable, listed on `/pages`      |
+| `template` | Reusable `{{TemplateName}}` blocks                      |
+| `help`     | Help content (the built-in `/wiki/help` page uses this) |
 
 Most pages should be `article`.
 

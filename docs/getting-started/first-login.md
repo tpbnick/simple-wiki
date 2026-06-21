@@ -3,7 +3,7 @@
 <div class="screenshot" markdown>
 
 ![Sign-in page](../assets/screenshots/login.png)
-*The sign-in form at `/login`.*
+_The sign-in form at `/login`._
 
 </div>
 
@@ -24,7 +24,7 @@ Ask whoever installed the wiki, or check the logs from that first startup. The p
 **Alternative:** the installer can set `ADMIN_PASSWORD` in `.env` before the first start (at least 8 characters). Use that value to sign in.
 
 !!! warning "Only applies on first boot"
-    Setting `ADMIN_PASSWORD` later does nothing. It only works when the admin account is first created. To start over, delete `wiki.db` and restart — but you'll lose all wiki data.
+Setting `ADMIN_PASSWORD` later does nothing. It only works when the admin account is first created. To start over, delete `wiki.db` and restart — but you'll lose all wiki data.
 
 ## Signing in for the first time
 

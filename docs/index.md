@@ -5,7 +5,7 @@ Simple-Wiki is a personal markdown wiki — wiki links, search, uploads, revisio
 <div class="screenshot" markdown>
 
 ![Simple-Wiki home page](assets/screenshots/home.png)
-*The home page with sidebar table of contents and a built-in syntax cheat sheet.*
+_The home page with sidebar table of contents and a built-in syntax cheat sheet._
 
 </div>
 
@@ -13,14 +13,14 @@ This guide covers **using** the wiki. For installation, Docker, and server setti
 
 ## What you can do
 
-| Role | Capabilities |
-|------|--------------|
-| **Visitor** | Read, search, tweak reading settings (when public read is on) |
-| **Editor** | Create and edit pages, upload files, view history, restore revisions, use extensions |
-| **Admin** | All of the above, plus users, backups, extensions, and revision limits |
+| Role        | Capabilities                                                                         |
+| ----------- | ------------------------------------------------------------------------------------ |
+| **Visitor** | Read, search, tweak reading settings (when public read is on)                        |
+| **Editor**  | Create and edit pages, upload files, view history, restore revisions, use extensions |
+| **Admin**   | All of the above, plus users, backups, extensions, and revision limits               |
 
 !!! note "Every account can edit"
-    There are no read-only editors. Only create accounts for people you trust.
+There are no read-only editors. Only create accounts for people you trust.
 
 ## Where to start
 

@@ -3,7 +3,7 @@
 <div class="screenshot" markdown>
 
 ![Reading settings panel](../assets/screenshots/settings.png)
-*Font, text size, column width, and links to Help and About.*
+_Font, text size, column width, and links to Help and About._
 
 </div>
 
@@ -31,4 +31,4 @@ The sun/moon toggle next to the gear switches light and dark mode. Saved in a co
 - **About** — wiki version and build info
 
 !!! tip "Per browser"
-    These settings don't sync between devices or browsers. Set them up on each machine you read from.
+These settings don't sync between devices or browsers. Set them up on each machine you read from.

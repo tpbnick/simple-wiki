@@ -3,7 +3,7 @@
 <div class="screenshot" markdown>
 
 ![Admin — Users tab](../assets/screenshots/admin-users.png)
-*Create accounts and view roles from Admin → Users.*
+_Create accounts and view roles from Admin → Users._
 
 </div>
 
@@ -22,12 +22,12 @@ They must change that password on first login.
 
 ## User list
 
-| Column | Meaning |
-|--------|---------|
-| **Username** | Login name |
-| **Role** | Admin or Editor |
+| Column                   | Meaning                                |
+| ------------------------ | -------------------------------------- |
+| **Username**             | Login name                             |
+| **Role**                 | Admin or Editor                        |
 | **Must change password** | Waiting on first-login password change |
-| **Created** | When the account was made |
+| **Created**              | When the account was made              |
 
 ## Roles
 

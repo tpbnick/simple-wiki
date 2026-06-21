@@ -6,9 +6,10 @@ Simple-Wiki uses standard markdown plus [GitHub Flavored Markdown](https://githu
 
 ```markdown
 # Heading 1
+
 ## Heading 2
 
-**bold** and *italic*
+**bold** and _italic_
 
 - Bullet
 - List
@@ -36,7 +37,7 @@ Add a language name after the opening backticks for syntax highlighting.
 
 ```markdown
 | Column | Value |
-|--------|-------|
+| ------ | ----- |
 | Name   | Ada   |
 ```
 
@@ -66,13 +67,13 @@ Link to other pages on your wiki:
 
 ## Quick reference
 
-| Syntax | Result |
-|--------|--------|
-| `[[Page Title]]` | Wiki link |
+| Syntax             | Result                     |
+| ------------------ | -------------------------- |
+| `[[Page Title]]`   | Wiki link                  |
 | `[[Title\|label]]` | Wiki link with custom text |
-| `**bold**` | **bold** |
-| `*italic*` | *italic* |
-| `` `code` `` | `code` |
-| `~~strike~~` | ~~strike~~ |
+| `**bold**`         | **bold**                   |
+| `*italic*`         | _italic_                   |
+| `` `code` ``       | `code`                     |
+| `~~strike~~`       | ~~strike~~                 |
 
 For infoboxes, callouts, and galleries, see [Templates](templates.md).

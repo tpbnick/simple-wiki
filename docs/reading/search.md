@@ -3,7 +3,7 @@
 <div class="screenshot" markdown>
 
 ![Search results](../assets/screenshots/search.png)
-*Full-text search results with highlighted snippets.*
+_Full-text search results with highlighted snippets._
 
 </div>
 

@@ -3,7 +3,7 @@
 <div class="screenshot" markdown>
 
 ![Family tree manager](assets/screenshots/family-tree.png)
-*The family tree list at `/family-tree`.*
+_The family tree list at `/family-tree`._
 
 </div>
 
@@ -15,9 +15,9 @@ Anyone can **view** trees. Creating, editing, and deleting trees requires a sign
 
 Go to `/family-tree`, or **Admin → Extensions → Open** next to Family Tree.
 
-| Action | Who |
-|--------|-----|
-| Browse and open trees | Everyone |
+| Action                    | Who             |
+| ------------------------- | --------------- |
+| Browse and open trees     | Everyone        |
 | **New tree** / **Delete** | Signed-in users |
 
 ## Tree editor

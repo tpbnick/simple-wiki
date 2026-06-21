@@ -3,7 +3,7 @@
 <div class="screenshot" markdown>
 
 ![Admin — Backups tab](../assets/screenshots/admin-backups.png)
-*Export and import wiki backups as zip files.*
+_Export and import wiki backups as zip files._
 
 </div>
 
@@ -35,11 +35,11 @@ If something goes wrong, the import rolls back automatically.
 
 ### Upload merge
 
-| Situation | What happens |
-|-----------|--------------|
-| File in backup, already on disk | Overwritten |
-| File in backup, not on disk | Added |
-| File on disk, not in backup | **Kept** — not deleted |
+| Situation                       | What happens           |
+| ------------------------------- | ---------------------- |
+| File in backup, already on disk | Overwritten            |
+| File in backup, not on disk     | Added                  |
+| File on disk, not in backup     | **Kept** — not deleted |
 
 ## When to back up
 

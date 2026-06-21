@@ -3,7 +3,7 @@
 <div class="screenshot" markdown>
 
 ![Sign-in page](assets/screenshots/login.png)
-*Visitors can browse without signing in when public read is enabled. Editors sign in via this form.*
+_Visitors can browse without signing in when public read is enabled. Editors sign in via this form._
 
 </div>
 
@@ -15,14 +15,14 @@ If your wiki is on the public internet, the person who hosts it may turn public 
 
 ## Roles
 
-| Role | What you can do |
-|------|-----------------|
-| **Visitor** | Read and search (when public read is on), change reading settings |
-| **Editor** | Everything above, plus create and edit pages, upload files, restore revisions, use extensions |
-| **Admin** | Everything above, plus the admin dashboard: users, backups, extension toggles, revision limits |
+| Role        | What you can do                                                                                |
+| ----------- | ---------------------------------------------------------------------------------------------- |
+| **Visitor** | Read and search (when public read is on), change reading settings                              |
+| **Editor**  | Everything above, plus create and edit pages, upload files, restore revisions, use extensions  |
+| **Admin**   | Everything above, plus the admin dashboard: users, backups, extension toggles, revision limits |
 
 !!! important "Every account can edit everything"
-    There is no read-only editor role. If someone has an account, they can edit any page. Only give accounts to people you trust with the whole wiki.
+There is no read-only editor role. If someone has an account, they can edit any page. Only give accounts to people you trust with the whole wiki.
 
 ## Signing in
 
@@ -47,14 +47,14 @@ Click **Sign out** in the header.
 
 ## Who needs an account?
 
-| Task | Account required? |
-|------|-------------------|
-| Read pages (public wiki) | No |
-| Search | No |
-| Create or edit pages | Yes |
-| Upload files | Yes |
-| View history / restore revisions | Yes |
-| Admin dashboard | Yes (admin role) |
+| Task                             | Account required? |
+| -------------------------------- | ----------------- |
+| Read pages (public wiki)         | No                |
+| Search                           | No                |
+| Create or edit pages             | Yes               |
+| Upload files                     | Yes               |
+| View history / restore revisions | Yes               |
+| Admin dashboard                  | Yes (admin role)  |
 
 ## Too many login attempts
 

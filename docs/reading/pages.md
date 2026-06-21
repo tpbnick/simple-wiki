@@ -3,7 +3,7 @@
 <div class="screenshot" markdown>
 
 ![Reading an article](../assets/screenshots/home.png)
-*A typical article page with title, last-edited time, and rendered markdown content.*
+_A typical article page with title, last-edited time, and rendered markdown content._
 
 </div>
 

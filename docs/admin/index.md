@@ -3,7 +3,7 @@
 <div class="screenshot" markdown>
 
 ![Admin dashboard — Pages tab](../assets/screenshots/admin-pages.png)
-*The admin dashboard with page search, listing, and actions.*
+_The admin dashboard with page search, listing, and actions._
 
 </div>
 
@@ -11,25 +11,25 @@ The admin dashboard at `/admin` is for users with the admin role. Click **Admin*
 
 ## Tabs
 
-| Tab | What you do there |
-|-----|-------------------|
-| **Pages** | Search, view, edit, delete, and create pages |
-| **Files** | Browse, preview, rename, and delete uploads |
+| Tab                | What you do there                                 |
+| ------------------ | ------------------------------------------------- |
+| **Pages**          | Search, view, edit, delete, and create pages      |
+| **Files**          | Browse, preview, rename, and delete uploads       |
 | **Recent Changes** | Site-wide edit feed + revision retention settings |
-| **Templates** | Manage template-namespace pages |
-| **Extensions** | Enable or disable bundled extensions |
-| **Users** | Create accounts |
-| **Backups** | Export and import the wiki |
+| **Templates**      | Manage template-namespace pages                   |
+| **Extensions**     | Enable or disable bundled extensions              |
+| **Users**          | Create accounts                                   |
+| **Backups**        | Export and import the wiki                        |
 
 ## Pages
 
 Search and paginate through all pages (100 per page).
 
-| Action | Notes |
-|--------|-------|
-| **View** / **Edit** | Open the page |
-| **Delete** | Removes the page |
-| **New page** | Opens the editor |
+| Action              | Notes            |
+| ------------------- | ---------------- |
+| **View** / **Edit** | Open the page    |
+| **Delete**          | Removes the page |
+| **New page**        | Opens the editor |
 
 ## Files
 
