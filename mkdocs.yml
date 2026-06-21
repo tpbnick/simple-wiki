@@ -1,0 +1,96 @@
+site_name: Simple-Wiki User Guide
+site_description: How to read, edit, and manage your Simple-Wiki
+site_url: https://tpbnick.github.io/simple-wiki/
+repo_url: https://github.com/tpbnick/simple-wiki
+repo_name: tpbnick/simple-wiki
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  logo: assets/logo.png
+  favicon: assets/logo.png
+  palette:
+    - media: '(prefers-color-scheme: light)'
+      scheme: default
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: '(prefers-color-scheme: dark)'
+      scheme: slate
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tracking
+    - navigation.top
+    - navigation.sections
+    - navigation.expand
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.action.edit
+    - toc.follow
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Welcome: index.md
+  - Getting started:
+      - First login: getting-started/first-login.md
+      - Navigation: getting-started/navigation.md
+  - Reading:
+      - Reading pages: reading/pages.md
+      - Search: reading/search.md
+      - Reading preferences: reading/preferences.md
+  - Accounts: accounts.md
+  - Editing:
+      - Editing basics: editing/basics.md
+      - Markdown & wiki links: editing/markdown.md
+      - Templates: editing/templates.md
+      - References: editing/references.md
+      - Uploads: editing/uploads.md
+  - Revision history: history.md
+  - Family trees: family-trees.md
+  - Admin:
+      - Admin dashboard: admin/index.md
+      - Users: admin/users.md
+      - Backups: admin/backups.md
+      - Extensions: admin/extensions.md
+  - Troubleshooting: troubleshooting.md
+
+extra_css:
+  - stylesheets/extra.css
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/tpbnick/simple-wiki
