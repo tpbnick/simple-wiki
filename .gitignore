@@ -1,12 +1,14 @@
 # Dependencies
 package-lock.json
 node_modules/
+.venv-docs/
 
 # Build output
 build/
 .svelte-kit/
 dist/
 .output/
+site/
 
 # Environment and secrets
 .env

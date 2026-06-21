@@ -8,6 +8,8 @@
 
 A personal markdown wiki with Wikipedia-like features — wiki links, full-text search, uploads, revision history, templates, admin tools, and a pluggable extension system. Built with SvelteKit and SQLite.
 
+**[User guide](https://tpbnick.github.io/simple-wiki/)** — how to read, edit, and manage your wiki (hosted on GitHub Pages).
+
 <p align="center">
   <img src="static/Simple-Wiki-Home.png" alt="Simple-Wiki home page" width="48%">
   <img src="static/Simple-Wiki-Admin.png" alt="Simple-Wiki admin panel" width="48%">
@@ -58,6 +60,20 @@ bun run start
 | `bun run start` | Run the production server                                       |
 | `bun run check` | Typecheck (Svelte + TypeScript)                                 |
 | `bun run test`  | Run tests (uses Node/vitest — prefer this over bare `bun test`) |
+
+## User guide
+
+The [user guide](https://tpbnick.github.io/simple-wiki/) is built with [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) and deployed to GitHub Pages on pushes to `main` that touch `docs/`.
+
+Preview locally:
+
+```bash
+python3 -m venv .venv-docs && source .venv-docs/bin/activate
+pip install -r requirements-docs.txt
+mkdocs serve
+```
+
+Open **http://127.0.0.1:8000**.
 
 ## Self-hosting on your LAN
 
