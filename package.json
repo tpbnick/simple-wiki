@@ -11,7 +11,8 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "node node_modules/.bin/vitest run"
+    "test": "node node_modules/.bin/vitest run",
+    "reset-password": "node scripts/reset-password.mjs"
   },
   "devDependencies": {
     "@sveltejs/adapter-node": "^5.2.11",

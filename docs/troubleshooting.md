@@ -4,7 +4,7 @@
 
 | Problem                        | What to try                                                                                                                                                             |
 | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Forgot admin password          | Check the server logs from first boot, or ask whoever installed the wiki. Resetting requires database access, or deleting `wiki.db` and starting fresh (loses all data) |
+| Forgot admin password          | In Docker: `docker exec <container> node scripts/reset-password.mjs admin` (prints a new temp password). Locally: `bun run reset-password -- admin`. Or check first-boot server logs |
 | "Invalid username or password" | Check caps lock. Usernames are case-sensitive                                                                                                                           |
 | Redirected to change password  | Normal on first login — set a new password at `/admin/change-password`                                                                                                  |
 | "Too many login attempts"      | Wait about 15 minutes, then try again                                                                                                                                   |
