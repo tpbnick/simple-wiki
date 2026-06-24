@@ -58,7 +58,9 @@ function listUsers(db) {
 
   console.log('Username\tAdmin\tMust change password')
   for (const user of users) {
-    console.log(`${user.username}\t${user.is_admin ? 'yes' : 'no'}\t${user.must_change_pw ? 'yes' : 'no'}`)
+    console.log(
+      `${user.username}\t${user.is_admin ? 'yes' : 'no'}\t${user.must_change_pw ? 'yes' : 'no'}`
+    )
   }
 }
 
@@ -70,7 +72,10 @@ function resetPassword(db, username, password) {
   }
 
   const hash = bcrypt.hashSync(password, BCRYPT_ROUNDS)
-  db.prepare('UPDATE users SET password_hash = ?, must_change_pw = 1 WHERE id = ?').run(hash, user.id)
+  db.prepare('UPDATE users SET password_hash = ?, must_change_pw = 1 WHERE id = ?').run(
+    hash,
+    user.id
+  )
   db.prepare('DELETE FROM sessions WHERE user_id = ?').run(user.id)
 }
 

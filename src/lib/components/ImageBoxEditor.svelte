@@ -219,7 +219,8 @@ function handleCaptionKeydown(
             rows={2}
             use:resizeCaptionField
             oninput={(event) => updateItem(index, { ...item, caption: event.currentTarget.value })}
-            onkeydown={(event) => handleCaptionKeydown(index, item, event)}></textarea>
+            onkeydown={(event) => handleCaptionKeydown(index, item, event)}
+          ></textarea>
 
           <div class="imagebox-editor-actions">
             <label

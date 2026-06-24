@@ -50,5 +50,6 @@ let {
       e.preventDefault()
       dragOver = false
       onFileDrop(e.dataTransfer?.files ?? null)
-    }}></textarea>
+    }}
+  ></textarea>
 </div>

@@ -2,13 +2,13 @@
 
 ## Cannot sign in
 
-| Problem                        | What to try                                                                                                                                                             |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Problem                        | What to try                                                                                                                                                                          |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Forgot admin password          | In Docker: `docker exec <container> node scripts/reset-password.mjs admin` (prints a new temp password). Locally: `bun run reset-password -- admin`. Or check first-boot server logs |
-| "Invalid username or password" | Check caps lock. Usernames are case-sensitive                                                                                                                           |
-| Redirected to change password  | Normal on first login — set a new password at `/admin/change-password`                                                                                                  |
-| "Too many login attempts"      | Wait about 15 minutes, then try again                                                                                                                                   |
-| Page requires login to read    | Public read may be off — sign in, or ask your host to enable `PUBLIC_READ`                                                                                              |
+| "Invalid username or password" | Check caps lock. Usernames are case-sensitive                                                                                                                                        |
+| Redirected to change password  | Normal on first login — set a new password at `/admin/change-password`                                                                                                               |
+| "Too many login attempts"      | Wait about 15 minutes, then try again                                                                                                                                                |
+| Page requires login to read    | Public read may be off — sign in, or ask your host to enable `PUBLIC_READ`                                                                                                           |
 
 ## Page won't save
 
