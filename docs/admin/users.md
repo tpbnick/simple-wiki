@@ -36,7 +36,13 @@ They must change that password on first login.
 
 ## If someone loses their password
 
-Create them a new account, or ask whoever hosts the wiki to reset it directly in the database.
+Ask whoever hosts the wiki to reset it from the shell:
+
+```bash
+docker exec <container> node scripts/reset-password.mjs <username>
+```
+
+That prints a new temporary password. List accounts with `--list`. Locally: `bun run reset-password -- <username>`.
 
 ## Tips
 

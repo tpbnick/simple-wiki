@@ -1,17 +1,16 @@
 <script lang="ts">
 import { enhance } from '$app/forms'
-import { BookOpen, Eye, EyeOff } from 'lucide-svelte'
+import { AlertCircle, BookOpen, Eye, EyeOff, X } from 'lucide-svelte'
 import type { PageData, ActionData } from './$types'
 
 let { data, form }: { data: PageData; form: ActionData } = $props()
 
 let pending = $state(false)
 let showPassword = $state(false)
-let loginError = $state<string | null>(null)
+let clientError = $state<string | null>(null)
+let errorDismissed = $state(false)
 
-$effect(() => {
-  loginError = form?.error ?? null
-})
+const loginError = $derived(errorDismissed ? null : (form?.error ?? clientError))
 
 function loginErrorMessage(result: {
   type?: string
@@ -28,11 +27,37 @@ function loginErrorMessage(result: {
   }
   return 'Unable to sign in. Please try again.'
 }
+
+function dismissLoginError() {
+  errorDismissed = true
+  clientError = null
+}
 </script>
 
 <svelte:head>
   <title>Sign in — Wiki</title>
 </svelte:head>
+
+{#if loginError}
+  <div
+    class="fixed top-4 left-1/2 z-50 w-[min(calc(100%-2rem),24rem)] -translate-x-1/2
+           alert alert-error shadow-lg border border-error/30 py-3"
+    role="alert"
+    aria-live="assertive"
+    id="login-error"
+  >
+    <AlertCircle size={18} class="shrink-0" aria-hidden="true" />
+    <span class="flex-1 text-sm">{loginError}</span>
+    <button
+      type="button"
+      class="btn btn-ghost btn-xs btn-square shrink-0"
+      aria-label="Dismiss error"
+      onclick={dismissLoginError}
+    >
+      <X size={14} />
+    </button>
+  </div>
+{/if}
 
 <div class="min-h-[calc(100vh-3.5rem)] flex items-center justify-center bg-base-200 p-4">
   <div class="w-full max-w-sm">
@@ -55,11 +80,12 @@ function loginErrorMessage(result: {
         class="space-y-4"
         use:enhance={() => {
           pending = true
-          loginError = null
+          clientError = null
+          errorDismissed = false
           return async ({ result, update }) => {
             try {
               const message = loginErrorMessage(result)
-              if (message) loginError = message
+              if (message) clientError = message
               await update({ reset: false })
             } finally {
               pending = false
@@ -83,10 +109,11 @@ function loginErrorMessage(result: {
             value={(form as { username?: string } | null)?.username ?? ''}
             autocomplete="username"
             required
+            aria-invalid={loginError ? 'true' : undefined}
             class="w-full h-10 px-3 rounded-lg border border-base-300 bg-base-100
                    text-sm text-base-content placeholder:text-base-content/30
                    focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary
-                   transition-all"
+                   transition-all {loginError ? 'border-error/60' : ''}"
           />
         </div>
 
@@ -125,11 +152,6 @@ function loginErrorMessage(result: {
               {/if}
             </button>
           </div>
-          {#if loginError}
-            <p id="login-error" class="mt-2 text-sm text-error" role="alert" aria-live="polite">
-              {loginError}
-            </p>
-          {/if}
         </div>
 
         <button

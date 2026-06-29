@@ -37,6 +37,7 @@ COPY --from=builder /app/package.json /app/bun.lock* ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/build ./build
 COPY server/start.mjs ./server/start.mjs
+COPY scripts/reset-password.mjs ./scripts/reset-password.mjs
 
 RUN npm prune --omit=dev \
   && npm rebuild better-sqlite3 \

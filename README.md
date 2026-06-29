@@ -134,6 +134,14 @@ Admin → Backups can export/import a zip containing `wiki.db`, optional markdow
 
 Import shows a 503 to other users while the database swap is in progress.
 
+### Reset a password
+
+```bash
+docker exec <container> node scripts/reset-password.mjs admin
+```
+
+Omit the password to get a random temporary one printed to the terminal. List users with `--list`. Works locally too: `bun run reset-password -- admin`.
+
 ## Environment variables
 
 Copy `.env.example` to `.env` and uncomment or set values as needed.
