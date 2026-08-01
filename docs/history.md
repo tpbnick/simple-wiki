@@ -51,4 +51,4 @@ The **Edit summary** field in the editor is optional, but worth using on bigger 
 ## Tips
 
 - Restoring never deletes history — it adds a new revision
-- If you get a conflict while editing, someone else saved first. Check history to see their version, then edit again
+- If you get a conflict while editing, use **Reload latest** or **Overwrite with mine**. History still shows what changed.

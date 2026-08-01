@@ -19,7 +19,7 @@ Click **Infobox** in the editor toolbar to open the visual editor. Pick **Basic*
 A gallery with captions:
 
 ```markdown
-{{ImageBox|image1=photo.jpg|caption1=Front view|columns=2}}
+{{ImageBox|@img0=photo.jpg|@img0_cap=Front view|columns=2}}
 ```
 
 Use the **ImageBox** toolbar button. Upload images per slot, set captions and column count, and drag to reorder images.

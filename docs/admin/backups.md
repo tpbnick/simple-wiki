@@ -15,7 +15,7 @@ Click **Export backup** for a zip containing:
 
 - `wiki.db` — always included
 - `manifest.txt` — wiki name and export date
-- **Uploaded files** — optional
+- **Uploaded files** — optional (the UI warns when that library is large; export loads uploads into memory)
 - **`markdown/` folder** — raw page exports with YAML frontmatter — optional
 
 Keep backups somewhere safe, not just on the same machine as the wiki.

@@ -3,11 +3,11 @@
 <div class="screenshot" markdown>
 
 ![Admin — Users tab](../assets/screenshots/admin-users.png)
-_Create accounts and view roles from Admin → Users._
+_Create accounts and manage roles from Admin → Users._
 
 </div>
 
-Admins create accounts under **Admin → Users**.
+Admins manage accounts under **Admin → Users**.
 
 ## Creating a user
 
@@ -28,11 +28,18 @@ They must change that password on first login.
 | **Role**                 | Admin or Editor                        |
 | **Must change password** | Waiting on first-login password change |
 | **Created**              | When the account was made              |
+| **Actions**              | Promote / demote, or delete            |
 
 ## Roles
 
 - **Editor** — can edit pages, upload files, use extensions
 - **Admin** — all of the above, plus the admin dashboard
+
+Use **Promote** / **Demote** in the actions column to change a role. You can’t demote or delete the last admin, and you can’t delete your own account.
+
+## Deleting a user
+
+Click the delete button next to the user and confirm. Their sessions end immediately.
 
 ## If someone loses their password
 

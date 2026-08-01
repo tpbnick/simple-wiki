@@ -3,6 +3,7 @@ import { invalidatePageSlugCache, readCachedPageSlugs, writeCachedPageSlugs } fr
 import { getRevisionRetentionLimit } from './settings.js'
 import {
   PageConflictError,
+  PageDuplicateError,
   PROTECTED_PAGE_SLUGS,
   ProtectedPageError,
   type Page,
@@ -35,6 +36,16 @@ export function getPage(slug: string): Page | null {
 /** Returns every page ordered by most recently updated. */
 export function getAllPages(): Page[] {
   return openDatabase().statements.getAllPages.all()
+}
+
+/** Returns full pages in a namespace, ordered by title. */
+export function getPagesByNamespace(namespace: string): Page[] {
+  return openDatabase().statements.getPagesByNamespace.all(namespace)
+}
+
+/** Returns the number of pages in a namespace. */
+export function countPagesByNamespace(namespace: string): number {
+  return openDatabase().statements.countPagesByNamespace.get(namespace)?.count ?? 0
 }
 
 /** Escapes `%`, `_`, and `\` for SQLite LIKE patterns with ESCAPE '\\'. */
@@ -86,6 +97,7 @@ export function findPagesReferencingUpload(filename: string): PageSummary[] {
 
 /**
  * Creates or updates a page and stores a revision when replacing existing content or title.
+ * Creates use INSERT (unique-slug safe); updates never upsert over a concurrent create.
  */
 export function savePage(
   slug: string,
@@ -99,14 +111,28 @@ export function savePage(
 
   const page = db.transaction(() => {
     const existingPage = statements.getPage.get(slug)
-    if (existingPage && expectedUpdatedAt && existingPage.updated_at !== expectedUpdatedAt) {
+
+    if (!existingPage) {
+      try {
+        statements.insertPage.run({ slug, title, content, namespace })
+      } catch (error) {
+        if (error instanceof Error && error.message.includes('UNIQUE constraint failed')) {
+          throw new PageDuplicateError(`A page already exists at /wiki/${slug}`)
+        }
+        throw error
+      }
+      return statements.getPage.get(slug)!
+    }
+
+    if (expectedUpdatedAt && existingPage.updated_at !== expectedUpdatedAt) {
       throw new PageConflictError()
     }
 
-    statements.upsertPage.run({ slug, title, content, namespace })
-    const contentChanged = existingPage && existingPage.content !== content
-    const titleChanged = existingPage && existingPage.title !== title
-    if (existingPage && (contentChanged || titleChanged)) {
+    statements.updatePage.run({ slug, title, content, namespace })
+
+    const contentChanged = existingPage.content !== content
+    const titleChanged = existingPage.title !== title
+    if (contentChanged || titleChanged) {
       statements.saveRevision.run(
         existingPage.id,
         existingPage.content,

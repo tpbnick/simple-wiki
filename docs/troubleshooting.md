@@ -14,7 +14,7 @@
 
 | Problem             | What to try                                                      |
 | ------------------- | ---------------------------------------------------------------- |
-| Edit conflict       | Someone else saved first — reload and try again                  |
+| Edit conflict       | Use **Reload latest** or **Overwrite with mine** on the banner   |
 | Content too large   | Page markdown is limited to 2 MB per save (uploads don't count)  |
 | Not signed in       | Sign in first                                                    |
 | "Too many requests" | You hit a rate limit — wait a minute and retry                   |
@@ -46,12 +46,14 @@
 | ----------------- | --------------------------------------------------------------------------------------------------------- |
 | Embed is empty    | Check **Admin → Extensions** — Family Tree must be enabled. Verify the `family=` slug matches a real tree |
 | Changes not saved | Click **Save** in the tree editor. Don't leave with unsaved changes                                       |
+| Edit conflict     | Use **Reload latest** or **Overwrite with mine** — same choices as wiki page conflicts                    |
 
 ## Backup import
 
 | Problem           | What to try                                                                                |
 | ----------------- | ------------------------------------------------------------------------------------------ |
 | Import fails      | Use a valid Simple-Wiki backup zip. Check **Fully overwrite existing database**            |
+| 413 / too large   | Increase `BODY_SIZE_LIMIT` (defaults to `512M` with `bun run start` / Docker) and restart  |
 | 503 during import | Normal — the database is swapping. Wait a few seconds and refresh                          |
 | Missing uploads   | Enable **Restore uploads** during import. Files on disk that aren't in the backup are kept |
 
