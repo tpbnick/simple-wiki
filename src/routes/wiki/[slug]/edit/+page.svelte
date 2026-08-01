@@ -1,5 +1,5 @@
 <script lang="ts">
-import { beforeNavigate } from '$app/navigation'
+import { beforeNavigate, invalidateAll } from '$app/navigation'
 import { onMount } from 'svelte'
 import { createFamilyTree } from '$lib/family-tree/create-tree.js'
 import {
@@ -71,7 +71,11 @@ let saving = $state(false)
 let allowNavigation = $state(false)
 let previewEnabled = $state(false)
 let expectedUpdatedAt = $state('')
+/** Server revision from a 409 — kept separate so Save cannot silently overwrite. */
+let conflictServerUpdatedAt = $state<string | null>(null)
+let lastEditKey = $state<string | null>(null)
 let previewRequestId = 0
+let saveFormEl = $state<HTMLFormElement | null>(null)
 let previewBundle = $state<EditorPreviewBundle>({
   existingSlugs: [],
   templatePages: {},
@@ -94,12 +98,14 @@ onMount(() => {
 })
 
 $effect(() => {
-  editKey
+  if (lastEditKey === editKey) return
+  lastEditKey = editKey
   title = baseline.title
   content = baseline.content
   namespace = baseline.namespace
   summary = ''
   expectedUpdatedAt = data.page?.updated_at ?? ''
+  conflictServerUpdatedAt = null
   previewBundle = data.previewBundle
   familyTrees = data.familyTrees
   allowNavigation = false
@@ -136,7 +142,10 @@ $effect(() => {
   if (payload.content !== undefined) content = String(payload.content)
   if (payload.namespace !== undefined) namespace = String(payload.namespace)
   if (payload.summary !== undefined) summary = String(payload.summary)
-  if (payload.expectedUpdatedAt) expectedUpdatedAt = String(payload.expectedUpdatedAt)
+  // Conflict: keep local draft and stash server timestamp separately (no silent overwrite).
+  if (typeof payload.expectedUpdatedAt === 'string' && payload.expectedUpdatedAt) {
+    conflictServerUpdatedAt = payload.expectedUpdatedAt
+  }
   schedulePreview()
 })
 
@@ -146,6 +155,21 @@ beforeNavigate(({ cancel }) => {
     cancel()
   }
 })
+
+async function discardConflictAndReload() {
+  if (!confirm('Discard your unsaved changes and load the latest version?')) return
+  conflictServerUpdatedAt = null
+  allowNavigation = true
+  lastEditKey = null
+  await invalidateAll()
+}
+
+function overwriteWithMyChanges() {
+  if (!conflictServerUpdatedAt) return
+  expectedUpdatedAt = conflictServerUpdatedAt
+  conflictServerUpdatedAt = null
+  queueMicrotask(() => saveFormEl?.requestSubmit())
+}
 
 $effect(() => {
   if (!isDirty) return
@@ -443,12 +467,21 @@ const saveEnhance = ({ formData }: { formData: FormData }) => {
   formData.set('content', content)
   formData.set('namespace', namespace)
   formData.set('expectedUpdatedAt', expectedUpdatedAt)
-  return async ({ result, update }: { result: { type: string }; update: () => Promise<void> }) => {
+  return async ({
+    result,
+    update
+  }: {
+    result: { type: string }
+    update: (opts?: { reset?: boolean; invalidateAll?: boolean }) => Promise<void>
+  }) => {
     try {
       if (result.type === 'redirect') {
         allowNavigation = true
+        await update()
+        return
       }
-      await update()
+      // Keep local editor state on validation/conflict failures.
+      await update({ reset: false, invalidateAll: false })
     } finally {
       saving = false
     }
@@ -538,9 +571,13 @@ const saveEnhance = ({ formData }: { formData: FormData }) => {
   <WikiEditSaveBar
     bind:summary
     bind:saving
+    bind:formEl={saveFormEl}
     formError={form?.error}
+    conflictServerUpdatedAt={conflictServerUpdatedAt}
     {cancelHref}
     isNew={data.isNew}
     onEnhance={saveEnhance}
+    onDiscardConflict={discardConflictAndReload}
+    onOverwriteConflict={overwriteWithMyChanges}
   />
 </div>

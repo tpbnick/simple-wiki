@@ -9,8 +9,8 @@ CREATE TABLE IF NOT EXISTS pages (
   title      TEXT    NOT NULL,
   content    TEXT    NOT NULL DEFAULT '',
   namespace  TEXT    NOT NULL DEFAULT 'article',
-  created_at TEXT    NOT NULL DEFAULT (datetime('now')),
-  updated_at TEXT    NOT NULL DEFAULT (datetime('now'))
+  created_at TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%f', 'now')),
+  updated_at TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%f', 'now'))
 );
 
 CREATE TABLE IF NOT EXISTS revisions (
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS revisions (
   content    TEXT    NOT NULL,
   summary    TEXT    NOT NULL DEFAULT '',
   title      TEXT,
-  created_at TEXT    NOT NULL DEFAULT (datetime('now'))
+  created_at TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%f', 'now'))
 );
 
 CREATE TABLE IF NOT EXISTS users (
@@ -65,5 +65,5 @@ CREATE TABLE IF NOT EXISTS rate_limits (
 );
 
 CREATE TRIGGER IF NOT EXISTS pages_updated_at AFTER UPDATE ON pages BEGIN
-  UPDATE pages SET updated_at = datetime('now') WHERE id = new.id;
+  UPDATE pages SET updated_at = strftime('%Y-%m-%d %H:%M:%f', 'now') WHERE id = new.id;
 END;

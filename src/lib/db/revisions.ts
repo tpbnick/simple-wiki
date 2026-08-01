@@ -31,6 +31,11 @@ export function getRecentRevisions(limit = 50): RecentChange[] {
   return openDatabase().statements.getRecentRevisions.all(limit)
 }
 
+/** Returns the total number of stored revisions. */
+export function countRevisions(): number {
+  return openDatabase().statements.countRecentRevisions.get()?.count ?? 0
+}
+
 /** Deletes revisions beyond the newest `limit` rows for every page. Returns rows removed. */
 export function pruneAllRevisions(limit: number): number {
   if (!Number.isInteger(limit) || limit < 1) return 0

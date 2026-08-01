@@ -45,12 +45,6 @@ $effect(() => {
   expectedUpdatedAt = data.page.updated_at
 })
 
-$effect(() => {
-  if (!form?.error) return
-  const payload = form as Record<string, unknown>
-  if (payload.expectedUpdatedAt) expectedUpdatedAt = String(payload.expectedUpdatedAt)
-})
-
 function openRestoreModal(revisionId: number, revisionNumber: number, summary: string) {
   restoreTarget = { revisionId, revisionNumber, summary }
   restoreDialogTrigger = document.activeElement as HTMLElement

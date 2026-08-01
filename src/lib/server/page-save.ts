@@ -1,4 +1,11 @@
-import { getPage, savePage, PageConflictError, VALID_NAMESPACES, type Page } from '$lib/db/index.js'
+import {
+  getPage,
+  savePage,
+  PageConflictError,
+  PageDuplicateError,
+  VALID_NAMESPACES,
+  type Page
+} from '$lib/db/index.js'
 import { slugify } from '$lib/slug.js'
 
 export const MAX_PAGE_CONTENT_BYTES = 2 * 1024 * 1024
@@ -119,12 +126,22 @@ export function persistWikiPage(options: {
     )
     return { ok: true, slug, page }
   } catch (error) {
+    if (error instanceof PageDuplicateError) {
+      return {
+        ok: false,
+        type: 'duplicate',
+        slug,
+        message: `A page already exists at /wiki/${slug}. Edit it instead.`,
+        fields: options.fields
+      }
+    }
     if (error instanceof PageConflictError) {
       const current = getPage(slug)
       return {
         ok: false,
         type: 'conflict',
-        message: 'This page was modified elsewhere. Review the latest version and save again.',
+        message:
+          'This page was modified elsewhere. Reload the latest version, or overwrite with your changes.',
         fields: options.fields,
         expectedUpdatedAt: current?.updated_at ?? null
       }

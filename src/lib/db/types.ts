@@ -84,6 +84,14 @@ export class PageConflictError extends Error {
   }
 }
 
+/** Thrown when creating a page whose slug already exists. */
+export class PageDuplicateError extends Error {
+  constructor(message = 'A page with this slug already exists') {
+    super(message)
+    this.name = 'PageDuplicateError'
+  }
+}
+
 /** Thrown when attempting to delete a protected system page. */
 export class ProtectedPageError extends Error {
   constructor(message = 'This page cannot be deleted') {

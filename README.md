@@ -93,7 +93,7 @@ docker compose up --build
 
 Open **http://localhost:3000**. The database and uploads live in Docker volumes so they survive restarts.
 
-Production images use Node (`node build/index.js`). Bun is fine for local development.
+Production images use Node via `server/start.mjs` (`bun run start` / Docker `CMD`). That wrapper sets CSRF-safe defaults for plain HTTP and aliases `WIKI_ORIGIN` → `ORIGIN`. Bun is fine for local development.
 
 Pre-built images are published to GitHub Container Registry on pushes to `main`:
 
@@ -153,7 +153,7 @@ Copy `.env.example` to `.env` and uncomment or set values as needed.
 | `DATABASE_PATH`   | `./wiki.db`                                                 | SQLite database file                                                                |
 | `UPLOADS_DIR`     | `./uploads` (or `/uploads` in Docker when that path exists) | Directory for uploaded files; must match the container volume mount                 |
 | `PORT`            | `3000`                                                      | Port for `bun run start` / production server                                        |
-| `BODY_SIZE_LIMIT` | `512K` (adapter-node) / `512M` (Docker image)               | Max POST body size for backup restore and file uploads; override for larger imports |
+| `BODY_SIZE_LIMIT` | `512M` via `bun run start` / Docker; adapter-node alone is `512K` | Max POST body size for backup restore and file uploads; override for larger imports |
 
 ### Wiki identity
 

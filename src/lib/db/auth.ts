@@ -91,3 +91,38 @@ export function destroyOtherSessions(userId: number, keepSessionId?: string): vo
     statements.deleteUserSessions.run(userId)
   }
 }
+
+/** Returns the number of wiki users. */
+export function countUsers(): number {
+  return openDatabase().statements.countUsers.get()?.count ?? 0
+}
+
+function requireUser(userId: number): User {
+  const user = openDatabase().statements.getUserById.get(userId)
+  if (!user) throw new Error('User not found')
+  return user
+}
+
+function assertNotLastAdmin(user: User): void {
+  if (user.is_admin !== 1) return
+  const admins = openDatabase().statements.countAdmins.get()?.count ?? 0
+  if (admins <= 1) throw new Error('Cannot change the last admin')
+}
+
+/** Promotes or demotes a user. Refuses to demote the last admin. */
+export function setWikiUserAdmin(userId: number, isAdmin: boolean): void {
+  const user = requireUser(userId)
+  if (!isAdmin) assertNotLastAdmin(user)
+  openDatabase().statements.setUserAdmin.run(isAdmin ? 1 : 0, userId)
+}
+
+/** Deletes a wiki user and their sessions. Refuses to delete the last admin. */
+export function deleteWikiUser(userId: number): void {
+  const user = requireUser(userId)
+  assertNotLastAdmin(user)
+  const { db, statements } = openDatabase()
+  db.transaction(() => {
+    statements.deleteUserSessions.run(userId)
+    statements.deleteUser.run(userId)
+  })()
+}

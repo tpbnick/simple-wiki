@@ -1,24 +1,29 @@
 <script lang="ts">
 import { enhance } from '$app/forms'
-import { Check, Copy, KeyRound, Search, Shield, UserPlus, Users } from 'lucide-svelte'
+import { Check, Copy, KeyRound, Search, Shield, Trash2, UserPlus, Users } from 'lucide-svelte'
+import { copyTextToClipboard } from '$lib/clipboard.js'
 import { formatDateTime, formatTimeAgo, toDatetimeAttr } from '$lib/format.js'
 import type { ActionData } from './$types'
 
 let {
   users,
+  currentUserId = null,
   form
 }: {
   users: Array<{
+    id: number
     username: string
     is_admin: number
     must_change_pw: number
     created_at: string
   }>
+  currentUserId?: number | null
   form: ActionData
 } = $props()
 
 let filter = $state('')
 let copiedPassword = $state(false)
+let copyFailed = $state(false)
 
 const filtered = $derived(
   users.filter((user) => !filter || user.username.toLowerCase().includes(filter.toLowerCase()))
@@ -32,15 +37,16 @@ function userInitial(username: string): string {
 }
 
 async function copyPassword(password: string) {
-  try {
-    await navigator.clipboard.writeText(password)
-    copiedPassword = true
-    setTimeout(() => {
-      copiedPassword = false
-    }, 2000)
-  } catch {
-    // Clipboard may be unavailable outside secure context.
+  copyFailed = false
+  const ok = await copyTextToClipboard(password)
+  if (!ok) {
+    copyFailed = true
+    return
   }
+  copiedPassword = true
+  setTimeout(() => {
+    copiedPassword = false
+  }, 2000)
 }
 </script>
 
@@ -83,6 +89,11 @@ async function copyPassword(password: string) {
             {/if}
           </button>
         </div>
+        {#if copyFailed}
+          <p class="text-xs mt-2 text-warning">
+            Clipboard unavailable — select the password above and copy manually.
+          </p>
+        {/if}
         <p class="text-xs mt-2 text-base-content/55">
           Share securely — the user must change this password on first login.
         </p>
@@ -184,6 +195,10 @@ async function copyPassword(password: string) {
               class="text-left px-3 py-2.5 font-semibold text-base-content/60 text-xs uppercase tracking-wider"
               >Created</th
             >
+            <th
+              class="text-right px-3 py-2.5 font-semibold text-base-content/60 text-xs uppercase tracking-wider"
+              >Actions</th
+            >
           </tr>
         </thead>
         <tbody class="divide-y divide-base-200">
@@ -245,11 +260,51 @@ async function copyPassword(password: string) {
                   {formatTimeAgo(user.created_at, 'short')}
                 </time>
               </td>
+              <td class="px-3 py-3">
+                <div class="flex items-center justify-end gap-1.5">
+                  <form method="POST" action="?/setUserAdmin" use:enhance>
+                    <input type="hidden" name="userId" value={user.id} />
+                    <input type="hidden" name="isAdmin" value={user.is_admin ? '0' : '1'} />
+                    <button
+                      type="submit"
+                      class="btn btn-ghost btn-xs"
+                      disabled={user.is_admin === 1 && adminCount <= 1}
+                      title={user.is_admin ? 'Demote to editor' : 'Promote to admin'}
+                    >
+                      {user.is_admin ? 'Demote' : 'Promote'}
+                    </button>
+                  </form>
+                  <form
+                    method="POST"
+                    action="?/deleteUser"
+                    use:enhance
+                    onsubmit={(event) => {
+                      if (
+                        !confirm(
+                          `Delete user “${user.username}”? Their sessions will end immediately.`
+                        )
+                      ) {
+                        event.preventDefault()
+                      }
+                    }}
+                  >
+                    <input type="hidden" name="userId" value={user.id} />
+                    <button
+                      type="submit"
+                      class="btn btn-ghost btn-xs text-error"
+                      disabled={user.id === currentUserId || (user.is_admin === 1 && adminCount <= 1)}
+                      title="Delete user"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </form>
+                </div>
+              </td>
             </tr>
           {/each}
           {#if filtered.length === 0}
             <tr>
-              <td colspan="4" class="text-center py-12 text-base-content/30 text-sm"
+              <td colspan="5" class="text-center py-12 text-base-content/30 text-sm"
                 >No users found</td
               >
             </tr>

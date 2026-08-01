@@ -7,15 +7,28 @@ let {
   wikiName,
   appVersion,
   uploadCount,
+  uploadsTotalBytes = 0,
   pageCount
 }: {
   wikiName: string
   appVersion: string
   uploadCount: number
+  uploadsTotalBytes?: number
   pageCount: number
 } = $props()
 
 let includeUploadsInBackup = $state(false)
+
+const LARGE_UPLOADS_BYTES = 50 * 1024 * 1024
+const uploadsSizeLabel = $derived.by(() => {
+  if (uploadsTotalBytes < 1024 * 1024) {
+    return `${Math.max(1, Math.round(uploadsTotalBytes / 1024))} KB`
+  }
+  return `${(uploadsTotalBytes / (1024 * 1024)).toFixed(1)} MB`
+})
+const warnLargeUploads = $derived(
+  includeUploadsInBackup && uploadsTotalBytes >= LARGE_UPLOADS_BYTES
+)
 let includeMarkdownInBackup = $state(false)
 let restoreUploadsOnImport = $state(false)
 let overwriteDatabaseOnImport = $state(false)
@@ -116,9 +129,18 @@ async function submitImport() {
           class="checkbox checkbox-sm mt-0.5"
         />
         <span class="text-base-content/70">
-          Include uploaded files ({uploadCount} on disk)
+          Include uploaded files ({uploadCount} on disk
+          {#if uploadCount > 0}
+            , {uploadsSizeLabel}
+          {/if})
         </span>
       </label>
+      {#if warnLargeUploads}
+        <p class="text-xs text-warning rounded-lg border border-warning/30 bg-warning/10 px-3 py-2">
+          Uploads are large ({uploadsSizeLabel}). Export loads them into memory and may briefly make
+          the wiki unavailable — prefer exporting without uploads if you only need the database.
+        </p>
+      {/if}
       <label class="flex items-start gap-2 text-sm">
         <input
           type="checkbox"

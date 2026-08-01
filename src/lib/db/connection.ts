@@ -98,7 +98,7 @@ function scheduleUploadHashBackfill(db: Database): void {
 function ensureHelpPage(preparedStatements: Statements) {
   if (preparedStatements.getPage.get('help')) return
 
-  preparedStatements.upsertPage.run({
+  preparedStatements.insertPage.run({
     slug: 'help',
     title: 'Help',
     content: HELP_CONTENT,
@@ -133,7 +133,7 @@ function ensureAdminUser(preparedStatements: Statements) {
 function ensureHomePage(preparedStatements: Statements) {
   if (preparedStatements.getPage.get('home')) return
 
-  preparedStatements.upsertPage.run({
+  preparedStatements.insertPage.run({
     slug: 'home',
     title: 'Welcome',
     content: HOME_CONTENT,
