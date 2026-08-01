@@ -40,7 +40,7 @@
   "dependencies": {
     "@shikijs/rehype": "^1.29.2",
     "bcryptjs": "^3.0.3",
-    "better-sqlite3": "^12.11.1",
+    "better-sqlite3": "^13.0.2",
     "fflate": "^0.8.3",
     "github-slugger": "^2.0.0",
     "photoswipe": "^5.4.4",
