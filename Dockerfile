@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # ── Build ─────────────────────────────────────────────────
-FROM node:22-bookworm-slim AS builder
+FROM node:25-bookworm-slim AS builder
 WORKDIR /app
 
 RUN apt-get update \
@@ -24,7 +24,7 @@ ENV GIT_COMMIT_DATE=$GIT_COMMIT_DATE
 RUN bun node_modules/@sveltejs/kit/svelte-kit.js sync && bun run build
 
 # ── Production ────────────────────────────────────────────
-FROM node:22-bookworm-slim AS runner
+FROM node:25-bookworm-slim AS runner
 WORKDIR /app
 
 RUN apt-get update \
