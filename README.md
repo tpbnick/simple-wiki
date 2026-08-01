@@ -148,11 +148,11 @@ Copy `.env.example` to `.env` and uncomment or set values as needed.
 
 ### Paths & server
 
-| Variable          | Default                                                     | Description                                                                         |
-| ----------------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `DATABASE_PATH`   | `./wiki.db`                                                 | SQLite database file                                                                |
-| `UPLOADS_DIR`     | `./uploads` (or `/uploads` in Docker when that path exists) | Directory for uploaded files; must match the container volume mount                 |
-| `PORT`            | `3000`                                                      | Port for `bun run start` / production server                                        |
+| Variable          | Default                                                           | Description                                                                         |
+| ----------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `DATABASE_PATH`   | `./wiki.db`                                                       | SQLite database file                                                                |
+| `UPLOADS_DIR`     | `./uploads` (or `/uploads` in Docker when that path exists)       | Directory for uploaded files; must match the container volume mount                 |
+| `PORT`            | `3000`                                                            | Port for `bun run start` / production server                                        |
 | `BODY_SIZE_LIMIT` | `512M` via `bun run start` / Docker; adapter-node alone is `512K` | Max POST body size for backup restore and file uploads; override for larger imports |
 
 ### Wiki identity

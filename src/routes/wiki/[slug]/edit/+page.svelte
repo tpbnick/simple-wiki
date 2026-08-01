@@ -573,7 +573,7 @@ const saveEnhance = ({ formData }: { formData: FormData }) => {
     bind:saving
     bind:formEl={saveFormEl}
     formError={form?.error}
-    conflictServerUpdatedAt={conflictServerUpdatedAt}
+    {conflictServerUpdatedAt}
     {cancelHref}
     isNew={data.isNew}
     onEnhance={saveEnhance}

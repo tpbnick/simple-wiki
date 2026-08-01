@@ -1,9 +1,5 @@
 import type { WikiExtension } from '../../src/lib/extensions/types.js'
-import {
-  FAMILY_TREE_SCHEMA,
-  listFamilyTreeSummaries,
-  resetFamilyTreeDbCache
-} from './db.js'
+import { FAMILY_TREE_SCHEMA, listFamilyTreeSummaries, resetFamilyTreeDbCache } from './db.js'
 import { renderFamilyTreeEmbed } from './lib/embed.js'
 
 const extension: WikiExtension = {

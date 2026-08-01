@@ -292,7 +292,8 @@ async function copyPassword(password: string) {
                     <button
                       type="submit"
                       class="btn btn-ghost btn-xs text-error"
-                      disabled={user.id === currentUserId || (user.is_admin === 1 && adminCount <= 1)}
+                      disabled={user.id === currentUserId ||
+                        (user.is_admin === 1 && adminCount <= 1)}
                       title="Delete user"
                     >
                       <Trash2 size={13} />

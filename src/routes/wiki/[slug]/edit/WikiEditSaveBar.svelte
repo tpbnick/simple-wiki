@@ -36,11 +36,7 @@ let {
   class="flex items-center gap-3 px-4 py-2 border-t border-base-300 bg-base-100 shrink-0 flex-wrap"
 >
   {#if conflictServerUpdatedAt && onDiscardConflict && onOverwriteConflict}
-    <EditConflictBanner
-      {saving}
-      onReload={onDiscardConflict}
-      onOverwrite={onOverwriteConflict}
-    />
+    <EditConflictBanner {saving} onReload={onDiscardConflict} onOverwrite={onOverwriteConflict} />
   {:else if formError}
     <p class="w-full text-xs text-error -mb-1" role="alert">{formError}</p>
   {/if}
