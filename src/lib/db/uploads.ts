@@ -49,6 +49,16 @@ export function getAllUploads(): Upload[] {
   return openDatabase().statements.getAllUploads.all()
 }
 
+/** Returns the number of upload records. */
+export function countUploads(): number {
+  return openDatabase().statements.countUploads.get()?.count ?? 0
+}
+
+/** Returns total stored upload bytes from metadata. */
+export function getUploadsTotalBytes(): number {
+  return openDatabase().statements.sumUploadBytes.get()?.total ?? 0
+}
+
 /** Returns upload metadata for a stored filename, if present. */
 export function getUploadByName(filename: string): Upload | null {
   return openDatabase().statements.getUploadByName.get(filename) ?? null

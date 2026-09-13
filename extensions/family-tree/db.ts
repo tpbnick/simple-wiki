@@ -40,6 +40,9 @@ function buildFamilyTreeStatements(db: ReturnType<typeof getDatabase>) {
     listFamilyTrees: db.prepare<[], FamilyTreeRow>(
       'SELECT * FROM family_trees ORDER BY updated_at DESC'
     ),
+    listFamilyTreeSummaries: db.prepare<[], { slug: string; title: string }>(
+      'SELECT slug, title FROM family_trees ORDER BY updated_at DESC'
+    ),
     getFamilyTree: db.prepare<[string], FamilyTreeRow>(
       'SELECT * FROM family_trees WHERE slug = ? LIMIT 1'
     ),
@@ -86,6 +89,11 @@ export function listFamilyTrees(): FamilyTreeRecord[] {
     .listFamilyTrees.all()
     .map(parseFamilyTreeRow)
     .filter((tree): tree is FamilyTreeRecord => tree !== null)
+}
+
+/** Returns slug/title pairs for editor menus without loading tree JSON. */
+export function listFamilyTreeSummaries(): Array<{ slug: string; title: string }> {
+  return getStatements().listFamilyTreeSummaries.all()
 }
 
 /** Returns a family tree by slug, or null when it does not exist. */

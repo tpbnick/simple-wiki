@@ -54,7 +54,10 @@ If you've typed anything, the editor warns you before navigating away or closing
 
 ### Edit conflicts
 
-If someone else saved while you were editing, you may see a conflict error. Reload, check what changed, and apply your edits again.
+If someone else saved while you were editing, the editor shows a conflict banner with two choices:
+
+- **Reload latest** — discard your draft and load their version
+- **Overwrite with mine** — keep your draft and replace what’s on the server
 
 ## Editing an existing page
 

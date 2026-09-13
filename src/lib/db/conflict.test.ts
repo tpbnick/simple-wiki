@@ -35,6 +35,12 @@ describe('savePage conflict detection', () => {
 
     expect(updated.content).toBe('Draft v2')
   })
+
+  it('stores millisecond precision on update', () => {
+    const page = savePage('rapid-page', 'Rapid', 'v1', 'article', 'create')
+    const updated = savePage('rapid-page', 'Rapid', 'v2', 'article', 'edit', page.updated_at)
+    expect(updated.updated_at).toMatch(/\.\d{3}/)
+  })
 })
 
 describe('deletePage', () => {

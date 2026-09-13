@@ -1,13 +1,11 @@
-import { getAllPageSlugs, getAllPages } from '$lib/db/index.js'
+import { getAllPageSlugs, getPagesByNamespace } from '$lib/db/index.js'
 import { listFamilyTrees } from '$extensions/family-tree/db.js'
 import type { EditorPreviewBundle } from './client-preview.js'
 
 /** Loads slug, template, and family-tree data for client-side editor preview. */
 export function loadEditorPreviewBundle(): EditorPreviewBundle {
   const templatePages = Object.fromEntries(
-    getAllPages()
-      .filter((page) => page.namespace === 'template')
-      .map((page) => [page.slug, page.content])
+    getPagesByNamespace('template').map((page) => [page.slug, page.content])
   )
 
   let familyTrees: EditorPreviewBundle['familyTrees'] = {}

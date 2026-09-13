@@ -13,6 +13,7 @@ export {
   VALID_NAMESPACES,
   PROTECTED_PAGE_SLUGS,
   PageConflictError,
+  PageDuplicateError,
   ProtectedPageError
 } from './types.js'
 
@@ -21,6 +22,8 @@ export { resetDatabaseConnection, applyExtensionSchemas, getDatabase } from './c
 export {
   getPage,
   getAllPages,
+  getPagesByNamespace,
+  countPagesByNamespace,
   getPageSummaries,
   searchContentPageSummaries,
   countContentPages,
@@ -37,6 +40,7 @@ export {
   getRevisionDiff,
   getRevisionPostEditSnapshot,
   getRecentRevisions,
+  countRevisions,
   restoreRevision,
   pruneAllRevisions
 } from './revisions.js'
@@ -60,8 +64,11 @@ export {
 export {
   getUserByName,
   listUsers,
+  countUsers,
   createWikiUser,
   setUserPassword,
+  setWikiUserAdmin,
+  deleteWikiUser,
   createSession,
   resolveSession,
   touchSession,
@@ -72,6 +79,8 @@ export {
 export {
   recordUpload,
   getAllUploads,
+  countUploads,
+  getUploadsTotalBytes,
   getUploadByName,
   getUploadByContentHash,
   renameUpload,

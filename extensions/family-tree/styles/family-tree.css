@@ -114,6 +114,42 @@
   background: var(--color-base-100);
 }
 
+.ft-conflict {
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--wiki-border);
+}
+
+.ft-save-error {
+  margin: 0;
+  padding: 0.4rem 1rem;
+  font-size: 0.75rem;
+  color: var(--color-error);
+  border-bottom: 1px solid var(--wiki-border);
+}
+
+@media (max-width: 767px) {
+  .ft-workspace {
+    flex-direction: column;
+  }
+
+  .ft-workspace__canvas {
+    flex: 1 1 55%;
+    min-height: 14rem;
+  }
+
+  .ft-splitter {
+    display: none;
+  }
+
+  .ft-editor-panel {
+    width: 100% !important;
+    flex: 0 0 auto;
+    max-height: 45%;
+    border-top: 1px solid var(--wiki-border);
+    overflow: auto;
+  }
+}
+
 .ft-viewport {
   position: relative;
   flex: 1;

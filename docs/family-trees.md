@@ -44,7 +44,9 @@ Drag the divider between sidebar and canvas to resize. Your preferred width is s
 - **Recenter** — top-right button
 - Click a person to highlight their paternal line
 
-Click **Save** when you're done. The editor warns you if you try to leave with unsaved changes.
+Click **Save** when you're done. The editor warns you if you try to leave with unsaved changes. If someone else saved first, use **Reload latest** or **Overwrite with mine**.
+
+On phones, the person sidebar stacks under the canvas.
 
 ## Embedding in articles
 

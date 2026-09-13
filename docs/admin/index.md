@@ -18,7 +18,7 @@ The admin dashboard at `/admin` is for users with the admin role. Click **Admin*
 | **Recent Changes** | Site-wide edit feed + revision retention settings |
 | **Templates**      | Manage template-namespace pages                   |
 | **Extensions**     | Enable or disable bundled extensions              |
-| **Users**          | Create accounts                                   |
+| **Users**          | Create, promote/demote, and delete accounts       |
 | **Backups**        | Export and import the wiki                        |
 
 ## Pages

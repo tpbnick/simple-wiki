@@ -76,11 +76,11 @@ function closeDeleteModal() {
   <AdminHeader
     {tab}
     pageCount={data.contentPageCount}
-    fileCount={data.uploads.length}
-    recentCount={data.recent.length}
-    templateCount={data.templates.length}
-    extensionCount={data.extensions.length}
-    userCount={data.users.length}
+    fileCount={data.uploadCount}
+    recentCount={data.recentCount}
+    templateCount={data.templateCount}
+    extensionCount={data.extensionCount}
+    userCount={data.userCount}
   />
 
   <div class="px-6 py-5 lg:px-8">
@@ -102,12 +102,13 @@ function closeDeleteModal() {
     {:else if tab === 'extensions'}
       <AdminExtensionsPanel extensions={data.extensions} {form} />
     {:else if tab === 'users'}
-      <AdminUsersPanel users={data.users} {form} />
+      <AdminUsersPanel users={data.users} currentUserId={data.user?.id ?? null} {form} />
     {:else if tab === 'backups'}
       <AdminBackupsPanel
         wikiName={data.wikiName}
         appVersion={data.appVersion}
-        uploadCount={data.uploads.length}
+        uploadCount={data.uploadCount}
+        uploadsTotalBytes={data.uploadsTotalBytes}
         pageCount={data.contentPageCount}
       />
     {/if}

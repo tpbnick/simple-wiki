@@ -126,6 +126,17 @@ const CORE_MIGRATIONS: Migration[] = [
         db.exec('ALTER TABLE revisions ADD COLUMN title TEXT')
       }
     }
+  },
+  {
+    id: '010_millisecond_timestamps',
+    up(db) {
+      db.exec(`
+        DROP TRIGGER IF EXISTS pages_updated_at;
+        CREATE TRIGGER IF NOT EXISTS pages_updated_at AFTER UPDATE ON pages BEGIN
+          UPDATE pages SET updated_at = strftime('%Y-%m-%d %H:%M:%f', 'now') WHERE id = new.id;
+        END;
+      `)
+    }
   }
 ]
 

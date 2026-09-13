@@ -1,5 +1,5 @@
 import type { WikiExtension } from '../../src/lib/extensions/types.js'
-import { FAMILY_TREE_SCHEMA, listFamilyTrees, resetFamilyTreeDbCache } from './db.js'
+import { FAMILY_TREE_SCHEMA, listFamilyTreeSummaries, resetFamilyTreeDbCache } from './db.js'
 import { renderFamilyTreeEmbed } from './lib/embed.js'
 
 const extension: WikiExtension = {
@@ -9,6 +9,17 @@ const extension: WikiExtension = {
   manageHref: '/family-tree',
   schema: FAMILY_TREE_SCHEMA,
   writeGuardPaths: ['/family-tree', '/api/family-tree'],
+  migrations: [
+    {
+      id: '001_millisecond_timestamps',
+      sql: `
+        DROP TRIGGER IF EXISTS family_trees_updated_at;
+        CREATE TRIGGER IF NOT EXISTS family_trees_updated_at AFTER UPDATE ON family_trees BEGIN
+          UPDATE family_trees SET updated_at = strftime('%Y-%m-%d %H:%M:%f', 'now') WHERE id = new.id;
+        END;
+      `
+    }
+  ],
 
   hooks: {
     onEditorToolbarItems() {
@@ -28,7 +39,7 @@ const extension: WikiExtension = {
 
     onEditorLoad(toolIds) {
       if (!toolIds.has('family-tree')) return {}
-      return { familyTrees: listFamilyTrees() }
+      return { familyTrees: listFamilyTreeSummaries() }
     },
 
     onDatabaseReset() {

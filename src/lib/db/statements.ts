@@ -35,13 +35,35 @@ export function buildStatements(db: Database) {
     countAllContentPages: db.prepare<[], { count: number }>(
       "SELECT COUNT(*) AS count FROM pages WHERE namespace != 'template'"
     ),
-    upsertPage: db.prepare(`
+    insertPage: db.prepare(`
       INSERT INTO pages (slug, title, content, namespace)
       VALUES (@slug, @title, @content, @namespace)
-      ON CONFLICT(slug) DO UPDATE SET
-        title = excluded.title, content = excluded.content, namespace = excluded.namespace
     `),
+    updatePage: db.prepare(`
+      UPDATE pages
+      SET title = @title, content = @content, namespace = @namespace
+      WHERE slug = @slug
+    `),
+    getPagesByNamespace: db.prepare<[string], Page>(
+      'SELECT * FROM pages WHERE namespace = ? ORDER BY title ASC'
+    ),
+    countPagesByNamespace: db.prepare<[string], { count: number }>(
+      'SELECT COUNT(*) AS count FROM pages WHERE namespace = ?'
+    ),
+    countUploads: db.prepare<[], { count: number }>('SELECT COUNT(*) AS count FROM uploads'),
+    sumUploadBytes: db.prepare<[], { total: number }>(
+      'SELECT COALESCE(SUM(size), 0) AS total FROM uploads'
+    ),
+    countUsers: db.prepare<[], { count: number }>('SELECT COUNT(*) AS count FROM users'),
+    countRecentRevisions: db.prepare<[], { count: number }>(
+      'SELECT COUNT(*) AS count FROM revisions'
+    ),
     deletePage: db.prepare('DELETE FROM pages WHERE slug = ?'),
+    deleteUser: db.prepare('DELETE FROM users WHERE id = ?'),
+    setUserAdmin: db.prepare('UPDATE users SET is_admin = ? WHERE id = ?'),
+    countAdmins: db.prepare<[], { count: number }>(
+      'SELECT COUNT(*) AS count FROM users WHERE is_admin = 1'
+    ),
     saveRevision: db.prepare<[number, string, string, string | null]>(
       'INSERT INTO revisions (page_id, content, summary, title) VALUES (?, ?, ?, ?)'
     ),

@@ -56,6 +56,26 @@ describe('persistWikiPage', () => {
     expect(getPage(result.slug)?.content).toBe('hello')
   })
 
+  it('returns duplicate when create races an existing slug', () => {
+    savePage('race-page', 'Race Page', 'first', 'article', 'create')
+
+    const result = persistWikiPage({
+      routeSlug: 'new',
+      fields: {
+        title: 'Race Page',
+        content: 'second',
+        namespace: 'article',
+        summary: 'create',
+        expectedUpdatedAt: null
+      }
+    })
+
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    expect(result.type).toBe('duplicate')
+    expect(getPage('race-page')?.content).toBe('first')
+  })
+
   it('returns a conflict result when expectedUpdatedAt is stale', () => {
     savePage('conflict-page', 'Conflict', 'v1', 'article', 'create')
     savePage('conflict-page', 'Conflict', 'v2', 'article', 'edit')

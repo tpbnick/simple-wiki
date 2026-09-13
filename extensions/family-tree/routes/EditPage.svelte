@@ -1,9 +1,11 @@
 <script lang="ts">
 import { beforeNavigate } from '$app/navigation'
 import { onMount } from 'svelte'
+import EditConflictBanner from '$lib/components/EditConflictBanner.svelte'
 import FamilyTreeCanvas from '../components/FamilyTreeCanvas.svelte'
 import FamilyTreeEditor from '../components/FamilyTreeEditor.svelte'
 import type { FamilyTreeData } from '../lib/types.js'
+import type { FamilyTreeRecord } from '../db.js'
 import type { EditPageData } from './types.js'
 import { ArrowLeft, Save } from 'lucide-svelte'
 
@@ -14,11 +16,10 @@ const SIDEBAR_DEFAULT = 288
 
 let { data }: { data: EditPageData } = $props()
 
-const emptyTreeData = (): FamilyTreeData => ({ rootId: '', people: {} })
-
 let title = $state('')
-let treeData = $state<FamilyTreeData>(emptyTreeData())
+let treeData = $state<FamilyTreeData>({ rootId: '', people: {} })
 let treeUpdatedAt = $state('')
+let conflictUpdatedAt = $state<string | null>(null)
 let selectedId = $state<string | null>(null)
 let saving = $state(false)
 let dirty = $state(false)
@@ -28,6 +29,7 @@ let resizing = $state(false)
 let workspaceEl = $state<HTMLDivElement | null>(null)
 let resizeMoveHandler: ((event: PointerEvent) => void) | null = null
 let resizeUpHandler: (() => void) | null = null
+let loadedSlug = $state<string | null>(null)
 
 function cleanupResizeListeners() {
   if (resizeMoveHandler) {
@@ -42,15 +44,14 @@ function cleanupResizeListeners() {
 }
 
 onMount(() => {
-  const stored = localStorage.getItem(SIDEBAR_WIDTH_KEY)
-  if (stored) {
-    const parsed = Number(stored)
+  try {
+    const stored = localStorage.getItem(SIDEBAR_WIDTH_KEY)
+    const parsed = stored ? Number(stored) : NaN
     if (Number.isFinite(parsed)) sidebarWidth = clampSidebarWidth(parsed)
+  } catch {
+    // localStorage may be unavailable
   }
-
-  return () => {
-    cleanupResizeListeners()
-  }
+  return cleanupResizeListeners
 })
 
 function startSidebarResize(event: PointerEvent) {
@@ -63,9 +64,12 @@ function startSidebarResize(event: PointerEvent) {
   resizeMoveHandler = (moveEvent: PointerEvent) => {
     sidebarWidth = clampSidebarWidth(startWidth + (startX - moveEvent.clientX))
   }
-
   resizeUpHandler = () => {
-    localStorage.setItem(SIDEBAR_WIDTH_KEY, String(sidebarWidth))
+    try {
+      localStorage.setItem(SIDEBAR_WIDTH_KEY, String(sidebarWidth))
+    } catch {
+      // ignore quota / private mode
+    }
     cleanupResizeListeners()
   }
 
@@ -80,30 +84,33 @@ function clampSidebarWidth(width: number): number {
   return Math.min(max, Math.max(SIDEBAR_MIN, Math.round(width)))
 }
 
-function personExists(id: string | null, next: FamilyTreeData): boolean {
-  return !!id && !!next.people[id]
+function applyTree(tree: FamilyTreeRecord) {
+  title = tree.title
+  treeData = structuredClone(tree.data)
+  treeUpdatedAt = tree.updated_at
+  conflictUpdatedAt = null
+  selectedId = tree.data.rootId
+  dirty = false
+  saveError = ''
+  loadedSlug = tree.slug
 }
 
 $effect.pre(() => {
-  data.tree
-  title = data.tree.title
-  treeData = structuredClone(data.tree.data)
-  treeUpdatedAt = data.tree.updated_at
-  selectedId = data.tree.data.rootId
-  dirty = false
-  saveError = ''
+  const tree = data.tree
+  if (loadedSlug === tree.slug && dirty) return
+  applyTree(tree)
 })
 
 function markDirty(next: FamilyTreeData) {
   treeData = next
   dirty = true
   saveError = ''
+  conflictUpdatedAt = null
 }
 
-async function saveTree() {
+async function saveTree(forceUpdatedAt?: string) {
   saving = true
   saveError = ''
-
   try {
     const response = await fetch(`/api/family-tree/${data.tree.slug}`, {
       method: 'PUT',
@@ -111,18 +118,18 @@ async function saveTree() {
       body: JSON.stringify({
         title,
         data: treeData,
-        expectedUpdatedAt: treeUpdatedAt
+        expectedUpdatedAt: forceUpdatedAt ?? treeUpdatedAt
       })
     })
-
+    const payload = await response.json().catch(() => null)
     if (!response.ok) {
-      const payload = await response.json().catch(() => null)
-      if (payload?.expectedUpdatedAt) treeUpdatedAt = String(payload.expectedUpdatedAt)
+      if (response.status === 409 && payload?.expectedUpdatedAt) {
+        conflictUpdatedAt = String(payload.expectedUpdatedAt)
+      }
       throw new Error(payload?.error ?? payload?.message ?? 'Save failed')
     }
-
-    const saved = await response.json()
-    treeUpdatedAt = saved.updated_at
+    treeUpdatedAt = payload.updated_at
+    conflictUpdatedAt = null
     dirty = false
   } catch (err) {
     saveError = err instanceof Error ? err.message : 'Save failed'
@@ -131,18 +138,36 @@ async function saveTree() {
   }
 }
 
+async function discardConflictAndReload() {
+  if (!confirm('Discard your unsaved changes and load the latest version?')) return
+  saving = true
+  saveError = ''
+  try {
+    const response = await fetch(`/api/family-tree/${data.tree.slug}`)
+    if (!response.ok) throw new Error('Could not reload tree')
+    applyTree((await response.json()) as FamilyTreeRecord)
+  } catch (err) {
+    saveError = err instanceof Error ? err.message : 'Reload failed'
+  } finally {
+    saving = false
+  }
+}
+
+function overwriteWithMyChanges() {
+  if (!conflictUpdatedAt) return
+  const stamp = conflictUpdatedAt
+  conflictUpdatedAt = null
+  void saveTree(stamp)
+}
+
 beforeNavigate(({ cancel }) => {
   if (!data.canEdit || saving) return
-  if (dirty && !confirm('You have unsaved changes. Leave anyway?')) {
-    cancel()
-  }
+  if (dirty && !confirm('You have unsaved changes. Leave anyway?')) cancel()
 })
 
 $effect(() => {
   if (!dirty || !data.canEdit) return
-  const handler = (event: BeforeUnloadEvent) => {
-    event.preventDefault()
-  }
+  const handler = (event: BeforeUnloadEvent) => event.preventDefault()
   window.addEventListener('beforeunload', handler)
   return () => window.removeEventListener('beforeunload', handler)
 })
@@ -170,19 +195,29 @@ $effect(() => {
       <button
         type="button"
         class="btn btn-primary btn-sm"
-        disabled={!dirty || saving}
-        onclick={saveTree}
+        disabled={!dirty || saving || !!conflictUpdatedAt}
+        onclick={() => saveTree()}
       >
         <Save size={14} />
         {saving ? 'Saving…' : 'Save'}
       </button>
-      {#if saveError}
-        <p class="text-xs text-error">{saveError}</p>
-      {/if}
     {:else}
       <h1 class="text-lg font-semibold truncate">{title}</h1>
     {/if}
   </header>
+
+  {#if conflictUpdatedAt}
+    <div class="ft-conflict">
+      <EditConflictBanner
+        {saving}
+        noun="tree"
+        onReload={discardConflictAndReload}
+        onOverwrite={overwriteWithMyChanges}
+      />
+    </div>
+  {:else if saveError}
+    <p class="ft-save-error" role="alert">{saveError}</p>
+  {/if}
 
   <div class="ft-workspace" class:ft-workspace--resizing={resizing} bind:this={workspaceEl}>
     <div class="ft-workspace__canvas">
@@ -215,9 +250,7 @@ $effect(() => {
           personId={selectedId}
           onchange={(next) => {
             markDirty(next)
-            if (!personExists(selectedId, next)) {
-              selectedId = next.rootId
-            }
+            if (!selectedId || !next.people[selectedId]) selectedId = next.rootId
           }}
         />
       </div>
