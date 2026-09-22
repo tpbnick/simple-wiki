@@ -1,5 +1,6 @@
 <script lang="ts">
 import { tick } from 'svelte'
+import { page } from '$app/state'
 import { mountWikiLightbox, closeActiveWikiLightbox } from '$lib/actions/wikiLightbox.js'
 import { createExtensionArticleMountController } from '$lib/extensions/client-mount.js'
 
@@ -14,6 +15,11 @@ let container = $state<HTMLDivElement | null>(null)
 let detachLightbox: (() => void) | undefined
 let detachHighlights: (() => void) | undefined
 const extensionMounts = createExtensionArticleMountController()
+const enabledExtensionIds = $derived(
+  Array.isArray(page.data.enabledExtensionIds)
+    ? page.data.enabledExtensionIds.filter((id): id is string => typeof id === 'string')
+    : []
+)
 
 function attachFootnoteHighlights(root: HTMLElement): () => void {
   const links = root.querySelectorAll<HTMLAnchorElement>(
@@ -42,6 +48,7 @@ function attachFootnoteHighlights(root: HTMLElement): () => void {
 
 $effect(() => {
   html
+  enabledExtensionIds
   const root = container
   if (!root) return
 
@@ -57,7 +64,7 @@ $effect(() => {
 
     detachLightbox = mountWikiLightbox(container)
     detachHighlights = attachFootnoteHighlights(container)
-    extensionMounts.sync(container, () => cancelled)
+    extensionMounts.sync(container, () => cancelled, enabledExtensionIds)
   })
 
   return () => {

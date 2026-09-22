@@ -1,5 +1,5 @@
 import type { TreeLayout } from './types.js'
-import { NODE_HEIGHT, NODE_WIDTH } from './types.js'
+import { NODE_WIDTH } from './types.js'
 
 export interface TreeViewportState {
   panX: number

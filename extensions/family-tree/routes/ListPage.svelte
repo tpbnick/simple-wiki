@@ -1,7 +1,7 @@
 <script lang="ts">
 import { goto, invalidateAll } from '$app/navigation'
 import ConfirmDialog from '$lib/components/ConfirmDialog.svelte'
-import { createFamilyTree } from '$lib/family-tree/create-tree.js'
+import { createFamilyTree } from '../lib/create-tree-client.js'
 import { GitBranch, Plus, Trash2 } from 'lucide-svelte'
 import type { ListPageData } from './types.js'
 

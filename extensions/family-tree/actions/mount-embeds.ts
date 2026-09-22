@@ -1,6 +1,7 @@
 import { mount, unmount } from 'svelte'
 import FamilyTreeCanvas from '../components/FamilyTreeCanvas.svelte'
 import FamilyTreeEmbedError from '../components/FamilyTreeEmbedError.svelte'
+import { extensionDisabledMessage } from '$lib/extensions/disabled-message.js'
 import { decodeFamilyTreePayloadInBrowser } from '../lib/embed-payload-browser.js'
 import { validateFamilyTreeData } from '../lib/validate.js'
 import type { FamilyTreeData } from '../lib/types.js'
@@ -150,6 +151,12 @@ async function fetchTreeData(slug: string, isCancelled: () => boolean): Promise<
     }
 
     if (response.status === 404) {
+      const body = await response.json().catch(() => null)
+      if (body?.error === 'Extension disabled') {
+        const name = typeof body.name === 'string' && body.name.trim() ? body.name : 'This'
+        const message = extensionDisabledMessage(name)
+        return { ok: false, title: message, message }
+      }
       return {
         ok: false,
         title: 'Family tree not found',

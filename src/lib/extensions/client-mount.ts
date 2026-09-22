@@ -1,18 +1,40 @@
-import { createFamilyTreeEmbedCache } from '$extensions/family-tree/actions/mount-embeds.js'
+import { extensionIdFromGlobPath } from './client-id.js'
+
+export interface ArticleMount {
+  sync(root: HTMLElement, isCancelled: () => boolean): void
+  detachForHtmlSwap(root: HTMLElement): void
+  destroy(): void
+}
+
+const mountModules = import.meta.glob<{ createArticleMount?: () => ArticleMount }>(
+  '../../../extensions/*/actions/mount.ts',
+  { eager: true }
+)
 
 /** Per-article controller that reuses extension embeds across preview HTML updates. */
-export function createExtensionArticleMountController() {
-  const familyTreeCache = createFamilyTreeEmbedCache()
+export function createExtensionArticleMountController(): {
+  sync(root: HTMLElement, isCancelled: () => boolean, enabledIds?: Iterable<string>): void
+  detachForHtmlSwap(root: HTMLElement): void
+  destroy(): void
+} {
+  const mounts = Object.entries(mountModules).flatMap(([path, module]) => {
+    const id = extensionIdFromGlobPath(path)
+    const mount = module.createArticleMount?.()
+    return id && mount ? [{ id, mount }] : []
+  })
 
   return {
-    sync(root: HTMLElement, isCancelled: () => boolean): void {
-      familyTreeCache.sync(root, isCancelled)
+    sync(root, isCancelled, enabledIds = []) {
+      const allowed = new Set(enabledIds)
+      for (const { id, mount } of mounts) {
+        if (allowed.has(id)) mount.sync(root, isCancelled)
+      }
     },
-    detachForHtmlSwap(root: HTMLElement): void {
-      familyTreeCache.detachForHtmlSwap(root)
+    detachForHtmlSwap(root) {
+      for (const { mount } of mounts) mount.detachForHtmlSwap(root)
     },
-    destroy(): void {
-      familyTreeCache.destroy()
+    destroy() {
+      for (const { mount } of mounts) mount.destroy()
     }
   }
 }

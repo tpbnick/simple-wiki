@@ -71,7 +71,6 @@ export function buildStatements(db: Database) {
       SELECT r.* FROM revisions r JOIN pages p ON p.id = r.page_id
       WHERE p.slug = ? ORDER BY r.created_at DESC, r.id DESC
     `),
-    getRevisionById: db.prepare<[number], Revision>('SELECT * FROM revisions WHERE id = ? LIMIT 1'),
     getRevisionDiffContext: db.prepare<
       [number],
       {

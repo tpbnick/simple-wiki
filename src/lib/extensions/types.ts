@@ -9,6 +9,8 @@ export interface SidebarItem {
 /** Toolbar button contributed by an extension to the wiki page editor. */
 export interface EditorToolbarItem {
   id: string
+  /** Folder id of the extension that contributed this tool. */
+  extensionId?: string
   label: string
   description?: string
 }
@@ -27,6 +29,8 @@ export interface WikiExtension {
   migrations?: Array<{ id: string; sql: string }>
   /** Path prefixes requiring login for non-GET writes. */
   writeGuardPaths?: string[]
+  /** {{Template}} names this extension renders. Disabled extensions show a notice instead. */
+  templates?: string[]
   hooks: WikiExtensionHooks
 }
 
@@ -41,6 +45,8 @@ export interface WikiExtensionHooks {
   onEditorToolbarItems?: () => EditorToolbarItem[]
   /** Extra data for the wiki editor when relevant toolbar items are active. */
   onEditorLoad?: (activeToolIds: Set<string>) => Record<string, unknown>
+  /** Extra records for client-side editor preview (merged into previewBundle.extensionData). */
+  onEditorPreviewBundle?: () => Record<string, unknown>
   /** Clears extension caches after the live database is replaced. */
   onDatabaseReset?: () => void
 }

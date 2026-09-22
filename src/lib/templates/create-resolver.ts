@@ -8,10 +8,6 @@ import {
   getTemplateDepth,
   withTemplateDepth
 } from '$lib/markdown/render-context.js'
-import {
-  renderFamilyTreeEmbedClient,
-  type FamilyTreePreviewRecord
-} from '$extensions/family-tree/lib/embed-client.js'
 import type { TemplateResolver } from '$lib/markdown/index.js'
 
 const MAX_TEMPLATE_DEPTH = 3
@@ -48,11 +44,8 @@ export interface WikiTemplateResolverOptions {
   templatePagesBySlug?: Record<string, string>
   /** Lazy template lookup (server reader). */
   getTemplateSource?: (slug: string) => string | null
-  /** Family tree records keyed by slug (client editor preview). */
-  familyTreesBySlug?: Record<string, FamilyTreePreviewRecord>
-  /** Extension templates such as FamilyTree on the server. */
+  /** Extension templates on the server, or client preview handlers. */
   onExtensionTemplate?: (name: string, params: Record<string, string>) => string | null
-  canEdit?: boolean
 }
 
 function resolveUserTemplate(
@@ -83,21 +76,11 @@ function resolveUserTemplate(
 export function createWikiTemplateResolver(
   options: WikiTemplateResolverOptions = {}
 ): TemplateResolver {
-  const {
-    templatePagesBySlug = {},
-    getTemplateSource,
-    familyTreesBySlug = {},
-    onExtensionTemplate,
-    canEdit = false
-  } = options
+  const { templatePagesBySlug = {}, getTemplateSource, onExtensionTemplate } = options
 
   const resolver: TemplateResolver = (name, params) => {
     const extensionResult = onExtensionTemplate?.(name, params)
     if (extensionResult != null) return extensionResult
-
-    if (name === 'FamilyTree' && !onExtensionTemplate) {
-      return renderFamilyTreeEmbedClient(params, familyTreesBySlug, canEdit)
-    }
 
     const builtIn = builtInTemplates[name]
     if (builtIn) return builtIn(params)

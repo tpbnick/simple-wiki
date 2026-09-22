@@ -10,11 +10,6 @@ export function getRevisions(slug: string): Revision[] {
   return openDatabase().statements.getRevisions.all(slug)
 }
 
-/** Returns a single revision by ID, or null when it does not exist. */
-function getRevisionById(revisionId: number): Revision | null {
-  return openDatabase().statements.getRevisionById.get(revisionId) ?? null
-}
-
 /** Returns added/removed lines for a revision edit, or null when the revision does not exist. */
 export function getRevisionDiff(
   revisionId: number

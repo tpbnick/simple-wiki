@@ -7,6 +7,7 @@ const extension: WikiExtension = {
   name: 'Example Extension',
   version: '1.0.0',
   description: 'Demonstrates the extension API',
+  templates: ['Counter'],
 
   hooks: {
     onSidebarItems(items) {

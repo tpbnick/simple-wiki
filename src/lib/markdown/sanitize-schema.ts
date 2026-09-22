@@ -1,14 +1,44 @@
 import { defaultSchema } from 'rehype-sanitize'
 import type { Schema } from 'hast-util-sanitize'
 
-const wikiClassPattern =
-  /^(alert|alert-info|alert-warning|wiki-|infobox-|imagebox-|user-template|template-missing|ft-)/
+type SchemaAttributeList = NonNullable<NonNullable<Schema['attributes']>[string]>
+
+type SanitizeContribution = {
+  classTokens?: string[]
+  divStylePatterns?: RegExp[]
+  divAttrs?: string[]
+  extraAttributes?: Record<string, SchemaAttributeList>
+}
+
+const extensionSanitize = import.meta.glob<SanitizeContribution>(
+  '../../../extensions/*/lib/sanitize.ts',
+  { eager: true }
+)
+
+const contributions = Object.values(extensionSanitize)
+const extraClassTokens = contributions.flatMap((module) => module.classTokens ?? [])
+const extraDivStyles = contributions.flatMap((module) => module.divStylePatterns ?? [])
+const extraDivAttrs = contributions.flatMap((module) => module.divAttrs ?? [])
+
+function mergedExtraAttributes(): Record<string, SchemaAttributeList> {
+  const merged: Record<string, SchemaAttributeList> = {}
+  for (const module of contributions) {
+    for (const [tag, attrs] of Object.entries(module.extraAttributes ?? {})) {
+      merged[tag] = [...(merged[tag] ?? []), ...attrs]
+    }
+  }
+  return merged
+}
+
+const extensionAttributes = mergedExtraAttributes()
+
+const wikiClassPattern = new RegExp(
+  `^(alert|alert-info|alert-warning|wiki-|infobox-|imagebox-|user-template|template-missing${extraClassTokens.map((token) => `|${token}`).join('')})`
+)
 
 const infoboxImageSizeStylePattern = /^width: \d{1,3}%; max-width: \d{1,3}%;?$/
 const imageboxGridStylePattern =
   /^(--imagebox-cols: [1-4]; )?grid-template-columns: repeat\([1-4], minmax\(0, 1fr\)\);?$/
-const familyTreeNodeStylePattern = /^left: [\d.]+px; top: [\d.]+px; width: [\d.]+px;?$/
-const familyTreeCanvasStylePattern = /^width: [\d.]+px; height: [\d.]+px;$/
 
 /** Sanitize schema extended for wiki templates, infoboxes, Shiki output, and footnotes. */
 export const wikiSanitizeSchema: Schema = {
@@ -46,15 +76,9 @@ export const wikiSanitizeSchema: Schema = {
     div: [
       ...(defaultSchema.attributes?.div ?? []),
       ['className', wikiClassPattern],
-      [
-        'style',
-        imageboxGridStylePattern,
-        /^--imagebox-cols: [1-4];?$/,
-        familyTreeNodeStylePattern,
-        familyTreeCanvasStylePattern
-      ],
-      'dataFamily',
-      'dataWikiPages'
+      ['style', imageboxGridStylePattern, /^--imagebox-cols: [1-4];?$/, ...extraDivStyles],
+      'dataWikiPages',
+      ...extraDivAttrs
     ],
     table: [...(defaultSchema.attributes?.table ?? []), ['className', 'infobox-data']],
     th: ['scope', 'colSpan', ['className', /^infobox-/], ...(defaultSchema.attributes?.th ?? [])],
@@ -78,7 +102,7 @@ export const wikiSanitizeSchema: Schema = {
       'aria-hidden',
       ['className', /.*/]
     ],
-    line: ['x1', 'y1', 'x2', 'y2', ['className', /^ft-edge/]],
+    line: ['x1', 'y1', 'x2', 'y2', ...(extensionAttributes.line ?? [])],
     path: ['d'],
     circle: ['cx', 'cy', 'r']
   },

@@ -1,5 +1,10 @@
 import type { WikiExtension } from '../../src/lib/extensions/types.js'
-import { FAMILY_TREE_SCHEMA, listFamilyTreeSummaries, resetFamilyTreeDbCache } from './db.js'
+import {
+  FAMILY_TREE_SCHEMA,
+  listFamilyTrees,
+  listFamilyTreeSummaries,
+  resetFamilyTreeDbCache
+} from './db.js'
 import { renderFamilyTreeEmbed } from './lib/embed.js'
 
 const extension: WikiExtension = {
@@ -9,6 +14,7 @@ const extension: WikiExtension = {
   manageHref: '/family-tree',
   schema: FAMILY_TREE_SCHEMA,
   writeGuardPaths: ['/family-tree', '/api/family-tree'],
+  templates: ['FamilyTree'],
   migrations: [
     {
       id: '001_millisecond_timestamps',
@@ -40,6 +46,18 @@ const extension: WikiExtension = {
     onEditorLoad(toolIds) {
       if (!toolIds.has('family-tree')) return {}
       return { familyTrees: listFamilyTreeSummaries() }
+    },
+
+    onEditorPreviewBundle() {
+      try {
+        return {
+          familyTrees: Object.fromEntries(
+            listFamilyTrees().map((tree) => [tree.slug, { title: tree.title, data: tree.data }])
+          )
+        }
+      } catch {
+        return { familyTrees: {} }
+      }
     },
 
     onDatabaseReset() {

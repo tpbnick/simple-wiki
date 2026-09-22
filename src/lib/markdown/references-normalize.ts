@@ -230,6 +230,6 @@ export function normalizeReferencesForRender(content: string): string {
   const paired = pairAnonymousMarkers(extracted.body, extracted.anonymous, inline.definitions.size)
   const definitions = new Map([...inline.definitions, ...paired.definitions, ...extracted.named])
 
-  let body = appendMissingNamedMarkers(paired.body, extracted.named)
+  const body = appendMissingNamedMarkers(paired.body, extracted.named)
   return buildGfmFootnotes(body, definitions)
 }

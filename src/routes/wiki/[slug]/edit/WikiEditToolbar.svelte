@@ -1,44 +1,54 @@
 <script lang="ts">
-import { ChevronDown, GitBranch, Images, LayoutList, Upload } from 'lucide-svelte'
+import { ChevronDown, Images, LayoutList, Upload } from 'lucide-svelte'
+import type { Component } from 'svelte'
 import type { ToolbarAction } from '$lib/wiki-edit/toolbar-actions.js'
+import type { EditorToolbarItem } from '$lib/extensions/types.js'
+import type { EditorToolbarPanelProps } from '$lib/extensions/editor-panels.js'
+import { extensionIdFromGlobPath } from '$lib/extensions/client-id.js'
+
+const panelModules = import.meta.glob<{ default: Component<EditorToolbarPanelProps> }>(
+  '../../../../../extensions/*/components/EditorToolbarPanel.svelte',
+  { eager: true }
+)
+
+const editorToolbarPanels: Record<string, Component<EditorToolbarPanelProps>> = Object.fromEntries(
+  Object.entries(panelModules).flatMap(([path, module]) => {
+    const id = extensionIdFromGlobPath(path)
+    return id ? [[id, module.default]] : []
+  })
+)
 
 let {
   toolbarActions,
+  editorTools,
+  editorExtensionData,
+  previewData,
   hasInfoboxInContent,
   showInfoboxAddMenu = $bindable(),
-  showFamilyTreeMenu = $bindable(),
-  hasFamilyTreeTool,
-  familyTrees,
-  newFamilyTreeTitle = $bindable(),
-  creatingFamilyTree,
-  familyTreeError,
   uploading,
   uploadError,
   onInsertInfobox,
   onInsertImageBox,
-  onInsertFamilyTree,
-  onCreateFamilyTree,
   onUploadClick,
-  onCloseFamilyTreeMenu
+  insertAt,
+  patchPreviewData
 }: {
   toolbarActions: ToolbarAction[]
+  editorTools: EditorToolbarItem[]
+  editorExtensionData: Record<string, unknown>
+  previewData: Record<string, unknown>
   hasInfoboxInContent: boolean
   showInfoboxAddMenu: boolean
-  showFamilyTreeMenu: boolean
-  hasFamilyTreeTool: boolean
-  familyTrees: Array<{ slug: string; title: string }>
-  newFamilyTreeTitle: string
-  creatingFamilyTree: boolean
-  familyTreeError: string
   uploading: boolean
   uploadError: string
   onInsertInfobox: (variant?: string) => void
   onInsertImageBox: () => void
-  onInsertFamilyTree: (slug: string) => void
-  onCreateFamilyTree: () => void | Promise<void>
   onUploadClick: () => void
-  onCloseFamilyTreeMenu: () => void
+  insertAt: (text: string) => void
+  patchPreviewData: (patch: Record<string, unknown>) => void
 } = $props()
+
+let openExtensionMenu = $state<string | null>(null)
 
 function closeInfoboxAddMenu() {
   showInfoboxAddMenu = false
@@ -46,16 +56,7 @@ function closeInfoboxAddMenu() {
 
 function toggleInfoboxMenu() {
   showInfoboxAddMenu = !showInfoboxAddMenu
-  if (showInfoboxAddMenu) {
-    showFamilyTreeMenu = false
-  }
-}
-
-function toggleFamilyTreeMenu() {
-  showFamilyTreeMenu = !showFamilyTreeMenu
-  if (showFamilyTreeMenu) {
-    showInfoboxAddMenu = false
-  }
+  if (showInfoboxAddMenu) openExtensionMenu = null
 }
 </script>
 
@@ -144,87 +145,23 @@ function toggleFamilyTreeMenu() {
     <span class="hidden sm:inline text-xs">Image box</span>
   </button>
 
-  {#if hasFamilyTreeTool}
-    <div class="family-tree-toolbar-wrap infobox-toolbar-wrap relative">
-      <button
-        type="button"
-        title="Insert family tree"
-        aria-label="Insert family tree"
-        aria-expanded={showFamilyTreeMenu}
-        class="btn btn-ghost btn-xs gap-1"
-        onclick={toggleFamilyTreeMenu}
-      >
-        <GitBranch size={14} />
-        <span class="hidden sm:inline text-xs">Family tree</span>
-        <ChevronDown
-          size={12}
-          class="opacity-60 transition-transform {showFamilyTreeMenu ? 'rotate-180' : ''}"
-        />
-      </button>
-
-      {#if showFamilyTreeMenu}
-        <div class="infobox-toolbar-menu family-tree-toolbar-menu" role="menu">
-          {#if familyTrees.length > 0}
-            <p
-              class="px-3 pt-1 pb-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-base-content/40"
-            >
-              Insert existing
-            </p>
-            {#each familyTrees as tree}
-              <button
-                type="button"
-                role="menuitem"
-                onmousedown={(e) => e.preventDefault()}
-                onclick={() => onInsertFamilyTree(tree.slug)}
-              >
-                {tree.title}
-              </button>
-            {/each}
-            <div class="border-t border-base-300 my-1"></div>
-          {/if}
-          <p
-            class="px-3 pt-1 pb-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-base-content/40"
-          >
-            Create new
-          </p>
-          <form
-            class="family-tree-toolbar-form"
-            onsubmit={(event) => {
-              event.preventDefault()
-              void onCreateFamilyTree()
-            }}
-          >
-            <label class="sr-only" for="family-tree-new-title">New family tree name</label>
-            <input
-              id="family-tree-new-title"
-              name="family-tree-new-title"
-              type="text"
-              bind:value={newFamilyTreeTitle}
-              placeholder="Tree name"
-              class="input input-bordered input-xs w-full"
-            />
-            <button
-              type="submit"
-              class="btn btn-primary btn-xs w-full"
-              disabled={creatingFamilyTree || !newFamilyTreeTitle.trim()}
-            >
-              {creatingFamilyTree ? 'Creating…' : 'Create & insert'}
-            </button>
-          </form>
-          {#if familyTreeError}
-            <p class="px-3 pb-2 text-xs text-error">{familyTreeError}</p>
-          {/if}
-          <a
-            href="/family-tree"
-            class="block px-3 py-2 text-xs text-base-content/60 hover:text-base-content hover:bg-base-200"
-            onclick={onCloseFamilyTreeMenu}
-          >
-            Manage all trees →
-          </a>
-        </div>
-      {/if}
-    </div>
-  {/if}
+  {#each editorTools as tool}
+    {@const Panel = editorToolbarPanels[tool.extensionId ?? tool.id]}
+    {#if Panel}
+      <Panel
+        {tool}
+        open={openExtensionMenu === tool.id}
+        editorData={editorExtensionData}
+        {previewData}
+        {insertAt}
+        onOpenChange={(next) => {
+          openExtensionMenu = next ? tool.id : null
+          if (next) showInfoboxAddMenu = false
+        }}
+        {patchPreviewData}
+      />
+    {/if}
+  {/each}
 
   <button
     type="button"

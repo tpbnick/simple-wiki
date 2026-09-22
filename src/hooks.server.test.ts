@@ -5,6 +5,8 @@ import {
   endDatabaseImport,
   resetDatabaseSwapLockForTests
 } from '$lib/db/swap-lock.js'
+import { openDatabase } from '$lib/db/connection.js'
+import { setExtensionEnabled } from '$lib/db/extension-settings.js'
 import { installTempWikiEnv } from '$lib/test/db-env.js'
 
 installTempWikiEnv('wiki-hooks-')
@@ -123,5 +125,36 @@ describe('hooks handle', () => {
 
     expect(response.status).toBe(403)
     expect(await response.json()).toEqual({ error: 'Password change required' })
+  })
+
+  it('returns 404 for disabled extension API paths', async () => {
+    resetDatabaseSwapLockForTests()
+    openDatabase()
+    setExtensionEnabled('family-tree', false)
+
+    const response = await handle({
+      event: mockEvent({ pathname: '/api/family-tree', method: 'POST' }),
+      resolve: async () => new Response('ok')
+    })
+
+    expect(response.status).toBe(404)
+    expect(await response.json()).toEqual({ error: 'Extension disabled', name: 'Family Tree' })
+  })
+
+  it('says the extension is disabled for its HTML routes', async () => {
+    resetDatabaseSwapLockForTests()
+    openDatabase()
+    setExtensionEnabled('family-tree', false)
+
+    const response = await handle({
+      event: mockEvent({ pathname: '/family-tree' }),
+      resolve: async () => new Response('ok')
+    })
+
+    expect(response.status).toBe(404)
+    expect(response.headers.get('content-type')).toContain('text/html')
+    expect(await response.text()).toContain(
+      'Family Tree extension is disabled - enable in admin settings'
+    )
   })
 })

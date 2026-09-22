@@ -1,4 +1,5 @@
 import { resolveSession, touchSession } from '$lib/db/index.js'
+import { extensionDisabledPageHtml } from '$lib/extensions/disabled-message.js'
 import { findDisabledExtensionForPath, loadExtensions } from '$lib/extensions/server.js'
 import { validateServerEnv } from '$lib/env.js'
 import { SESSION_COOKIE_NAME } from '$lib/auth.js'
@@ -75,14 +76,22 @@ export const handle: Handle = async ({ event, resolve }) => {
   if (disabledExtension) {
     if (pathname.startsWith('/api')) {
       return applySecurityHeaders(
-        new Response(JSON.stringify({ error: 'Extension disabled' }), {
-          status: 404,
-          headers: { 'Content-Type': 'application/json' }
-        })
+        new Response(
+          JSON.stringify({ error: 'Extension disabled', name: disabledExtension.name }),
+          {
+            status: 404,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        )
       )
     }
 
-    return applySecurityHeaders(new Response('Not found', { status: 404 }))
+    return applySecurityHeaders(
+      new Response(extensionDisabledPageHtml(disabledExtension.name), {
+        status: 404,
+        headers: { 'Content-Type': 'text/html; charset=utf-8' }
+      })
+    )
   }
 
   if (

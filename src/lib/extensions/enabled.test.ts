@@ -3,11 +3,12 @@ import { openDatabase } from '$lib/db/connection.js'
 import { setExtensionEnabled } from '$lib/db/extension-settings.js'
 import {
   findDisabledExtensionForPath,
+  getEditorPreviewBundleData,
   getEditorToolbarItems,
+  getEnabledExtensionIds,
   getExtensions,
   loadExtensions,
   resetExtensionsForTests,
-  runOnSidebarItems,
   runOnTemplateParse
 } from '$lib/extensions/server.js'
 import { installTempWikiEnv } from '$lib/test/db-env.js'
@@ -29,9 +30,17 @@ describe('enabled extensions', () => {
   it('skips hooks for disabled extensions', () => {
     setExtensionEnabled('family-tree', false)
 
-    expect(runOnTemplateParse('FamilyTree', { family: 'demo' })).toBeNull()
+    expect(runOnTemplateParse('FamilyTree', { family: 'demo' })).toContain(
+      'Family Tree extension is disabled - enable in admin settings'
+    )
     expect(getEditorToolbarItems().some((tool) => tool.id === 'family-tree')).toBe(false)
-    expect(runOnSidebarItems([]).some((item) => item.href === '/family-tree')).toBe(false)
+    expect(getEditorPreviewBundleData().familyTrees).toBeUndefined()
+    expect(getEnabledExtensionIds()).not.toContain('family-tree')
+  })
+
+  it('includes family-tree in enabled ids by default', () => {
+    expect(getEnabledExtensionIds()).toContain('family-tree')
+    expect(getEditorToolbarItems().some((tool) => tool.extensionId === 'family-tree')).toBe(true)
   })
 
   it('blocks routes for disabled extensions', () => {

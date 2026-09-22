@@ -1,4 +1,4 @@
-import { json, error } from '@sveltejs/kit'
+import { json } from '@sveltejs/kit'
 import { getAllPageSlugs } from '$lib/db/pages.js'
 import { requireReadAccess } from '$lib/read-access.js'
 import { enforceReadRateLimit } from '$lib/read-rate-limit.js'
