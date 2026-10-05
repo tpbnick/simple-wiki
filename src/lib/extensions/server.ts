@@ -1,5 +1,6 @@
 import { applyExtensionSchemas } from '$lib/db/connection.js'
 import { isExtensionEnabled as readExtensionEnabled } from '$lib/db/extension-settings.js'
+import { renderExtensionDisabledHtml } from './disabled-message.js'
 import type { WikiExtension, WikiExtensionHooks, SidebarItem, EditorToolbarItem } from './types.js'
 import type { Page } from '$lib/db/index.js'
 
@@ -116,10 +117,18 @@ export function findDisabledExtensionForPath(pathname: string): WikiExtension | 
   return null
 }
 
+/** Folder ids of extensions that are currently enabled. */
+export function getEnabledExtensionIds(): string[] {
+  return getActiveExtensions().flatMap((extension) => (extension.id ? [extension.id] : []))
+}
+
 /** Returns editor toolbar items contributed by enabled extensions. */
 export function getEditorToolbarItems(): EditorToolbarItem[] {
-  return getActiveExtensions().flatMap(
-    (extension) => extension.hooks.onEditorToolbarItems?.() ?? []
+  return getActiveExtensions().flatMap((extension) =>
+    (extension.hooks.onEditorToolbarItems?.() ?? []).map((item) => ({
+      ...item,
+      extensionId: extension.id
+    }))
   )
 }
 
@@ -132,6 +141,37 @@ export function runOnPageRender(html: string, page: Page): string {
   )
 }
 
+/** Every disabled extension, including the template names it owns. */
+export function getDisabledExtensions(): Array<{
+  id: string
+  name: string
+  templates: string[]
+}> {
+  return loadedExtensions.flatMap((extension) => {
+    if (!extension.id || readExtensionEnabled(extension.id)) return []
+    return [{ id: extension.id, name: extension.name, templates: extension.templates ?? [] }]
+  })
+}
+
+function disabledExtensionNotice(name: string, params: Record<string, string>): string | null {
+  for (const extension of loadedExtensions) {
+    if (!extension.id || readExtensionEnabled(extension.id)) continue
+    if (extension.templates?.includes(name)) return renderExtensionDisabledHtml(extension.name)
+  }
+
+  for (const extension of loadedExtensions) {
+    if (!extension.id || readExtensionEnabled(extension.id) || !extension.hooks.onTemplateParse) {
+      continue
+    }
+    if (extension.templates?.includes(name)) continue
+    if (extension.hooks.onTemplateParse(name, params) != null) {
+      return renderExtensionDisabledHtml(extension.name)
+    }
+  }
+
+  return null
+}
+
 /** Runs template-parse hooks from enabled extensions. */
 export function runOnTemplateParse(name: string, params: Record<string, string>): string | null {
   for (const extension of getActiveExtensions()) {
@@ -139,7 +179,8 @@ export function runOnTemplateParse(name: string, params: Record<string, string>)
     const result = extension.hooks.onTemplateParse(name, params)
     if (result != null) return result
   }
-  return null
+
+  return disabledExtensionNotice(name, params)
 }
 
 /** Runs sidebar hooks from enabled extensions. */
@@ -164,6 +205,18 @@ export function getEditorLoadData(activeTools: EditorToolbarItem[]): Record<stri
   for (const extension of getActiveExtensions()) {
     if (!extension.hooks.onEditorLoad) continue
     Object.assign(data, extension.hooks.onEditorLoad(toolIds))
+  }
+
+  return data
+}
+
+/** Merges editor preview records from enabled extensions. */
+export function getEditorPreviewBundleData(): Record<string, unknown> {
+  const data: Record<string, unknown> = {}
+
+  for (const extension of getActiveExtensions()) {
+    if (!extension.hooks.onEditorPreviewBundle) continue
+    Object.assign(data, extension.hooks.onEditorPreviewBundle())
   }
 
   return data

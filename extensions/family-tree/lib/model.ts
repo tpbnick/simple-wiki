@@ -217,7 +217,7 @@ export function linkParent(
   if (!canLinkParent(data, childId, parentId)) return data
 
   const child = data.people[childId]
-  let people = linkParentsAsSpousesIfNeeded({ ...data.people }, child, parentId)
+  const people = linkParentsAsSpousesIfNeeded({ ...data.people }, child, parentId)
 
   people[childId] = {
     ...child,

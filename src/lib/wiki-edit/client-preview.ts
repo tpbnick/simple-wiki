@@ -2,14 +2,18 @@ import { renderMarkdown } from '$lib/markdown/index.js'
 import { prepareWikiMarkdownForRender } from '$lib/markdown/prepare-for-render.js'
 import { sanitizeWikiHtml } from '$lib/markdown/sanitize-html.js'
 import { createWikiTemplateResolver } from '$lib/templates/create-resolver.js'
-import type { FamilyTreePreviewRecord } from '$extensions/family-tree/lib/embed-client.js'
+import { runClientTemplateParse } from '$lib/extensions/client-templates.js'
+import { renderExtensionDisabledHtml } from '$lib/extensions/disabled-message.js'
 import { buildPreviewContent } from './preview-content.js'
 
 /** Reference data loaded once when the editor opens — used for client-side preview until save. */
 export interface EditorPreviewBundle {
   existingSlugs: string[]
   templatePages: Record<string, string>
-  familyTrees: Record<string, FamilyTreePreviewRecord>
+  extensionData: Record<string, unknown>
+  enabledExtensionIds: string[]
+  /** Disabled extensions. Preview shows a notice instead of their templates. */
+  disabledExtensions: Array<{ id: string; name: string; templates: string[] }>
 }
 
 export interface EditorPreviewOptions {
@@ -32,8 +36,20 @@ export async function renderEditorPreview(
 
   const templateResolver = createWikiTemplateResolver({
     templatePagesBySlug: bundle.templatePages,
-    familyTreesBySlug: bundle.familyTrees,
-    canEdit: true
+    onExtensionTemplate: (name, params) => {
+      const disabled = bundle.disabledExtensions.find((extension) =>
+        extension.templates.includes(name)
+      )
+      if (disabled) return renderExtensionDisabledHtml(disabled.name)
+      return runClientTemplateParse(
+        name,
+        params,
+        bundle.extensionData,
+        true,
+        bundle.enabledExtensionIds,
+        bundle.disabledExtensions
+      )
+    }
   })
 
   const html = await renderMarkdown(markdown, {

@@ -31,6 +31,9 @@ jobs:
       - name: Prettier
         run: bun run format:check
 
+      - name: Lint
+        run: bun run lint
+
       - name: Typecheck
         run: bun run check
 
@@ -39,6 +42,14 @@ jobs:
 
       - name: Build app
         run: bun run build
+
+      - name: Install Playwright browser
+        run: bunx playwright install --with-deps chromium
+
+      - name: End-to-end tests
+        run: bun run test:e2e
+        env:
+          PLAYWRIGHT_SKIP_BUILD: '1'
 
   docker-verify:
     name: Verify Docker build

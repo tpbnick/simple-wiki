@@ -1,6 +1,6 @@
 import { redirect, fail } from '@sveltejs/kit'
 import { getPage } from '$lib/db/index.js'
-import { slugify, titleFromSlug } from '$lib/slug.js'
+import { titleFromSlug } from '$lib/slug.js'
 import { getEditorToolbarItems, getEditorLoadData } from '$lib/extensions/index.js'
 import { requireAuthenticated, requireAuthenticatedPage } from '$lib/auth-access.js'
 import { enforceFormWriteRateLimit } from '$lib/server/form-rate-limit.js'
@@ -20,9 +20,6 @@ export const load: PageServerLoad = ({ params, locals, url }) => {
   const defaultNamespace = url.searchParams.get('ns') === 'template' ? 'template' : 'article'
   const defaultTitle = titleParam || (page ? '' : titleFromSlug(slug))
   const editorTools = getEditorToolbarItems()
-  const editorExtensionData = getEditorLoadData(editorTools)
-  const familyTrees =
-    (editorExtensionData.familyTrees as Array<{ slug: string; title: string }> | undefined) ?? []
 
   return {
     page,
@@ -31,7 +28,7 @@ export const load: PageServerLoad = ({ params, locals, url }) => {
     defaultNamespace,
     defaultTitle,
     editorTools,
-    familyTrees,
+    editorExtensionData: getEditorLoadData(editorTools),
     previewBundle: loadEditorPreviewBundle()
   }
 }

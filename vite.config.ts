@@ -33,5 +33,8 @@ export default defineConfig({
   plugins: [renderContextNodeStub(), tailwindcss(), sveltekit()],
   ssr: {
     external: ['better-sqlite3']
+  },
+  optimizeDeps: {
+    exclude: ['lucide-svelte']
   }
 })

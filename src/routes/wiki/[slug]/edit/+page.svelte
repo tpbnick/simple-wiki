@@ -1,7 +1,6 @@
 <script lang="ts">
 import { beforeNavigate, invalidateAll } from '$app/navigation'
 import { onMount } from 'svelte'
-import { createFamilyTree } from '$lib/family-tree/create-tree.js'
 import {
   findInfoboxInContent,
   replaceInfoboxInContent,
@@ -48,10 +47,6 @@ let previewHtml = $state('')
 let showPreview = $state(false)
 let infoboxEditorActive = $state(false)
 let showInfoboxAddMenu = $state(false)
-let showFamilyTreeMenu = $state(false)
-let newFamilyTreeTitle = $state('')
-let creatingFamilyTree = $state(false)
-let familyTreeError = $state('')
 let previewLoading = $state(false)
 let previewError = $state('')
 
@@ -79,9 +74,10 @@ let saveFormEl = $state<HTMLFormElement | null>(null)
 let previewBundle = $state<EditorPreviewBundle>({
   existingSlugs: [],
   templatePages: {},
-  familyTrees: {}
+  extensionData: {},
+  enabledExtensionIds: [],
+  disabledExtensions: []
 })
-let familyTrees = $state<Array<{ slug: string; title: string }>>([])
 
 let infoboxData = $state<InfoboxData | null>(null)
 let infoboxSyncPaused = $state(false)
@@ -107,7 +103,6 @@ $effect(() => {
   expectedUpdatedAt = data.page?.updated_at ?? ''
   conflictServerUpdatedAt = null
   previewBundle = data.previewBundle
-  familyTrees = data.familyTrees
   allowNavigation = false
 
   const match = findInfoboxInContent(baseline.content)
@@ -129,7 +124,6 @@ const isDirty = $derived(
   title !== baseline.title || content !== baseline.content || namespace !== baseline.namespace
 )
 
-const hasFamilyTreeTool = $derived(data.editorTools.some((tool) => tool.id === 'family-tree'))
 const infoboxMatch = $derived(findInfoboxInContent(content))
 const hasInfoboxInContent = $derived(infoboxMatch !== null)
 const imageBoxMatches = $derived(findAllImageBoxesInContent(content))
@@ -206,7 +200,7 @@ $effect(() => {
 })
 
 const editorPlaceholder =
-  'Start writing… use [[links]], {{Infobox|…}}, {{ImageBox|…}}, {{FamilyTree|family=…}}, and standard Markdown'
+  'Start writing… use [[links]], {{Infobox|…}}, {{ImageBox|…}}, and standard Markdown'
 
 let debounceTimer: ReturnType<typeof setTimeout>
 
@@ -375,50 +369,18 @@ function removeInfobox() {
   setContent(removeInfoboxFromContent(content))
 }
 
-function closeFamilyTreeMenu() {
-  showFamilyTreeMenu = false
-  familyTreeError = ''
-}
-
-function insertFamilyTreeEmbed(slug: string) {
-  insertAt(`\n{{FamilyTree|family=${slug}}}\n`)
-  closeFamilyTreeMenu()
-}
-
-async function createAndInsertFamilyTree() {
-  const trimmed = newFamilyTreeTitle.trim()
-  if (!trimmed) return
-
-  creatingFamilyTree = true
-  familyTreeError = ''
-
-  try {
-    const payload = await createFamilyTree(trimmed)
-    newFamilyTreeTitle = ''
-    previewBundle = {
-      ...previewBundle,
-      familyTrees: {
-        ...previewBundle.familyTrees,
-        [payload.slug]: { title: payload.title, data: payload.data }
-      }
-    }
-    familyTrees = [{ slug: payload.slug, title: payload.title }, ...familyTrees]
-    insertFamilyTreeEmbed(payload.slug)
-    schedulePreview()
-  } catch (err) {
-    familyTreeError = err instanceof Error ? err.message : 'Could not create family tree'
-  } finally {
-    creatingFamilyTree = false
+function patchPreviewData(patch: Record<string, unknown>) {
+  previewBundle = {
+    ...previewBundle,
+    extensionData: { ...previewBundle.extensionData, ...patch }
   }
+  schedulePreview()
 }
 
 function handleToolbarMenuClick(event: MouseEvent) {
   const target = event.target as HTMLElement | null
   if (!target?.closest('.infobox-toolbar-wrap')) {
     showInfoboxAddMenu = false
-  }
-  if (!target?.closest('.family-tree-toolbar-wrap')) {
-    closeFamilyTreeMenu()
   }
 }
 
@@ -513,22 +475,18 @@ const saveEnhance = ({ formData }: { formData: FormData }) => {
 
   <WikiEditToolbar
     {toolbarActions}
+    editorTools={data.editorTools}
+    editorExtensionData={data.editorExtensionData}
+    previewData={previewBundle.extensionData}
     {hasInfoboxInContent}
     bind:showInfoboxAddMenu
-    bind:showFamilyTreeMenu
-    {hasFamilyTreeTool}
-    {familyTrees}
-    bind:newFamilyTreeTitle
-    {creatingFamilyTree}
-    {familyTreeError}
     {uploading}
     {uploadError}
     onInsertInfobox={insertInfobox}
     onInsertImageBox={insertImageBox}
-    onInsertFamilyTree={insertFamilyTreeEmbed}
-    onCreateFamilyTree={createAndInsertFamilyTree}
     onUploadClick={() => fileInput?.click()}
-    onCloseFamilyTreeMenu={closeFamilyTreeMenu}
+    {insertAt}
+    {patchPreviewData}
   />
 
   <div class="flex flex-1 min-h-0 flex-col md:flex-row">

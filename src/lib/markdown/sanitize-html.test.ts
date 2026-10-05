@@ -14,4 +14,8 @@ describe('sanitizeWikiHtml', () => {
     expect(sanitized).not.toContain('data-tree')
     expect(sanitized).not.toContain('dataTree')
   })
+
+  it('keeps extension class prefixes from sanitize contributions', () => {
+    expect(sanitizeWikiHtml('<div class="ft-node">x</div>')).toContain('ft-node')
+  })
 })

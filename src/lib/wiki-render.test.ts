@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { loadExtensions, resetExtensionsForTests } from '$lib/extensions/index.js'
+import { setExtensionEnabled } from '$lib/db/extension-settings.js'
 import { createFamilyTree, resetFamilyTreeDbCache } from '../../extensions/family-tree/db.js'
 import { renderWikiPage } from '$lib/wiki-render.js'
 import { installTempWikiEnv } from '$lib/test/db-env.js'
@@ -39,4 +40,22 @@ describe('renderWikiPage', () => {
       expect(html).not.toContain('<script')
     }
   )
+
+  it('says the extension is disabled instead of rendering a family tree', async () => {
+    createFamilyTree('Example Family', 'example-family')
+    setExtensionEnabled('family-tree', false)
+
+    const { html } = await renderWikiPage({
+      id: 1,
+      slug: 'demo',
+      title: 'Demo',
+      content: '{{FamilyTree|family=example-family}}',
+      namespace: 'article',
+      created_at: '',
+      updated_at: ''
+    })
+
+    expect(html).toContain('Family Tree extension is disabled - enable in admin settings')
+    expect(html).not.toContain('wiki-family-tree-embed')
+  })
 })
